@@ -155,7 +155,6 @@
     <script>
         $(function() {
             //console.log(window.location.hostname);
-            var api = 'http://' + window.location.hostname + '/';
             var refreshIntervalId = null;
             $('#stream').click(function() {
                 window.infoHash = $('input').val();
@@ -169,7 +168,7 @@
                 $('.jumbotron').hide(1000);
                 $('.imgLoad').html('<img src="animation.gif"><br /><br />');
                 // Add torrent in client
-                $.get(api + 'add/' + infoHash, function(data) {
+                $.get('add/' + infoHash, function(data) {
                     if (data.error) {
                         //Error here =) 
                     } else {
@@ -184,7 +183,7 @@
                         $('#return').show();
 
                         refreshIntervalId = window.setInterval(function() {
-                            $.get(api + 'stats/' + infoHash, function(data) {
+                            $.get('stats/' + infoHash, function(data) {
                                 var data = jQuery.parseJSON(data);
                                 $('#downloaded').html('<i class="fa fa-cloud-download" aria-hidden="true"></i> ' + prettyBytes(data.downloaded));
                                 $('#downloadSpeed').html('<i class="fa fa-line-chart" aria-hidden="true"></i> ' + prettyBytes(data.downloadSpeed));

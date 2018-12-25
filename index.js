@@ -26,32 +26,24 @@ var getLargestFile = function(torrent) {
 app.get('/', function(req, res) {
     res.sendFile(path.join(__dirname + '/index.html'));
 });
-// Debug part, can be removed
 ///////////////////////////////
 app.get('/clear/:infoHash', function(req, res) {
     db.removeCollection(req.params.infoHash);
-    res.status(200).send('clear!');
+    console.log('Removed:', req.params.infoHash);
+    res.status(200).send('Removed: ' + req.params.infoHash);
 });
-// Debug part, can be removed
 ///////////////////////////////
 app.get('/clear', function(req, res) {
-    // client.destroy();
     db.listCollections().forEach(function(key, value) {
-        console.log('key:', key)
-        console.log('value:', value)
+        console.log('Removed:', value.name);
         db.removeCollection(value.name);
     });
-    res.status(200).send('clear!');
+    res.status(200).send('Removed all!');
 });
 // Debug part, can be removed
 ///////////////////////////////
 app.get('/info', function(req, res) {
-    db.listCollections().forEach(function(key, value) {
-        console.log('key:', key)
-        console.log('value:', value)
-
-    });
-    res.status(200).send('info!');
+    res.status(200).send(JSON.stringify(db.listCollections()));
 });
 
 // Add torrent
