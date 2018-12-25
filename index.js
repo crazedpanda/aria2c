@@ -71,6 +71,7 @@ app.get('/add/:infoHash', function(req, res) {
         res.status(200).send('Torrent exist!');
         return;
     } else {
+        console.log(req.params.infoHash);
         var magnetURI = buildMagnetURI(req.params.infoHash);
         try {
             client.add(magnetURI, function(torrent) {
@@ -132,5 +133,5 @@ app.get('/stream/:infoHash.mp4', function(req, res, next) {
         res.status(500).send('Error: ' + err.toString());
     }
 });
-app.listen(3000);
-console.log("Running at Port 3000");
+app.listen(process.env.PORT);
+console.log('Running at ' + process.env.IP + ', Port ' + process.env.PORT + '!');
