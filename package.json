@@ -3,7 +3,7 @@
   "version": "1.0.1",
   "description": "",
   "scripts": {
-    "start": "index.js"
+    "start": "node index.js"
   },
   "dependencies": {
     "express": "",
