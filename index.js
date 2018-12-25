@@ -43,6 +43,7 @@ app.get('/clear', function(req, res) {
 // Debug part, can be removed
 ///////////////////////////////
 app.get('/info', function(req, res) {
+    console.log(client.torrents);
     res.status(200).send(JSON.stringify(db.listCollections()));
 });
 
