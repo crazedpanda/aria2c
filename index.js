@@ -22,12 +22,6 @@ app.get('/', function(req, res) {
     res.sendFile(__dirname + '/public/index.html');
 });
 ///////////////////////////////
-app.get('/clear/:infoHash', function(req, res) {
-    console.log('Removed:', req.params.infoHash);
-    client.remove(req.params.infoHash);
-    res.status(200).send('Removed: ' + req.params.infoHash);
-});
-///////////////////////////////
 app.get('/clear', function(req, res) {
     client.torrents.forEach(function(value, key) {
         console.log('Removed:', value.infoHash);
@@ -36,7 +30,7 @@ app.get('/clear', function(req, res) {
     res.status(200).send('Removed all!');
 });
 ///////////////////////////////
-app.get('/info', function(req, res) {
+app.get('/list', function(req, res) {
     var list = [];
     client.torrents.forEach(function(value, key) {
         list.push(value.infoHash);
@@ -64,6 +58,12 @@ app.get('/add/:infoHash', function(req, res) {
             res.status(200).send(err.toString());
         }
     }
+});
+///////////////////////////////
+app.get('/remove/:infoHash', function(req, res) {
+    console.log('Removed:', req.params.infoHash);
+    client.remove(req.params.infoHash);
+    res.status(200).send('Removed: ' + req.params.infoHash);
 });
 ///////////////////////////////
 app.get('/stats/:infoHash', function(req, res) {
