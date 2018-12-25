@@ -7,7 +7,6 @@
   },
   "dependencies": {
     "express": "",
-    "lokijs": "",
-    "webtorrent": ""
+    "webtorrent-hybrid": ""
   }
 }

@@ -1,13 +1,9 @@
-// require('events').EventEmitter.defaultMaxListeners = 0
-var express = require("express");
+var express = require('express');
 var app = express();
-var path = require("path");
-var loki = require('lokijs');
-var WebTorrent = require('webtorrent')
-var client = new WebTorrent()
-var db = new loki('loki.json');
+var WebTorrent = require('webtorrent-hybrid');
+var client = new WebTorrent();
 
-app.use(express.static('public'));
+app.use(express.static(__dirname + '/public'));
 
 var buildMagnetURI = function(infoHash) {
     return 'magnet:?xt=urn:btih:' + infoHash + '&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.ccc.de%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A80&tr=udp%3A%2F%2Fopen.demonii.com%3A1337&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp://tracker.coppersurfer.tk/announce&tr=udp://tracker.coppersurfer.tk:6969&tr=udp://tracker.leechers-paradise.org:6969/announce&tr=udp://tracker.coppersurfer.tk:6969/announce&tr=udp://tracker.ilibr.org:6969/announce&tr=http://tracker.mininova.org/announce&tr=http://tracker.frostwire.com:6969/announce&tr=udp://tracker.openbittorrent.com:80';
@@ -24,29 +20,27 @@ var getLargestFile = function(torrent) {
 // Home
 ///////////////////////////////
 app.get('/', function(req, res) {
-    res.sendFile(path.join(__dirname + '/index.html'));
+    res.sendFile(__dirname + '/public/index.html');
 });
 ///////////////////////////////
 app.get('/clear/:infoHash', function(req, res) {
     console.log('Removed:', req.params.infoHash);
     client.remove(req.params.infoHash);
-    db.removeCollection(req.params.infoHash);
     res.status(200).send('Removed: ' + req.params.infoHash);
 });
 ///////////////////////////////
-app.get('/clear', function(req, res) {
+/*app.get('/clear', function(req, res) {
     db.listCollections().forEach(function(value, key) {
         console.log('Removed:', value.name);
         client.remove(value.name);
         db.removeCollection(value.name);
     });
     res.status(200).send('Removed all!');
-});
+});*/
 // Debug part, can be removed
 ///////////////////////////////
 app.get('/info', function(req, res) {
-    console.log();
-    res.status(200).send(JSON.stringify(db.listCollections()));
+    res.status(200).send(JSON.stringify(client.torrents));
 });
 
 // Add torrent
@@ -54,7 +48,7 @@ app.get('/info', function(req, res) {
 app.get('/add/:infoHash', function(req, res) {
     var add = new Object();
     // Check if torrent exist
-    var exist = db.getCollection(req.params.infoHash);
+    var exist = false;
     if (exist) {
         res.status(200).send('Torrent exist!');
         return;
@@ -67,7 +61,6 @@ app.get('/add/:infoHash', function(req, res) {
                 torrent.files.forEach(function(file) {
                     console.log('name', file.name)
                 })
-                db.addCollection(req.params.infoHash);
                 res.status(200).send('Torrent added');
             })
         } catch (err) {
