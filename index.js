@@ -34,9 +34,7 @@ app.get('/clear/:infoHash', function(req, res) {
 });
 ///////////////////////////////
 app.get('/clear', function(req, res) {
-    db.listCollections().forEach(function(key, value) {
-        console.log('A', key);
-        console.log('B', value);
+    db.listCollections().forEach(function(value, key) {
         console.log('Removed:', value.name);
         db.removeCollection(value.name);
     });
