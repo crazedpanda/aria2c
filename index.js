@@ -17,7 +17,6 @@ var getLargestFile = function(torrent) {
     }
     return file;
 };
-// Home
 ///////////////////////////////
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/public/index.html');
@@ -44,8 +43,6 @@ app.get('/info', function(req, res) {
     });
     res.status(200).send(JSON.stringify(list));
 });
-
-// Add torrent
 ///////////////////////////////
 app.get('/add/:infoHash', function(req, res) {
     var add = new Object();
@@ -54,27 +51,24 @@ app.get('/add/:infoHash', function(req, res) {
         res.status(200).send('Torrent exist!');
         return;
     } else {
-        console.log(req.params.infoHash);
         var magnetURI = buildMagnetURI(req.params.infoHash);
         try {
             client.add(magnetURI, function(torrent) {
-                console.log('Client is downloading:', torrent.infoHash)
+                console.log('Downloading:', torrent.infoHash);
                 torrent.files.forEach(function(file) {
-                    console.log('name', file.name)
+                    console.log('Name:', file.name);
                 })
-                res.status(200).send('Torrent added');
+                res.status(200).send('Added: ' + torrent.infoHash);
             })
         } catch (err) {
             res.status(200).send(err.toString());
         }
     }
 });
-// Statistic torrent
 ///////////////////////////////
 app.get('/stats/:infoHash', function(req, res) {
     try {
-        var torrent = req.params.infoHash
-        var torrent = client.get(torrent);
+        var torrent = client.get(req.params.infoHash);
         var stats = new Object();
         stats.downloaded = torrent.downloaded
         stats.downloadSpeed = torrent.downloadSpeed
@@ -86,14 +80,10 @@ app.get('/stats/:infoHash', function(req, res) {
         res.status(500).send('Error: ' + err.toString());
     }
 });
-// The stream torrent
 ///////////////////////////////
 app.get('/stream/:infoHash', function(req, res, next) {
-
-    var torrent = req.params.infoHash
-
     try {
-        var torrent = client.get(torrent);
+        var torrent = client.get(req.params.infoHash);
         var file = getLargestFile(torrent);
         var total = file.length;
 
@@ -119,4 +109,4 @@ app.get('/stream/:infoHash', function(req, res, next) {
     }
 });
 app.listen(process.env.PORT);
-console.log('Running at ' + process.env.IP + ', Port ' + process.env.PORT + '!');
+console.log('Running at Port ' + process.env.PORT + '!');
