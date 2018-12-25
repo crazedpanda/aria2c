@@ -40,6 +40,9 @@ app.get('/clear/:infoHash', function(req, res) {
 // Debug part, can be removed
 ///////////////////////////////
 app.get('/info', function(req, res) {
+    client.torrents.forEach(function(value, key) {
+        console.log('A:', value);
+    });
     res.status(200).send(JSON.stringify(client.torrents.length));
 });
 
