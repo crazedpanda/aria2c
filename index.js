@@ -40,7 +40,7 @@ app.get('/clear/:infoHash', function(req, res) {
 // Debug part, can be removed
 ///////////////////////////////
 app.get('/info', function(req, res) {
-    res.status(200).send(JSON.stringify(client.torrents));
+    res.status(200).send(JSON.stringify(client.torrents.length));
 });
 
 // Add torrent
@@ -48,8 +48,7 @@ app.get('/info', function(req, res) {
 app.get('/add/:infoHash', function(req, res) {
     var add = new Object();
     // Check if torrent exist
-    var exist = false;
-    if (exist) {
+    if (client.get(req.params.infoHash)) {
         res.status(200).send('Torrent exist!');
         return;
     } else {
