@@ -41,7 +41,7 @@ app.get('/clear/:infoHash', function(req, res) {
 ///////////////////////////////
 app.get('/info', function(req, res) {
     client.torrents.forEach(function(value, key) {
-        console.log('A:', value);
+        console.log('A:', value.infoHash);
     });
     res.status(200).send(JSON.stringify(client.torrents.length));
 });
