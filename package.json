@@ -1,19 +1,16 @@
 {
-  "name": "peerflix-server",
-  "version": "0.4.2",
-  "author": "Aliaksei Sapach <dreamsonic@tut.by>",
-  "description": "Streaming torrent client for node.js with web ui.",
-  "main": "./server/bin.js",
+  "name": "bittystream",
+  "version": "1.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "atmoner",
+  "license": "MIT",
   "dependencies": {
-    "archiver": "^3.0.0",
-    "connect-multiparty": "^2.0.0",
-    "express": "^3.21.2",
-    "lodash": "^4",
-    "mkdirp": "^0.5.1",
-    "pump": "^1.0.2",
-    "range-parser": "^1.2.0",
-    "read-torrent": "^1.3.0",
-    "socket.io": "^1.7.4",
-    "torrent-stream": "^1.0.3"
+    "express": "",
+    "lokijs": "",
+    "webtorrent": ""
   }
 }
