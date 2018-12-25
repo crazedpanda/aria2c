@@ -174,11 +174,10 @@
                     } else {
                         $('.jumbotron').hide(1000);
                         // Check if no error
-                        var video = api + 'stream/' + infoHash + '.mp4';
                         $('.imgLoad').hide();
                         $('#infoForh').hide();
                         $('.row').show(1000);
-                        $('video').attr('src', video);
+                        $('.video').attr('src', 'stream/' + infoHash);
                         $('.video').show();
                         $('#return').show();
 
