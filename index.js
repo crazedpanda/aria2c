@@ -29,21 +29,20 @@ app.get('/clear/:infoHash', function(req, res) {
     res.status(200).send('Removed: ' + req.params.infoHash);
 });
 ///////////////////////////////
-/*app.get('/clear', function(req, res) {
-    db.listCollections().forEach(function(value, key) {
-        console.log('Removed:', value.name);
-        client.remove(value.name);
-        db.removeCollection(value.name);
+app.get('/clear', function(req, res) {
+    client.torrents.forEach(function(value, key) {
+        console.log('Removed:', value.infoHash);
+        client.remove(value.infoHash);
     });
     res.status(200).send('Removed all!');
-});*/
-// Debug part, can be removed
+});
 ///////////////////////////////
 app.get('/info', function(req, res) {
+    var list = [];
     client.torrents.forEach(function(value, key) {
-        console.log('A:', value.infoHash);
+        list.push(value.infoHash);
     });
-    res.status(200).send(JSON.stringify(client.torrents.length));
+    res.status(200).send(JSON.stringify(list));
 });
 
 // Add torrent
