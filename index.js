@@ -103,7 +103,7 @@ app.get('/stats/:infoHash', function(req, res) {
 });
 // The stream torrent
 ///////////////////////////////
-app.get('/stream/:infoHash.mp4', function(req, res, next) {
+app.get('/stream/:infoHash', function(req, res, next) {
 
     var torrent = req.params.infoHash
 
