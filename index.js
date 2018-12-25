@@ -28,14 +28,16 @@ app.get('/', function(req, res) {
 });
 ///////////////////////////////
 app.get('/clear/:infoHash', function(req, res) {
-    db.removeCollection(req.params.infoHash);
     console.log('Removed:', req.params.infoHash);
+    client.remove(req.params.infoHash);
+    db.removeCollection(req.params.infoHash);
     res.status(200).send('Removed: ' + req.params.infoHash);
 });
 ///////////////////////////////
 app.get('/clear', function(req, res) {
     db.listCollections().forEach(function(value, key) {
         console.log('Removed:', value.name);
+        client.remove(value.name);
         db.removeCollection(value.name);
     });
     res.status(200).send('Removed all!');
@@ -43,7 +45,7 @@ app.get('/clear', function(req, res) {
 // Debug part, can be removed
 ///////////////////////////////
 app.get('/info', function(req, res) {
-    console.log(client.get('6a9759bffd5c0af65319979fb7832189f4f3c35d'));
+    console.log();
     res.status(200).send(JSON.stringify(db.listCollections()));
 });
 
