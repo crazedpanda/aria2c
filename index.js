@@ -1,6 +1,6 @@
 var express = require('express');
 var app = express();
-var WebTorrent = require('webtorrent-hybrid');
+var WebTorrent = require('webtorrent');
 var client = new WebTorrent();
 
 app.use(express.static(__dirname + '/public'));
