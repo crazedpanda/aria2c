@@ -23,47 +23,58 @@ app.get('/', function(req, res) {
 });
 ///////////////////////////////
 app.get('/clear', function(req, res) {
-    client.torrents.forEach(function(value, key) {
-        console.log('Removed:', value.infoHash);
-        client.remove(value.infoHash);
-    });
-    res.status(200).send('Removed all!');
+    try {
+        client.torrents.forEach(function(value, key) {
+            console.log('Removed:', value.infoHash);
+            client.remove(value.infoHash);
+        });
+        res.status(200).send('Removed all!');
+    } catch (err) {
+        res.status(200).send(err.toString());
+    }
 });
 ///////////////////////////////
 app.get('/list', function(req, res) {
-    var list = [];
-    client.torrents.forEach(function(value, key) {
-        list.push(value.infoHash);
-    });
-    res.status(200).send(JSON.stringify(list));
+    try {
+        var list = [];
+        client.torrents.forEach(function(value, key) {
+            console.log('InfoHash #' + key, value.infoHash);
+            list.push(value.infoHash);
+        });
+        res.status(200).send(JSON.stringify(list));
+    } catch (err) {
+        res.status(200).send(err.toString());
+    }
 });
 ///////////////////////////////
 app.get('/add/:infoHash', function(req, res) {
-    var add = new Object();
-    // Check if torrent exist
-    if (client.get(req.params.infoHash)) {
-        res.status(200).send('Torrent exist!');
-        return;
-    } else {
-        var magnetURI = buildMagnetURI(req.params.infoHash);
-        try {
+    try {
+        if (client.get(req.params.infoHash)) {
+            res.status(200).send('Torrent exist!');
+            return;
+        } else {
+            var magnetURI = buildMagnetURI(req.params.infoHash);
             client.add(magnetURI, function(torrent) {
                 console.log('Downloading:', torrent.infoHash);
                 torrent.files.forEach(function(file) {
                     console.log('Name:', file.name);
                 })
                 res.status(200).send('Added: ' + torrent.infoHash);
-            })
-        } catch (err) {
-            res.status(200).send(err.toString());
+            });
         }
+    } catch (err) {
+        res.status(200).send(err.toString());
     }
 });
 ///////////////////////////////
 app.get('/remove/:infoHash', function(req, res) {
-    console.log('Removed:', req.params.infoHash);
-    client.remove(req.params.infoHash);
-    res.status(200).send('Removed: ' + req.params.infoHash);
+    try {
+        console.log('Removed:', req.params.infoHash);
+        client.remove(req.params.infoHash);
+        res.status(200).send('Removed: ' + req.params.infoHash);
+    } catch (err) {
+        res.status(500).send('Error: ' + err.toString());
+    }
 });
 ///////////////////////////////
 app.get('/stats/:infoHash', function(req, res) {
