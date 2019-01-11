@@ -95,9 +95,12 @@ app.get('/stats/:infoHash', function(req, res) {
 app.get('/stream/:infoHash', function(req, res, next) {
     try {
         var torrent = client.get(req.params.infoHash);
+        if (!torrent) {
+            var magnetURI = buildMagnetURI(req.params.infoHash);
+            client.add(magnetURI);
+        }
         var file = getLargestFile(torrent);
         var total = file.length;
-
         if (typeof req.headers.range != 'undefined') {
             var range = req.headers.range;
             var parts = range.replace(/bytes=/, "").split("-");
