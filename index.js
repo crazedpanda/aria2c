@@ -100,37 +100,6 @@ app.get('/stream/:infoHash', function(req, res, next) {
             client.add(magnetURI);
         }
         var file = getLargestFile(torrent);
-        var total = file.length;
-        if (typeof req.headers.range != 'undefined') {
-            var range = req.headers.range;
-            var parts = range.replace(/bytes=/, "").split("-");
-            var partialstart = parts[0];
-            var partialend = parts[1];
-            var start = parseInt(partialstart, 10);
-            var end = partialend ? parseInt(partialend, 10) : total - 1;
-            var chunksize = (end - start) + 1;
-            var test = total / 2;
-
-        } else {
-            var start = 0;
-            var end = total;
-        }
-        var stream = file.createReadStream({ start: start, end: end });
-        res.writeHead(206, { 'Content-Range': 'bytes ' + start + '-' + end + '/' + total, 'Accept-Ranges': 'bytes', 'Content-Length': chunksize, 'Content-Type': 'video/mp4' });
-        stream.pipe(res);
-    } catch (err) {
-        res.status(500).send('Error: ' + err.toString());
-    }
-});
-///////////////////////////////
-app.get('/download/:infoHash', function(req, res, next) {
-    try {
-        var torrent = client.get(req.params.infoHash);
-        if (!torrent) {
-            var magnetURI = buildMagnetURI(req.params.infoHash);
-            client.add(magnetURI);
-        }
-        var file = getLargestFile(torrent);
         var range = req.headers.range;
         if (range) {
             var parts = range.replace(/bytes=/, "").split("-");
