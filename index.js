@@ -131,9 +131,29 @@ app.get('/download/:infoHash', function(req, res, next) {
             client.add(magnetURI);
         }
         var file = getLargestFile(torrent);
-        var stream = file.createReadStream({ start: 0, end: file.length });
-        res.writeHead(206, { 'Content-Range': 'bytes ' + 0 + '-' + file.length + '/' + file.length, 'Accept-Ranges': 'bytes', 'Content-Length': chunksize, 'Content-Type': 'video/mp4' });
-        stream.pipe(res);
+        var range = req.headers.range;
+        if (range) {
+            var parts = range.replace(/bytes=/, "").split("-");
+            var start = parseInt(parts[0], 10);
+            var end = parts[1] ? parseInt(parts[1], 10) : file.length - 1;
+            var chunksize = (end - start) + 1;
+            var stream = file.createReadStream({ start, end });
+            var head = {
+                'Content-Range': `bytes ${start}-${end}/${file.length}`,
+                'Accept-Ranges': 'bytes',
+                'Content-Length': chunksize,
+                'Content-Type': 'video/mp4',
+            };
+            res.writeHead(206, head);
+            stream.pipe(res);
+        } else {
+            var head = {
+                'Content-Length': file.length,
+                'Content-Type': 'video/mp4',
+            };
+            res.writeHead(200, head);
+            file.createReadStream({ 0, file.length }).pipe(res);
+        }
     } catch (err) {
         res.status(500).send('Error: ' + err.toString());
     }
