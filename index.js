@@ -136,7 +136,7 @@ app.get('/download/:infoHash', function(req, res, next) {
             'Content-Type': 'video/mp4',
         };
         res.writeHead(200, head);
-        file.createReadStream({ 0, file.length }).pipe(res);
+        file.createReadStream({ start: 0, end: file.length }).pipe(res);
     } catch (err) {
         res.status(500).send('Error: ' + err.toString());
     }
