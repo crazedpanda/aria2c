@@ -122,5 +122,21 @@ app.get('/stream/:infoHash', function(req, res, next) {
         res.status(500).send('Error: ' + err.toString());
     }
 });
+///////////////////////////////
+app.get('/download/:infoHash', function(req, res, next) {
+    try {
+        var torrent = client.get(req.params.infoHash);
+        if (!torrent) {
+            var magnetURI = buildMagnetURI(req.params.infoHash);
+            client.add(magnetURI);
+        }
+        var file = getLargestFile(torrent);
+        var stream = file.createReadStream({ start: 0, end: file.length });
+        res.writeHead(206, { 'Content-Range': 'bytes ' + 0 + '-' + file.length + '/' + file.length, 'Accept-Ranges': 'bytes', 'Content-Length': chunksize, 'Content-Type': 'video/mp4' });
+        stream.pipe(res);
+    } catch (err) {
+        res.status(500).send('Error: ' + err.toString());
+    }
+});
 app.listen(process.env.PORT);
 console.log('Running at Port ' + process.env.PORT + '!');
