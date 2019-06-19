@@ -104,7 +104,7 @@ app.get('/stream/:infoHash', function(req, res, next) {
         var torrent = client.get(req.params.infoHash);
         if (torrent) {
             var file = getLargestFile(torrent);
-            if (file.length) {
+            if (file) {
                 var range = req.headers.range;
                 if (range) {
                     var parts = range.replace(/bytes=/, "").split("-");
