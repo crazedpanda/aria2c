@@ -1,11 +1,10 @@
 var express = require('express');
-var serveIndex = require('serve-index');
 var app = express();
 var WebTorrent = require('webtorrent');
 var client = new WebTorrent();
 
 app.use(express.static(__dirname + '/public'));
-app.use('/download', express.static('/tmp/webtorrent'), serveIndex('/tmp/webtorrent', {'icons': true}));
+app.use('/download', express.static('/tmp/webtorrent'));
 
 var buildMagnetURI = function(infoHash) {
     return 'magnet:?xt=urn:btih:' + infoHash + '&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.ccc.de%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A80&tr=udp%3A%2F%2Fopen.demonii.com%3A1337&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp://tracker.coppersurfer.tk/announce&tr=udp://tracker.coppersurfer.tk:6969&tr=udp://tracker.leechers-paradise.org:6969/announce&tr=udp://tracker.coppersurfer.tk:6969/announce&tr=udp://tracker.ilibr.org:6969/announce&tr=http://tracker.mininova.org/announce&tr=http://tracker.frostwire.com:6969/announce&tr=udp://tracker.openbittorrent.com:80';
@@ -141,5 +140,26 @@ app.get('/stream/:infoHash', function(req, res) {
         res.status(200).send('Error: ' + err.toString());
     }
 });
+///////////////////////////////
+app.get('/files/:infoHash', function(req, res) {
+    res.status(200).send(JSON.stringify(getFilePaths('/tmp/webtorrent/' + req.params.infoHash)));
+});
+
+function getFilePaths(dir) {
+	var filesToReturn = [];
+	function walkDir(currentPath) {
+		var files = fs.readdirSync(currentPath);
+		for (var i in files) {
+			var curFile = path.join(currentPath, files[i]);
+			if (fs.statSync(curFile).isFile()) {
+				filesToReturn.push(curFile.replace(dir, ''));
+			} else if (fs.statSync(curFile).isDirectory()) {
+				walkDir(curFile);
+			}
+		}
+	};
+	walkDir(dir);
+	return filesToReturn;
+}
 app.listen(process.env.PORT);
 console.log('Running at Port ' + process.env.PORT + '!');
