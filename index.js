@@ -135,7 +135,6 @@ app.get('/stream/:infoHash', function(req, res, next) {
         } else {
             var magnetURI = buildMagnetURI(req.params.infoHash);
             client.add(magnetURI);
-            res.status(200).send('Redirect');
             res.redirect('/stream/' + req.params.infoHash);
         }
     } catch (err) {
