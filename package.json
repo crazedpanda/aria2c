@@ -1,6 +1,6 @@
 {
-  "name": "bittystream",
-  "version": "1.0.1",
+  "name": "mipeerflix",
+  "version": "0.0.0",
   "description": "",
   "scripts": {
     "start": "node index.js"
