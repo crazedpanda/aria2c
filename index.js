@@ -1,8 +1,9 @@
 var express = require('express');
 var app = express();
 var WebTorrent = require('webtorrent');
-var client = new WebTorrent();
 var fs = require('fs');
+var path = require('path');
+var client = new WebTorrent();
 
 app.use(express.static(__dirname + '/public'));
 
@@ -142,9 +143,14 @@ app.get('/stream/:infoHash', function(req, res) {
 });
 ///////////////////////////////
 app.get('/download/:infoHash', function(req, res) {
-    fs.readdir('/tmp/webtorrent/' + req.params.infoHash, function(err, items) {
-        res.status(200).send(JSON.stringify(items));
-    });
+    const getFilePaths = (folderPath) => {
+        const entryPaths = fs.readdirSync(folderPath).map(entry => path.join(folderPath, entry));
+        const filePaths = entryPaths.filter(entryPath => fs.statSync(entryPath).isFile());
+        const dirPaths = entryPaths.filter(entryPath => !filePaths.includes(entryPath));
+        const dirFiles = dirPaths.reduce((prev, curr) => prev.concat(getFilePaths(curr)), []);
+        return [...filePaths, ...dirFiles];
+    };
+    res.status(200).send(JSON.stringify(getFilePaths('/tmp/webtorrent/' + req.params.infoHash)));
 //     res.sendFile('/tmp/webtorrent/' + req.params.infoHash);
 });
 app.listen(process.env.PORT);
