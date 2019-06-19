@@ -104,32 +104,38 @@ app.get('/stream/:infoHash', function(req, res, next) {
         var torrent = client.get(req.params.infoHash);
         if (torrent) {
             var file = getLargestFile(torrent);
-            var range = req.headers.range;
-            if (range) {
-                var parts = range.replace(/bytes=/, "").split("-");
-                var start = parseInt(parts[0], 10);
-                var end = parts[1] ? parseInt(parts[1], 10) : file.length - 1;
-                var chunksize = (end - start) + 1;
-                var stream = file.createReadStream({ start: start, end: end });
-                var head = {
-                    'Content-Range': `bytes ${start}-${end}/${file.length}`,
-                    'Accept-Ranges': 'bytes',
-                    'Content-Length': chunksize,
-                    'Content-Type': 'video/mp4',
-                };
-                res.writeHead(206, head);
-                stream.pipe(res);
+            if (file.length) {
+                var range = req.headers.range;
+                if (range) {
+                    var parts = range.replace(/bytes=/, "").split("-");
+                    var start = parseInt(parts[0], 10);
+                    var end = parts[1] ? parseInt(parts[1], 10) : file.length - 1;
+                    var chunksize = (end - start) + 1;
+                    var stream = file.createReadStream({ start: start, end: end });
+                    var head = {
+                        'Content-Range': `bytes ${start}-${end}/${file.length}`,
+                        'Accept-Ranges': 'bytes',
+                        'Content-Length': chunksize,
+                        'Content-Type': 'video/mp4',
+                    };
+                    res.writeHead(206, head);
+                    stream.pipe(res);
+                } else {
+                    var head = {
+                        'Content-Length': file.length,
+                        'Content-Type': 'video/mp4',
+                    };
+                    res.writeHead(200, head);
+                    file.createReadStream({ start: start, end: file.length }).pipe(res);
+                }
             } else {
-                var head = {
-                    'Content-Length': file.length,
-                    'Content-Type': 'video/mp4',
-                };
-                res.writeHead(200, head);
-                file.createReadStream({ start: start, end: file.length }).pipe(res);
+                res.status(200).send('No file length!');
+                res.redirect('/stream/' + req.params.infoHash);
             }
         } else {
             var magnetURI = buildMagnetURI(req.params.infoHash);
             client.add(magnetURI);
+            res.status(200).send('Redirect');
             res.redirect('/stream/' + req.params.infoHash);
         }
     } catch (err) {
