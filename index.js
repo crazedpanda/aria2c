@@ -38,7 +38,6 @@ app.get('/list', function(req, res) {
     try {
         var list = [];
         client.torrents.forEach(function(value, key) {
-            console.log('InfoHash #' + key, value.infoHash);
             list.push(value.infoHash);
         });
         res.status(200).send(JSON.stringify(list));
@@ -51,7 +50,6 @@ app.get('/add/:infoHash', function(req, res) {
     try {
         if (client.get(req.params.infoHash)) {
             res.status(200).send('Torrent exist!');
-            return;
         } else {
             var magnetURI = buildMagnetURI(req.params.infoHash);
             client.add(magnetURI, function(torrent) {
@@ -69,64 +67,73 @@ app.get('/add/:infoHash', function(req, res) {
 ///////////////////////////////
 app.get('/remove/:infoHash', function(req, res) {
     try {
-        console.log('Removed:', req.params.infoHash);
-        client.remove(req.params.infoHash);
-        res.status(200).send('Removed: ' + req.params.infoHash);
+        if (client.get(req.params.infoHash)) {
+            console.log('Removed:', req.params.infoHash);
+            client.remove(req.params.infoHash);
+            res.status(200).send('Removed: ' + req.params.infoHash);
+        } else {
+            res.status(200).send('Torrent does not exist!');
+        }
     } catch (err) {
-        res.status(500).send('Error: ' + err.toString());
+        res.status(200).send('Error: ' + err.toString());
     }
 });
 ///////////////////////////////
 app.get('/stats/:infoHash', function(req, res) {
     try {
         var torrent = client.get(req.params.infoHash);
-        var stats = new Object();
-        stats.downloaded = torrent.downloaded;
-        stats.downloadSpeed = torrent.downloadSpeed;
-        stats.progress = torrent.progress;
-        stats.timeRemaining = torrent.timeRemaining;
-        stats.numPeers = torrent.numPeers;
-        stats.path = torrent.path;
-
-        res.status(200).send(JSON.stringify(stats));
+        if (torrent) {
+            var stats = new Object();
+            stats.downloaded = torrent.downloaded;
+            stats.downloadSpeed = torrent.downloadSpeed;
+            stats.progress = torrent.progress;
+            stats.timeRemaining = torrent.timeRemaining;
+            stats.numPeers = torrent.numPeers;
+            stats.path = torrent.path;
+            res.status(200).send(JSON.stringify(stats));
+        } else {
+            res.status(200).send('Torrent does not exist!');
+        }
     } catch (err) {
-        res.status(500).send('Error: ' + err.toString());
+        res.status(200).send('Error: ' + err.toString());
     }
 });
 ///////////////////////////////
 app.get('/stream/:infoHash', function(req, res, next) {
     try {
         var torrent = client.get(req.params.infoHash);
-        if (!torrent) {
+        if (torrent) {
+            var file = getLargestFile(torrent);
+            var range = req.headers.range;
+            if (range) {
+                var parts = range.replace(/bytes=/, "").split("-");
+                var start = parseInt(parts[0], 10);
+                var end = parts[1] ? parseInt(parts[1], 10) : file.length - 1;
+                var chunksize = (end - start) + 1;
+                var stream = file.createReadStream({ start: start, end: end });
+                var head = {
+                    'Content-Range': `bytes ${start}-${end}/${file.length}`,
+                    'Accept-Ranges': 'bytes',
+                    'Content-Length': chunksize,
+                    'Content-Type': 'video/mp4',
+                };
+                res.writeHead(206, head);
+                stream.pipe(res);
+            } else {
+                var head = {
+                    'Content-Length': file.length,
+                    'Content-Type': 'video/mp4',
+                };
+                res.writeHead(200, head);
+                file.createReadStream({ start: start, end: file.length }).pipe(res);
+            }
+        } else {
             var magnetURI = buildMagnetURI(req.params.infoHash);
             client.add(magnetURI);
-        }
-        var file = getLargestFile(torrent);
-        var range = req.headers.range;
-        if (range) {
-            var parts = range.replace(/bytes=/, "").split("-");
-            var start = parseInt(parts[0], 10);
-            var end = parts[1] ? parseInt(parts[1], 10) : file.length - 1;
-            var chunksize = (end - start) + 1;
-            var stream = file.createReadStream({ start: start, end: end });
-            var head = {
-                'Content-Range': `bytes ${start}-${end}/${file.length}`,
-                'Accept-Ranges': 'bytes',
-                'Content-Length': chunksize,
-                'Content-Type': 'video/mp4',
-            };
-            res.writeHead(206, head);
-            stream.pipe(res);
-        } else {
-            var head = {
-                'Content-Length': file.length,
-                'Content-Type': 'video/mp4',
-            };
-            res.writeHead(200, head);
-            file.createReadStream({ start: start, end: file.length }).pipe(res);
+            res.redirect('/stream/' + req.params.infoHash);
         }
     } catch (err) {
-        res.status(500).send('Error: ' + err.toString());
+        res.status(200).send('Error: ' + err.toString());
     }
 });
 app.listen(process.env.PORT);
