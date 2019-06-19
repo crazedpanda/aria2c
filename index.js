@@ -1,7 +1,7 @@
 var express = require('express');
+var serveIndex = require('serve-index');
 var app = express();
 var WebTorrent = require('webtorrent');
-var serveIndex = require('serve-index');
 var client = new WebTorrent();
 
 app.use(express.static(__dirname + '/public'));
