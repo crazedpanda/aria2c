@@ -142,7 +142,7 @@ app.get('/stream/:infoHash', function(req, res) {
 });
 ///////////////////////////////
 app.get('/files/:infoHash', function(req, res) {
-    res.status(200).send(JSON.stringify(getFilePaths('/tmp/webtorrent/' + req.params.infoHash)));
+    res.status(200).send(JSON.stringify(getFilePaths('/tmp/webtorrent')));
 });
 
 function getFilePaths(dir) {
