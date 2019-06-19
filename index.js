@@ -129,7 +129,6 @@ app.get('/stream/:infoHash', function(req, res, next) {
                     file.createReadStream({ start: start, end: file.length }).pipe(res);
                 }
             } else {
-                res.status(200).send('No file length!');
                 res.redirect('/stream/' + req.params.infoHash);
             }
         } else {
