@@ -80,13 +80,15 @@ app.get('/remove/:infoHash', function(req, res) {
 app.get('/stats/:infoHash', function(req, res) {
     try {
         var torrent = client.get(req.params.infoHash);
+
+        res.status(200).send(JSON.stringify(torrent));
         var stats = new Object();
         stats.downloaded = torrent.downloaded
         stats.downloadSpeed = torrent.downloadSpeed
         stats.progress = torrent.progress
         stats.numPeers = torrent.numPeers
 
-        res.status(200).send(JSON.stringify(torrent));
+        res.status(200).send(JSON.stringify(stats));
     } catch (err) {
         res.status(500).send('Error: ' + err.toString());
     }
