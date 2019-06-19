@@ -143,15 +143,26 @@ app.get('/stream/:infoHash', function(req, res) {
 });
 ///////////////////////////////
 app.get('/download/:infoHash', function(req, res) {
-    const getFilePaths = (folderPath) => {
-        const entryPaths = fs.readdirSync(folderPath).map(entry => path.join(folderPath, entry));
-        const filePaths = entryPaths.filter(entryPath => fs.statSync(entryPath).isFile());
-        const dirPaths = entryPaths.filter(entryPath => !filePaths.includes(entryPath));
-        const dirFiles = dirPaths.reduce((prev, curr) => prev.concat(getFilePaths(curr)), []);
-        return [...filePaths, ...dirFiles];
-    };
     res.status(200).send(JSON.stringify(getFilePaths('/tmp/webtorrent/' + req.params.infoHash)));
 //     res.sendFile('/tmp/webtorrent/' + req.params.infoHash);
 });
+
+function getFilePaths(dir) {
+	var filesToReturn = [];
+	function walkDir(currentPath) {
+		var files = fs.readdirSync(currentPath);
+		for (var i in files) {
+			var curFile = path.join(currentPath, files[i]);
+			if (fs.statSync(curFile).isFile()) {
+				filesToReturn.push(curFile.replace(dir, ''));
+			} else if (fs.statSync(curFile).isDirectory()) {
+				walkDir(curFile);
+			}
+		}
+	};
+	walkDir(dir);
+	return filesToReturn;
+}
+
 app.listen(process.env.PORT);
 console.log('Running at Port ' + process.env.PORT + '!');
