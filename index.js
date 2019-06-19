@@ -89,7 +89,6 @@ app.get('/stats/:infoHash', function(req, res) {
             stats.progress = torrent.progress;
             stats.timeRemaining = torrent.timeRemaining;
             stats.numPeers = torrent.numPeers;
-            stats.path = torrent.path;
             res.status(200).send(JSON.stringify(stats));
         } else {
             res.status(200).send('Torrent does not exist!');
@@ -99,7 +98,7 @@ app.get('/stats/:infoHash', function(req, res) {
     }
 });
 ///////////////////////////////
-app.get('/stream/:infoHash', function(req, res, next) {
+app.get('/stream/:infoHash', function(req, res) {
     try {
         var torrent = client.get(req.params.infoHash);
         if (torrent) {
@@ -139,6 +138,10 @@ app.get('/stream/:infoHash', function(req, res, next) {
     } catch (err) {
         res.status(200).send('Error: ' + err.toString());
     }
+});
+///////////////////////////////
+app.get('/download/:infoHash', function(req, res) {
+    res.sendFile('/tmp/webtorrent/' + req.params.infoHash);
 });
 app.listen(process.env.PORT);
 console.log('Running at Port ' + process.env.PORT + '!');
