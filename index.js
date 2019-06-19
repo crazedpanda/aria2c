@@ -86,7 +86,7 @@ app.get('/stats/:infoHash', function(req, res) {
         stats.progress = torrent.progress
         stats.numPeers = torrent.numPeers
 
-        res.status(200).send(JSON.stringify(stats));
+        res.status(200).send(JSON.stringify(torrent));
     } catch (err) {
         res.status(500).send('Error: ' + err.toString());
     }
