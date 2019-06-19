@@ -2,6 +2,7 @@ var express = require('express');
 var app = express();
 var WebTorrent = require('webtorrent');
 var client = new WebTorrent();
+var fs = require('fs');
 
 app.use(express.static(__dirname + '/public'));
 
@@ -141,7 +142,10 @@ app.get('/stream/:infoHash', function(req, res) {
 });
 ///////////////////////////////
 app.get('/download/:infoHash', function(req, res) {
-    res.sendFile('/tmp/webtorrent/' + req.params.infoHash);
+    fs.readdir('/tmp/webtorrent/' + req.params.infoHash, function(err, items) {
+        res.status(200).send(JSON.stringify(items));
+    });
+//     res.sendFile('/tmp/webtorrent/' + req.params.infoHash);
 });
 app.listen(process.env.PORT);
 console.log('Running at Port ' + process.env.PORT + '!');
