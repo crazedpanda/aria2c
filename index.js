@@ -142,9 +142,12 @@ app.get('/stream/:infoHash', function(req, res) {
     }
 });
 ///////////////////////////////
-app.get('/download/:infoHash', function(req, res) {
+app.get('/files/:infoHash', function(req, res) {
     res.status(200).send(JSON.stringify(getFilePaths('/tmp/webtorrent/' + req.params.infoHash)));
-//     res.sendFile('/tmp/webtorrent/' + req.params.infoHash);
+});
+///////////////////////////////
+app.get('/download/:infoHash/:fileName', function(req, res) {
+    res.sendFile('/tmp/webtorrent/' + req.params.infoHash + '/' + req.params.fileName);
 });
 
 function getFilePaths(dir) {
