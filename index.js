@@ -5,7 +5,7 @@ var serveIndex = require('serve-index');
 var client = new WebTorrent();
 
 app.use(express.static(__dirname + '/public'));
-app.use('/download', express.static('tmp/webtorrent'), serveIndex('tmp/webtorrent', {'icons': true}));
+app.use('/download', express.static('/tmp/webtorrent'), serveIndex('/tmp/webtorrent', {'icons': true}));
 
 var buildMagnetURI = function(infoHash) {
     return 'magnet:?xt=urn:btih:' + infoHash + '&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.ccc.de%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A80&tr=udp%3A%2F%2Fopen.demonii.com%3A1337&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp://tracker.coppersurfer.tk/announce&tr=udp://tracker.coppersurfer.tk:6969&tr=udp://tracker.leechers-paradise.org:6969/announce&tr=udp://tracker.coppersurfer.tk:6969/announce&tr=udp://tracker.ilibr.org:6969/announce&tr=http://tracker.mininova.org/announce&tr=http://tracker.frostwire.com:6969/announce&tr=udp://tracker.openbittorrent.com:80';
