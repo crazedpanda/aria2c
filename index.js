@@ -5,7 +5,7 @@ var app = express();
 var WebTorrent = require('webtorrent');
 var client = new WebTorrent();
 
-var port = process.env.PORT ? process.env.PORT : 34567;
+var port = process.env.PORT ? process.env.PORT : 3000;
 
 app.use(express.static(__dirname + '/public'));
 app.use('/download', express.static('/tmp/webtorrent'));
