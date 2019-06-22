@@ -5,6 +5,8 @@ var app = express();
 var WebTorrent = require('webtorrent');
 var client = new WebTorrent();
 
+var port = process.env.PORT ? process.env.PORT : 34567;
+
 app.use(express.static(__dirname + '/public'));
 app.use('/download', express.static('/tmp/webtorrent'));
 
@@ -163,5 +165,5 @@ function getFilePaths(dir) {
 	walkDir(dir);
 	return filesToReturn;
 }
-app.listen(process.env.PORT);
-console.log('Running at Port ' + process.env.PORT + '!');
+app.listen(port);
+console.log('Running at Port ' + port + '!');
