@@ -100,7 +100,6 @@
 
     <script>
         $(function() {
-            //console.log(window.location.hostname);
             var refreshIntervalId = null;
             $('#stream').click(function() {
                 window.infoHash = $('input').val();
@@ -115,8 +114,9 @@
                 $('.imgLoad').html('<img src="animation.gif"><br /><br />');
                 // Add torrent in client
                 $.get('add/' + infoHash, function(data) {
+                    console.log('add', data);
                     if (data.error) {
-                        //Error here =) 
+                        //Error here =)
                     } else {
                         $('.jumbotron').hide(1000);
                         // Check if no error
@@ -129,6 +129,7 @@
 
                         refreshIntervalId = window.setInterval(function() {
                             $.get('stats/' + infoHash, function(data) {
+                                console.log('stats', data);
                                 var data = jQuery.parseJSON(data);
                                 $('#downloaded').html('<i class="fa fa-cloud-download" aria-hidden="true"></i> ' + prettyBytes(data.downloaded));
                                 $('#downloadSpeed').html('<i class="fa fa-line-chart" aria-hidden="true"></i> ' + prettyBytes(data.downloadSpeed));
@@ -138,7 +139,7 @@
                                 $('#numPeers').html('<i class="fa fa-eye" aria-hidden="true"></i> ' + data.numPeers);
                             });
                         }, 2000);
-                    } // else no error  
+                    } // else no error
                 });
             });
 
