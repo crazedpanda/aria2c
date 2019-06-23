@@ -165,5 +165,6 @@ function getFilePaths(dir) {
 	walkDir(dir);
 	return filesToReturn;
 }
-app.listen(port);
-console.log('Running at Port ' + port + '!');
+app.listen(port, function() {
+    console.log('Server is running at ' + port);
+});
