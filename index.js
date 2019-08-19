@@ -2,7 +2,7 @@ var express = require('express');
 var fs = require('fs');
 var path = require('path');
 var app = express();
-var WebTorrent = require('webtorrent');
+var WebTorrent = require('webtorrent-hybrid');
 var client = new WebTorrent();
 
 var port = process.env.PORT ? process.env.PORT : 3000;
