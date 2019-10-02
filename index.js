@@ -1,170 +1,205 @@
 var express = require('express');
 var fs = require('fs');
 var path = require('path');
+var cookieParser = require('cookie-parser')
 var app = express();
 var WebTorrent = require('webtorrent-hybrid');
 var client = new WebTorrent();
-
 var port = process.env.PORT ? process.env.PORT : 3000;
-
-app.use(express.static(__dirname + '/public'));
-app.use('/download', express.static('/tmp/webtorrent'));
-
 var buildMagnetURI = function(infoHash) {
-    return 'magnet:?xt=urn:btih:' + infoHash + '&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.ccc.de%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A80&tr=udp%3A%2F%2Fopen.demonii.com%3A1337&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp://tracker.coppersurfer.tk/announce&tr=udp://tracker.coppersurfer.tk:6969&tr=udp://tracker.leechers-paradise.org:6969/announce&tr=udp://tracker.coppersurfer.tk:6969/announce&tr=udp://tracker.ilibr.org:6969/announce&tr=http://tracker.mininova.org/announce&tr=http://tracker.frostwire.com:6969/announce&tr=udp://tracker.openbittorrent.com:80';
+	return 'magnet:?xt=urn:btih:' + infoHash + '&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.ccc.de%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A80&tr=udp%3A%2F%2Fopen.demonii.com%3A1337&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp://tracker.coppersurfer.tk/announce&tr=udp://tracker.coppersurfer.tk:6969&tr=udp://tracker.leechers-paradise.org:6969/announce&tr=udp://tracker.coppersurfer.tk:6969/announce&tr=udp://tracker.ilibr.org:6969/announce&tr=http://tracker.mininova.org/announce&tr=http://tracker.frostwire.com:6969/announce&tr=udp://tracker.openbittorrent.com:80';
+};
+var getFile = function(torrent, fileIndex) {
+	var file = torrent.files[fileIndex];
+	return file;
 };
 var getLargestFile = function(torrent) {
-    var file;
-    for (var i = 0; i < torrent.files.length; i++) {
-        if (!file || file.length < torrent.files[i].length) {
-            file = torrent.files[i];
-        }
-    }
-    return file;
+	var file;
+	for (var i = 0; i < torrent.files.length; i++) {
+		if (!file || file.length < torrent.files[i].length) {
+			file = torrent.files[i];
+		}
+	}
+	return file;
 };
+app.use(cookieParser());
+app.use(express.static(__dirname + '/public'));
+app.use('/download', express.static('/tmp/webtorrent'));
 ///////////////////////////////
 app.get('/', function(req, res) {
-    res.sendFile(__dirname + '/public/index.html');
+	res.send('Hello World!');
 });
 ///////////////////////////////
 app.get('/clear', function(req, res) {
-    try {
-        client.torrents.forEach(function(value, key) {
-            console.log('Removed:', value.infoHash);
-            client.remove(value.infoHash);
-        });
-        res.status(200).send('Removed all!');
-    } catch (err) {
-        res.status(200).send(err.toString());
-    }
+	try {
+		client.torrents.forEach(function(value, key) {
+			console.log('Removed:', value.infoHash);
+			client.remove(value.infoHash);
+		});
+		res.send('Removed all!');
+	} catch (err) {
+		res.send(err.toString());
+	}
 });
 ///////////////////////////////
 app.get('/list', function(req, res) {
-    try {
-        var list = [];
-        client.torrents.forEach(function(value, key) {
-            list.push(value.infoHash);
-        });
-        res.status(200).send(JSON.stringify(list));
-    } catch (err) {
-        res.status(200).send(err.toString());
-    }
+	try {
+		var html = '<title>List</title>';
+		client.torrents.forEach(function(value, key) {
+			html += '<a href="/' + value.infoHash + '">' + value.infoHash + '</a><br>';
+		});
+		res.send(html);
+	} catch (err) {
+		res.send(err.toString());
+	}
 });
 ///////////////////////////////
-app.get('/add/:infoHash', function(req, res) {
-    try {
-        if (client.get(req.params.infoHash)) {
-            res.status(200).send('Torrent exist!');
-        } else {
-            var magnetURI = buildMagnetURI(req.params.infoHash);
-            client.add(magnetURI, function(torrent) {
-                console.log('Downloading:', torrent.infoHash);
-                torrent.files.forEach(function(file) {
-                    console.log('Name:', file.name);
-                })
-                res.status(200).send('Added: ' + torrent.infoHash);
-            });
-        }
-    } catch (err) {
-        res.status(200).send(err.toString());
-    }
+app.get('/:infoHash', function(req, res) {
+	try {
+		var torrent = client.get(req.params.infoHash);
+		if (torrent) {
+			if (torrent.files.length) {
+				var html = '';
+				torrent.files.forEach(function(file, key) {
+					html += file.path + ' | ' + file.length + ' | ' + file.progress + ' | <a href="/stream/' + req.params.infoHash.toLowerCase() + '/' + key + '">Stream</a>';
+					if (file.progress == 1) {
+						html += ' | <a href="/download/' + req.params.infoHash.toLowerCase() + '/' + file.path + '">Download</a>';
+					}
+					html += '<br>';
+				});
+				res.send(html);
+			} else {
+				if (req.cookies.redirects) {
+					if (parseInt(req.cookies.redirects) < 4) {
+						res.cookie('redirects', parseInt(req.cookies.redirects) + 1);
+					} else {
+						res.clearCookie('redirects');
+						if (client.get(req.params.infoHash)) {
+							console.log('Removed:', req.params.infoHash);
+							client.remove(req.params.infoHash);
+						}
+						throw new Error('No peers for ' + req.params.infoHash + '!');
+					}
+				} else {
+					res.cookie('redirects', 1);
+				}
+				res.redirect('/' + req.params.infoHash);
+			}
+		} else {
+			var magnetURI = buildMagnetURI(req.params.infoHash);
+			client.add(magnetURI, function(torrent) {
+				console.log('Added:', req.params.infoHash);
+				res.redirect('/' + req.params.infoHash);
+			});
+		}
+	} catch (err) {
+		res.send(err.toString());
+	}
 });
 ///////////////////////////////
 app.get('/remove/:infoHash', function(req, res) {
-    try {
-        if (client.get(req.params.infoHash)) {
-            console.log('Removed:', req.params.infoHash);
-            client.remove(req.params.infoHash);
-            res.status(200).send('Removed: ' + req.params.infoHash);
-        } else {
-            res.status(200).send('Torrent does not exist!');
-        }
-    } catch (err) {
-        res.status(200).send('Error: ' + err.toString());
-    }
-});
-///////////////////////////////
-app.get('/stats/:infoHash', function(req, res) {
-    try {
-        var torrent = client.get(req.params.infoHash);
-        if (torrent) {
-            var stats = new Object();
-            stats.downloaded = torrent.downloaded;
-            stats.downloadSpeed = torrent.downloadSpeed;
-            stats.progress = torrent.progress;
-            stats.timeRemaining = torrent.timeRemaining;
-            stats.numPeers = torrent.numPeers;
-            res.status(200).send(JSON.stringify(stats));
-        } else {
-            res.status(200).send('Torrent does not exist!');
-        }
-    } catch (err) {
-        res.status(200).send('Error: ' + err.toString());
-    }
+	try {
+		if (client.get(req.params.infoHash)) {
+			console.log('Removed:', req.params.infoHash);
+			client.remove(req.params.infoHash);
+			res.send('Removed: ' + req.params.infoHash);
+		} else {
+			res.send('Torrent does not exist!');
+		}
+	} catch (err) {
+		res.send('Error: ' + err.toString());
+	}
 });
 ///////////////////////////////
 app.get('/stream/:infoHash', function(req, res) {
-    try {
-        var torrent = client.get(req.params.infoHash);
-        if (torrent) {
-            var file = getLargestFile(torrent);
-            if (file) {
-                var range = req.headers.range;
-                if (range) {
-                    var parts = range.replace(/bytes=/, "").split("-");
-                    var start = parseInt(parts[0], 10);
-                    var end = parts[1] ? parseInt(parts[1], 10) : file.length - 1;
-                    var chunksize = (end - start) + 1;
-                    var stream = file.createReadStream({ start: start, end: end });
-                    var head = {
-                        'Content-Range': `bytes ${start}-${end}/${file.length}`,
-                        'Accept-Ranges': 'bytes',
-                        'Content-Length': chunksize,
-                        'Content-Type': 'video/mp4',
-                    };
-                    res.writeHead(206, head);
-                    stream.pipe(res);
-                } else {
-                    var head = {
-                        'Content-Length': file.length,
-                        'Content-Type': 'video/mp4',
-                    };
-                    res.writeHead(200, head);
-                    file.createReadStream({ start: start, end: file.length }).pipe(res);
-                }
-            } else {
-                res.redirect('/stream/' + req.params.infoHash);
-            }
-        } else {
-            var magnetURI = buildMagnetURI(req.params.infoHash);
-            client.add(magnetURI);
-            res.redirect('/stream/' + req.params.infoHash);
-        }
-    } catch (err) {
-        res.status(200).send('Error: ' + err.toString());
-    }
+	try {
+		var torrent = client.get(req.params.infoHash);
+		if (torrent) {
+			var file = getLargestFile(torrent);
+			if (file) {
+				var range = req.headers.range;
+				if (range) {
+					var parts = range.replace(/bytes=/, "").split("-");
+					var start = parseInt(parts[0], 10);
+					var end = parts[1] ? parseInt(parts[1], 10) : file.length - 1;
+					var chunksize = (end - start) + 1;
+					var stream = file.createReadStream({
+						start: start,
+						end: end
+					});
+					var head = {
+						'Content-Range': `bytes ${start}-${end}/${file.length}`,
+						'Accept-Ranges': 'bytes',
+						'Content-Length': chunksize,
+						'Content-Type': 'video/mp4',
+					};
+					res.writeHead(206, head);
+					stream.pipe(res);
+				} else {
+					file.createReadStream({
+						start: 0,
+						end: file.length
+					}).pipe(res);
+				}
+			} else {
+				res.redirect('/stream/' + req.params.infoHash);
+			}
+		} else {
+			var magnetURI = buildMagnetURI(req.params.infoHash);
+			client.add(magnetURI, function(torrent) {
+				console.log('Added:', req.params.infoHash);
+				res.redirect('/stream/' + req.params.infoHash);
+			});
+		}
+	} catch (err) {
+		res.send('Error: ' + err.toString());
+	}
 });
 ///////////////////////////////
-app.get('/files/:infoHash', function(req, res) {
-    res.status(200).send(JSON.stringify(getFilePaths('/tmp/webtorrent/' + req.params.infoHash)));
-});
-
-function getFilePaths(dir) {
-	var filesToReturn = [];
-	function walkDir(currentPath) {
-		var files = fs.readdirSync(currentPath);
-		for (var i in files) {
-			var curFile = path.join(currentPath, files[i]);
-			if (fs.statSync(curFile).isFile()) {
-				filesToReturn.push(curFile.replace(dir, ''));
-			} else if (fs.statSync(curFile).isDirectory()) {
-				walkDir(curFile);
+app.get('/stream/:infoHash/:fileIndex', function(req, res) {
+	try {
+		var torrent = client.get(req.params.infoHash);
+		if (torrent) {
+			var file = getFile(torrent, req.params.fileIndex);
+			if (file) {
+				var range = req.headers.range;
+				if (range) {
+					var parts = range.replace(/bytes=/, "").split("-");
+					var start = parseInt(parts[0], 10);
+					var end = parts[1] ? parseInt(parts[1], 10) : file.length - 1;
+					var chunksize = (end - start) + 1;
+					var stream = file.createReadStream({
+						start: start,
+						end: end
+					});
+					var head = {
+						'Content-Range': `bytes ${start}-${end}/${file.length}`,
+						'Accept-Ranges': 'bytes',
+						'Content-Length': chunksize,
+						'Content-Type': 'video/mp4',
+					};
+					res.writeHead(206, head);
+					stream.pipe(res);
+				} else {
+					file.createReadStream({
+						start: 0,
+						end: file.length
+					}).pipe(res);
+				}
+			} else {
+				res.redirect('/stream/' + req.params.infoHash + '/' + req.params.fileIndex);
 			}
+		} else {
+			var magnetURI = buildMagnetURI(req.params.infoHash);
+			client.add(magnetURI, function(torrent) {
+				console.log('Added:', req.params.infoHash);
+				res.redirect('/stream/' + req.params.infoHash + '/' + req.params.fileIndex);
+			});
 		}
-	};
-	walkDir(dir);
-	return filesToReturn;
-}
+	} catch (err) {
+		res.send('Error: ' + err.toString());
+	}
+});
 app.listen(port, function() {
-    console.log('Server is running at ' + port);
+	console.log('Server is running at ' + port);
 });
