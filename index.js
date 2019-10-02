@@ -59,13 +59,16 @@ app.get('/:infoHash', function(req, res) {
 		var torrent = client.get(req.params.infoHash);
 		if (torrent) {
 			if (torrent.files.length) {
-				var html = '';
+				var html = '<title>' + req.params.infoHash.toLowerCase() + '</title>';
 				torrent.files.forEach(function(file, key) {
-					html += file.path + ' | ' + file.length + ' | ' + file.progress + ' | <a href="/stream/' + req.params.infoHash.toLowerCase() + '/' + key + '">Stream</a>';
+					html += '<table class="torrent" id="' + req.params.infoHash.toLowerCase() + '"><tr class="filepath"><td style="font-weight:bold">File Path:</td><td>' + file.path + '</td></tr><tr class="filesize"><td style="font-weight:bold">File Size:</td><td>' + file.length + ' bytes</td></tr><tr class="fileprogress"><td style="font-weight:bold">Download Progress:</td><td>' + Math.round(file.progress * 100) + '%</td></tr><tr class="buttons"><td></td><td><a href="/stream/' + req.params.infoHash.toLowerCase() + '/' + key + '">Stream</a>';
 					if (file.progress == 1) {
 						html += ' | <a href="/download/' + req.params.infoHash.toLowerCase() + '/' + file.path + '">Download</a>';
 					}
-					html += '<br>';
+					html += '</td></tr></table>';
+					if (torrent.files.length - 1 != key) {
+						html += '<hr>';
+					}
 				});
 				res.send(html);
 			} else {
