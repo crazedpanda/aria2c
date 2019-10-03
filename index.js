@@ -27,7 +27,7 @@ app.use(express.static(__dirname + '/public'));
 app.use('/download', express.static('/tmp/webtorrent'));
 ///////////////////////////////
 app.get('/', function(req, res) {
-	res.send('Hello World!');
+	res.send('<title>MiPeerFlix</title>Hello World!');
 });
 ///////////////////////////////
 app.get('/clear', function(req, res) {
@@ -36,21 +36,21 @@ app.get('/clear', function(req, res) {
 			console.log('Removed:', value.infoHash);
 			client.remove(value.infoHash);
 		});
-		res.send('Removed all!');
+		res.send('<title>MiPeerFlix - Clear</title>Removed all!');
 	} catch (err) {
-		res.send(err.toString());
+		res.send('<title>MiPeerFlix - Error</title>' + err.toString());
 	}
 });
 ///////////////////////////////
 app.get('/list', function(req, res) {
 	try {
-		var html = '<title>List</title>';
+		var html = '<title>MiPeerFlix - List</title>';
 		client.torrents.forEach(function(value, key) {
 			html += '<a href="/' + value.infoHash + '">' + value.infoHash + '</a><br>';
 		});
 		res.send(html);
 	} catch (err) {
-		res.send(err.toString());
+		res.send('<title>MiPeerFlix - Error</title>' + err.toString());
 	}
 });
 ///////////////////////////////
@@ -59,7 +59,7 @@ app.get('/:infoHash', function(req, res) {
 		var torrent = client.get(req.params.infoHash);
 		if (torrent) {
 			if (torrent.files.length) {
-				var html = '<title>' + req.params.infoHash.toLowerCase() + '</title><b>Torrent Menu:</b> <a href="/remove/' + req.params.infoHash + '">Remove</a> | <a href="/' + req.params.infoHash + '">Reload</a><hr>';
+				var html = '<title>MiPeerFlix - ' + req.params.infoHash.toLowerCase() + '</title><b>Torrent Menu:</b> <a href="/remove/' + req.params.infoHash + '">Remove</a> | <a href="/' + req.params.infoHash + '">Reload</a><hr>';
 				torrent.files.forEach(function(file, key) {
 					html += '<table class="torrent" id="' + req.params.infoHash.toLowerCase() + '" style="table-layout:fixed;width:100%"><tr class="filepath"><td style="font-weight:bold;width:140px;vertical-align:middle">File Path:</td><td>' + file.path + '</td></tr><tr class="filesize"><td style="font-weight:bold;width:140px;vertical-align:middle">File Size:</td><td>' + file.length + ' bytes</td></tr><tr class="fileprogress"><td style="font-weight:bold;width:140px;vertical-align:middle">Download Progress:</td><td>' + Math.round(file.progress * 100) + '%</td></tr><tr class="buttons"><td></td><td><a href="/stream/' + req.params.infoHash.toLowerCase() + '/' + key + '">Stream</a>';
 					if (file.progress == 1) {
@@ -96,7 +96,7 @@ app.get('/:infoHash', function(req, res) {
 			});
 		}
 	} catch (err) {
-		res.send(err.toString());
+		res.send('<title>MiPeerFlix - Error</title>' + err.toString());
 	}
 });
 ///////////////////////////////
@@ -105,12 +105,12 @@ app.get('/remove/:infoHash', function(req, res) {
 		if (client.get(req.params.infoHash)) {
 			console.log('Removed:', req.params.infoHash);
 			client.remove(req.params.infoHash);
-			res.send('Removed: ' + req.params.infoHash);
+			res.send('<title>MiPeerFlix - Remove</title>Removed: ' + req.params.infoHash);
 		} else {
-			res.send('Torrent does not exist!');
+			res.send('<title>MiPeerFlix - Remove</title>Torrent does not exist!');
 		}
 	} catch (err) {
-		res.send('Error: ' + err.toString());
+		res.send('<title>MiPeerFlix - Error</title>' + err.toString());
 	}
 });
 ///////////////////////////////
@@ -155,7 +155,7 @@ app.get('/stream/:infoHash', function(req, res) {
 			});
 		}
 	} catch (err) {
-		res.send('Error: ' + err.toString());
+		res.send('<title>MiPeerFlix - Error</title>' + err.toString());
 	}
 });
 ///////////////////////////////
@@ -200,7 +200,7 @@ app.get('/stream/:infoHash/:fileIndex', function(req, res) {
 			});
 		}
 	} catch (err) {
-		res.send('Error: ' + err.toString());
+		res.send('<title>MiPeerFlix - Error</title>' + err.toString());
 	}
 });
 app.listen(port, function() {
