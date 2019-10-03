@@ -71,7 +71,7 @@ app.get('/:infoHash', function(req, res) {
 					}
 				});
 				if (torrent.progress < 1) {
-					html += '<script>window.onload = function() { setTimeout("location.reload(true);", 15); };</script>';
+					html += '<script>window.onload = function() { setTimeout("location.reload(true);", 15000); };</script>';
 				}
 				res.send(html);
 			} else {
