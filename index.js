@@ -70,6 +70,9 @@ app.get('/:infoHash', function(req, res) {
 						html += '<hr>';
 					}
 				});
+				if (torrent.progress < 1) {
+					html += '<script>window.onload = function() { setTimeout("location.reload(true);", 15); };</script>';
+				}
 				res.send(html);
 			} else {
 				if (req.cookies.redirects) {
