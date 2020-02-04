@@ -123,6 +123,13 @@ app.get('/stream/:infoHash', function(req, res) {
 		if (torrent) {
 			var file = getLargestFile(torrent);
 			if (file) {
+				var head = {
+					'Content-Range': `bytes ${start}-${end}/${file.length}`,
+					'Accept-Ranges': 'bytes',
+					'Content-Length': chunksize,
+					'Content-Type': 'video/mp4',
+				};
+				res.writeHead(206, head);
 				var range = req.headers.range;
 				if (range) {
 					var parts = range.replace(/bytes=/, "").split("-");
@@ -133,13 +140,6 @@ app.get('/stream/:infoHash', function(req, res) {
 						start: start,
 						end: end
 					});
-					var head = {
-						'Content-Range': `bytes ${start}-${end}/${file.length}`,
-						'Accept-Ranges': 'bytes',
-						'Content-Length': chunksize,
-						'Content-Type': 'video/mp4',
-					};
-					res.writeHead(206, head);
 					stream.pipe(res);
 				} else {
 					file.createReadStream({
@@ -168,6 +168,13 @@ app.get('/stream/:infoHash/:fileIndex', function(req, res) {
 		if (torrent) {
 			var file = getFile(torrent, req.params.fileIndex);
 			if (file) {
+				var head = {
+					'Content-Range': `bytes ${start}-${end}/${file.length}`,
+					'Accept-Ranges': 'bytes',
+					'Content-Length': chunksize,
+					'Content-Type': 'video/mp4',
+				};
+				res.writeHead(206, head);
 				var range = req.headers.range;
 				if (range) {
 					var parts = range.replace(/bytes=/, "").split("-");
@@ -178,13 +185,6 @@ app.get('/stream/:infoHash/:fileIndex', function(req, res) {
 						start: start,
 						end: end
 					});
-					var head = {
-						'Content-Range': `bytes ${start}-${end}/${file.length}`,
-						'Accept-Ranges': 'bytes',
-						'Content-Length': chunksize,
-						'Content-Type': 'video/mp4',
-					};
-					res.writeHead(206, head);
 					stream.pipe(res);
 				} else {
 					file.createReadStream({
