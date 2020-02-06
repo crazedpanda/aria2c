@@ -75,7 +75,7 @@ app.get('/:infoHash', function(req, res) {
 				}
 				res.send(html);
 			} else {
-				if (req.cookies.redirects) {
+				if ('redirects' in req.cookies) {
 					if (parseInt(req.cookies.redirects) < 4) {
 						res.cookie('redirects', parseInt(req.cookies.redirects) + 1);
 					} else {
