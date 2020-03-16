@@ -69,7 +69,9 @@ app.get('/:infoHash', function(req, res) {
 				res.send('No peers for ' + req.params.infoHash + '!');
 			} else {
 				console.log('No files in torrent! Trying again!');
-				res.redirect('/' + req.params.infoHash + '?redirect=1');
+				Promise.delay(5000).then(function() {
+					res.redirect('/' + req.params.infoHash + '?redirect=1');
+				});
 			}
 		}
 	} else {
@@ -80,10 +82,10 @@ app.get('/:infoHash', function(req, res) {
 		} else {
 			console.log('Adding torrent in client!');
 			var magnetURI = buildMagnetURI(req.params.infoHash);
-			client.add(magnetURI, function(torrent) {
-				console.log('Added:', torrent);
+			client.add(magnetURI);
+			Promise.delay(5000).then(function() {
+				res.redirect('/' + req.params.infoHash + '?redirect=1');
 			});
-			res.redirect('/' + req.params.infoHash + '?redirect=1');
 		}
 	}
 });
@@ -134,11 +136,13 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 				client.remove(req.params.infoHash);
 				res.send('No peers for ' + req.params.infoHash + '!');
 			} else {
-				var redirectURL = '/stream/' + req.params.infoHash;
-				if ('fileIndex' in req.params && req.params.fileIndex) {
-					redirectURL += '/' + req.params.fileIndex;
-				}
-				res.redirect(redirectURL + '?redirect=1');
+				Promise.delay(5000).then(function() {
+					var redirectURL = '/stream/' + req.params.infoHash;
+					if ('fileIndex' in req.params && req.params.fileIndex) {
+						redirectURL += '/' + req.params.fileIndex;
+					}
+					res.redirect(redirectURL + '?redirect=1');
+				});
 			}
 		}
 	} else {
@@ -147,14 +151,14 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 			res.send('No peers for ' + req.params.infoHash + '!');
 		} else {
 			var magnetURI = buildMagnetURI(req.params.infoHash);
-			client.add(magnetURI, function(torrent) {
-				console.log('Added:', torrent);
+			client.add(magnetURI);
+			Promise.delay(5000).then(function() {
+				var redirectURL = '/stream/' + req.params.infoHash;
+				if ('fileIndex' in req.params && req.params.fileIndex) {
+					redirectURL += '/' + req.params.fileIndex;
+				}
+				res.redirect(redirectURL + '?redirect=1');
 			});
-			var redirectURL = '/stream/' + req.params.infoHash;
-			if ('fileIndex' in req.params && req.params.fileIndex) {
-				redirectURL += '/' + req.params.fileIndex;
-			}
-			res.redirect(redirectURL + '?redirect=1');
 		}
 	}
 });
