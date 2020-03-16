@@ -41,20 +41,20 @@ app.get('/list', function(req, res) {
 });
 app.get('/:infoHash', function(req, res) {
 	var torrent = client.get(req.params.infoHash);
-	torrent.on('noPeers', function(err) {
-		console.log("noPeers", err);
-		res.send('No peers for ' + req.params.infoHash + '!');
-	});
-        torrent.on('warning', function (err) {
-		console.log("Torrent Warning : ", err);
-        });
-  	torrent.on('error', function (err) {
-		console.log("Torrent Error : ", err);
-  	});
-	torrent.on('done', function () {
-		console.log("Torrent Done!");
-	});
 	if (torrent) {
+		torrent.on('noPeers', function(err) {
+			console.log("noPeers", err);
+			res.send('No peers for ' + req.params.infoHash + '!');
+		});
+		torrent.on('warning', function (err) {
+			console.log("Torrent Warning : ", err);
+		});
+		torrent.on('error', function (err) {
+			console.log("Torrent Error : ", err);
+		});
+		torrent.on('done', function () {
+			console.log("Torrent Done!");
+		});
 		if (torrent.files.length) {
 			var html = '<head>';
 			if (torrent.progress < 1) {
@@ -75,11 +75,15 @@ app.get('/:infoHash', function(req, res) {
 		}
 		res.redirect('/' + req.params.infoHash);
 	} else {
-		var magnetURI = buildMagnetURI(req.params.infoHash);
-		client.add(magnetURI, function(torrent) {
-			console.log('Added:', req.params.infoHash);
-			res.redirect('/' + req.params.infoHash);
-		});
+		if ('redirect' in req.query) {
+			res.send('No peers for ' + req.params.infoHash + '!');
+		} else {
+			var magnetURI = buildMagnetURI(req.params.infoHash);
+			client.add(magnetURI, function(torrent) {
+				console.log('Added:', req.params.infoHash);
+				res.redirect('/' + req.params.infoHash + '?redirect=1');
+			});
+		}
 	}
 });
 app.get('/remove/:infoHash', function(req, res) {
@@ -134,16 +138,20 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 			}
 			res.redirect(redirectURL);
 		}
-	} else {
-		var magnetURI = buildMagnetURI(req.params.infoHash);
-		client.add(magnetURI, function(torrent) {
-			console.log('Added:', req.params.infoHash);
-			var redirectURL = '/stream/' + req.params.infoHash;
-			if ('fileIndex' in req.params) {
-				redirectURL += '/' + req.params.fileIndex;
-			}
-			res.redirect(redirectURL);
-		});
+	} else 
+		if ('redirect' in req.query) {
+			res.send('No peers for ' + req.params.infoHash + '!');
+		} else {
+			var magnetURI = buildMagnetURI(req.params.infoHash);
+			client.add(magnetURI, function(torrent) {
+				console.log('Added:', req.params.infoHash);
+				var redirectURL = '/stream/' + req.params.infoHash;
+				if ('fileIndex' in req.params) {
+					redirectURL += '/' + req.params.fileIndex;
+				}
+				res.redirect(redirectURL + '?redirect=1');
+			});
+		}
 	}
 });
 app.listen(port, function() {
