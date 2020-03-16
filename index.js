@@ -74,7 +74,7 @@ app.get('/:infoHash', function(req, res) {
     });
 });
 app.get('/remove/:infoHash', function(req, res) {
-    removeTorrent(req.params).then(function() {
+    removeTorrent(req.params).then(function(arg) {
 		res.send('<title>MiPeerFlix - Remove</title>Removed: ' + arg.infoHash);
     }, function() {
         res.send('<title>MiPeerFlix - Remove</title>Error removing torrent!');
@@ -185,7 +185,6 @@ function addTorrent(arg) {
             return arg;
         });
     }).then(checkTorrent).then(function(arg) {
-        console.log(arg.infoHash, 'Torrent added!');
         return arg;
     }, function(arg) {
         console.log(arg.infoHash, 'Error adding torrent!');
