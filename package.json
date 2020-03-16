@@ -7,7 +7,6 @@
   },
   "dependencies": {
     "bluebird": "",
-    "cookie-parser": "",
     "express": "",
     "webtorrent-hybrid": ""
   }
