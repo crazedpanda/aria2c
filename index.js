@@ -123,11 +123,15 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 				}).pipe(res);
 			}
 		} else {
-			var redirectURL = '/stream/' + req.params.infoHash;
-			if ('fileIndex' in req.params && req.params.fileIndex) {
-				redirectURL += '/' + req.params.fileIndex;
+			if ('redirect' in req.query) {
+				res.send('No peers for ' + req.params.infoHash + '!');
+			} else {
+				var redirectURL = '/stream/' + req.params.infoHash;
+				if ('fileIndex' in req.params && req.params.fileIndex) {
+					redirectURL += '/' + req.params.fileIndex;
+				}
+				res.redirect(redirectURL + '?redirect=1');
 			}
-			res.redirect(redirectURL);
 		}
 	} else {
 		if ('redirect' in req.query) {
