@@ -124,7 +124,7 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 			}
 		} else {
 			var redirectURL = '/stream/' + req.params.infoHash;
-			if ('fileIndex' in req.params) {
+			if ('fileIndex' in req.params && req.params.fileIndex) {
 				redirectURL += '/' + req.params.fileIndex;
 			}
 			res.redirect(redirectURL);
@@ -137,7 +137,7 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 			client.add(magnetURI, function(torrent) {
 				console.log('Added:', req.params.infoHash);
 				var redirectURL = '/stream/' + req.params.infoHash;
-				if ('fileIndex' in req.params) {
+				if ('fileIndex' in req.params && req.params.fileIndex) {
 					redirectURL += '/' + req.params.fileIndex;
 				}
 				res.redirect(redirectURL + '?redirect=1');
