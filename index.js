@@ -71,7 +71,8 @@ app.get('/:infoHash', function(req, res) {
     }, function(arg) {
 	    var torrent = client.get(arg.infoHash);
         if (torrent.numPeers == 0) {
-            res.send('No peers for ' + req.params.infoHash + '!');
+            removeTorrent(arg);
+            res.send('No peers for ' + arg.infoHash + '!');
         } else {
             res.redirect('/' + arg.infoHash);
         }        
@@ -123,6 +124,7 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
     }, function(arg) {
 	    var torrent = client.get(arg.infoHash);
         if (torrent.numPeers == 0) {
+            removeTorrent(arg);
             res.send('No peers for ' + arg.infoHash + '!');
         } else {
             var redirectURL = '/stream/' + arg.infoHash;
