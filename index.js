@@ -46,13 +46,13 @@ app.get('/:infoHash', function(req, res) {
 			console.log("noPeers", err);
 			res.send('No peers for ' + req.params.infoHash + '!');
 		});
-		torrent.on('warning', function (err) {
+		torrent.on('warning', function(err) {
 			console.log("Torrent Warning : ", err);
 		});
-		torrent.on('error', function (err) {
+		torrent.on('error', function(err) {
 			console.log("Torrent Error : ", err);
 		});
-		torrent.on('done', function () {
+		torrent.on('done', function() {
 			console.log("Torrent Done!");
 		});
 		if (torrent.files.length) {
@@ -138,7 +138,7 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 			}
 			res.redirect(redirectURL);
 		}
-	} else 
+	} else {
 		if ('redirect' in req.query) {
 			res.send('No peers for ' + req.params.infoHash + '!');
 		} else {
