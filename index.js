@@ -84,8 +84,7 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
     addTorrent(req.params).then(checkPeers).then(function(arg) {
 	    var torrent = client.get(arg.infoHash);
         if ('fileIndex' in arg) {
-            console.log(typeof arg.fileIndex);
-            var file = getFile(torrent, (arg.fileIndex - 1));
+            var file = getFile(torrent, parseInt(arg.fileIndex) - 1);
         } else {
             var file = getLargestFile(torrent);
         }
