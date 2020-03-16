@@ -53,16 +53,20 @@ app.get('/:infoHash', function(req, res) {
             html += '<meta http-equiv="refresh" content="15"/>';
         }
         html += '<title>MiPeerFlix - ' + arg.infoHash.toLowerCase() + '</title><b>Torrent Menu:</b> <a href="/remove/' + arg.infoHash + '">Remove</a> | <a href="/' + arg.infoHash + '">Reload</a><br><b>Number of Peers:</b> ' + torrent.numPeers + '<hr>';
-        torrent.files.forEach(function(file, key) {
-            html += '<table class="torrent" id="' + arg.infoHash.toLowerCase() + '" style="table-layout:fixed;width:100%"><tr class="filepath"><td style="font-weight:bold;width:140px;vertical-align:middle">File Path:</td><td>' + file.path + '</td></tr><tr class="filesize"><td style="font-weight:bold;width:140px;vertical-align:middle">File Size:</td><td>' + file.length + ' bytes</td></tr><tr class="fileprogress"><td style="font-weight:bold;width:140px;vertical-align:middle">Download Progress:</td><td>' + Math.floor(file.progress * 100) + '%</td></tr><tr class="buttons"><td></td><td><a href="/stream/' + arg.infoHash.toLowerCase() + '/' + (key + 1) + '">Stream</a>';
-            if (file.progress == 1) {
-                html += ' | <a href="/download/' + arg.infoHash.toLowerCase() + '/' + file.path + '">Download</a>';
-            }
-            html += '</td></tr></table>';
-            if (torrent.files.length - 1 != key) {
-                html += '<hr>';
-            }
-        });
+        if (torrent.files.length) {
+            torrent.files.forEach(function(file, key) {
+                html += '<table class="torrent" id="' + arg.infoHash.toLowerCase() + '" style="table-layout:fixed;width:100%"><tr class="filepath"><td style="font-weight:bold;width:140px;vertical-align:middle">File Path:</td><td>' + file.path + '</td></tr><tr class="filesize"><td style="font-weight:bold;width:140px;vertical-align:middle">File Size:</td><td>' + file.length + ' bytes</td></tr><tr class="fileprogress"><td style="font-weight:bold;width:140px;vertical-align:middle">Download Progress:</td><td>' + Math.floor(file.progress * 100) + '%</td></tr><tr class="buttons"><td></td><td><a href="/stream/' + arg.infoHash.toLowerCase() + '/' + (key + 1) + '">Stream</a>';
+                if (file.progress == 1) {
+                    html += ' | <a href="/download/' + arg.infoHash.toLowerCase() + '/' + file.path + '">Download</a>';
+                }
+                html += '</td></tr></table>';
+                if (torrent.files.length - 1 != key) {
+                    html += '<hr>';
+                }
+            });
+        } else {
+            html += 'Waiting for peers to load files!';
+        }
         res.send(html);
     }, function(arg) {
 	    var torrent = client.get(arg.infoHash);
