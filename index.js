@@ -64,6 +64,7 @@ app.get('/:infoHash', function(req, res) {
 			res.send(html);
 		} else {
 			if ('redirect' in req.query) {
+				client.remove(req.params.infoHash);
 				res.send('No peers for ' + req.params.infoHash + '!');
 			} else {
 				res.redirect('/' + req.params.infoHash + '?redirect=1');
@@ -71,6 +72,7 @@ app.get('/:infoHash', function(req, res) {
 		}
 	} else {
 		if ('redirect' in req.query) {
+			client.remove(req.params.infoHash);
 			res.send('No peers for ' + req.params.infoHash + '!');
 		} else {
 			var magnetURI = buildMagnetURI(req.params.infoHash);
@@ -125,6 +127,7 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 			}
 		} else {
 			if ('redirect' in req.query) {
+				client.remove(req.params.infoHash);
 				res.send('No peers for ' + req.params.infoHash + '!');
 			} else {
 				var redirectURL = '/stream/' + req.params.infoHash;
@@ -136,6 +139,7 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 		}
 	} else {
 		if ('redirect' in req.query) {
+			client.remove(req.params.infoHash);
 			res.send('No peers for ' + req.params.infoHash + '!');
 		} else {
 			var magnetURI = buildMagnetURI(req.params.infoHash);
