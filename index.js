@@ -1,3 +1,4 @@
+var Promise = require('bluebird');
 var express = require('express');
 var WebTorrent = require('webtorrent-hybrid');
 var client = new WebTorrent();
