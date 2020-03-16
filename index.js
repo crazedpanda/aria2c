@@ -65,18 +65,19 @@ app.get('/:infoHash', function(req, res) {
 			});
 			res.send(html);
 		} else {
-			if ('redirect' in req.query) {
+			if (req.headers.cookie.indexOf('retry') > -1) {
 				client.remove(req.params.infoHash);
 				res.send('No peers for ' + req.params.infoHash + '!');
 			} else {
 				console.log('No files in torrent! Trying again!');
 				Promise.delay(5000).then(function() {
-					res.redirect('/' + req.params.infoHash + '?redirect=1');
+					res.cookie('retry', 1);
+					res.redirect('/' + req.params.infoHash);
 				});
 			}
 		}
 	} else {
-		if ('redirect' in req.query) {
+		if (req.headers.cookie.indexOf('retry') > -1) {
 			console.log('Tried to start torrent!');
 			client.remove(req.params.infoHash);
 			res.send('No peers for ' + req.params.infoHash + '!');
@@ -85,7 +86,8 @@ app.get('/:infoHash', function(req, res) {
 			var magnetURI = buildMagnetURI(req.params.infoHash);
 			client.add(magnetURI);
 			Promise.delay(5000).then(function() {
-				res.redirect('/' + req.params.infoHash + '?redirect=1');
+				res.cookie('retry', 1);
+				res.redirect('/' + req.params.infoHash);
 			});
 		}
 	}
@@ -133,7 +135,7 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 				}).pipe(res);
 			}
 		} else {
-			if ('redirect' in req.query) {
+			if (req.headers.cookie.indexOf('retry') > -1) {
 				client.remove(req.params.infoHash);
 				res.send('No peers for ' + req.params.infoHash + '!');
 			} else {
@@ -142,12 +144,13 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 					if ('fileIndex' in req.params && req.params.fileIndex) {
 						redirectURL += '/' + req.params.fileIndex;
 					}
-					res.redirect(redirectURL + '?redirect=1');
+					res.cookie('retry', 1);
+					res.redirect(redirectURL);
 				});
 			}
 		}
 	} else {
-		if ('redirect' in req.query) {
+		if (req.headers.cookie.indexOf('retry') > -1) {
 			client.remove(req.params.infoHash);
 			res.send('No peers for ' + req.params.infoHash + '!');
 		} else {
@@ -158,7 +161,8 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 				if ('fileIndex' in req.params && req.params.fileIndex) {
 					redirectURL += '/' + req.params.fileIndex;
 				}
-				res.redirect(redirectURL + '?redirect=1');
+				res.cookie('retry', 1);
+				res.redirect(redirectURL);
 			});
 		}
 	}
