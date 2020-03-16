@@ -42,15 +42,6 @@ app.get('/list', function(req, res) {
 app.get('/:infoHash', function(req, res) {
 	var torrent = client.get(req.params.infoHash);
 	if (torrent) {
-		torrent.on('noPeers', function() {
-			res.send('No peers for ' + req.params.infoHash + '!');
-		});
-		torrent.on('warning', function(err) {
-			console.log("Torrent Warning : ", err.toString());
-		});
-		torrent.on('error', function(err) {
-			console.log("Torrent Error : ", err.toString());
-		});
 		if (torrent.files.length) {
 			var html = '<head>';
 			if (torrent.progress < 1) {
@@ -68,8 +59,13 @@ app.get('/:infoHash', function(req, res) {
 				}
 			});
 			res.send(html);
+		} else {
+			if ('redirect' in req.query) {
+				res.send('No peers for ' + req.params.infoHash + '!');
+			} else {
+				res.redirect('/' + req.params.infoHash + '?redirect=1');
+			}
 		}
-		res.redirect('/' + req.params.infoHash);
 	} else {
 		if ('redirect' in req.query) {
 			res.send('No peers for ' + req.params.infoHash + '!');
@@ -94,14 +90,13 @@ app.get('/remove/:infoHash', function(req, res) {
 app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 	var torrent = client.get(req.params.infoHash);
 	if (torrent) {
-		torrent.on('noPeers', function(announceType) {
-			res.send('No peers for ' + req.params.infoHash + '!');
-		});
 		if ('fileIndex' in req.params) {
 			var file = getFile(torrent, req.params.fileIndex);
+			console.log('a', file);
 		} else {
 			var file = getLargestFile(torrent);
-		}
+			console.log('b', file);
+		}		
 		if (file) {
 			var range = req.headers.range;
 			if (range) {
