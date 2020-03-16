@@ -40,7 +40,6 @@ app.get('/list', function(req, res) {
 	res.send(html);
 });
 app.get('/:infoHash', function(req, res) {
-	console.log('c', req.params.infoHash);
 	var torrent = client.get(req.params.infoHash);
 	if (torrent) {
 		if (torrent.files.length) {
@@ -71,6 +70,7 @@ app.get('/:infoHash', function(req, res) {
 		if ('redirect' in req.query) {
 			res.send('No peers for ' + req.params.infoHash + '!');
 		} else {
+			console.log('c', req.params.infoHash);
 			var magnetURI = buildMagnetURI(req.params.infoHash);
 			client.add(magnetURI, function(torrent) {
 				console.log('Added:', req.params.infoHash);
@@ -89,7 +89,6 @@ app.get('/remove/:infoHash', function(req, res) {
 	}
 });
 app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
-	console.log('d', req.params.infoHash);
 	var torrent = client.get(req.params.infoHash);
 	if (torrent) {
 		if ('fileIndex' in req.params) {
@@ -139,6 +138,7 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 		if ('redirect' in req.query) {
 			res.send('No peers for ' + req.params.infoHash + '!');
 		} else {
+			console.log('d', req.params.infoHash);
 			var magnetURI = buildMagnetURI(req.params.infoHash);
 			client.add(magnetURI, function(torrent) {
 				console.log('Added:', req.params.infoHash);
