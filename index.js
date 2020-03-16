@@ -41,10 +41,17 @@ app.get('/list', function(req, res) {
 });
 app.get('/:infoHash', function(req, res) {
 	var torrent = client.get(req.params.infoHash);
+	torrent.on('noPeers', function(err) {
+		console.log("noPeers", err);
+		res.send('No peers for ' + req.params.infoHash + '!');
+	});
+        torrent.on('warning', function (err) {
+		console.log("Torrent Warning : ", err);
+        });
+  	torrent.on('error', function (err) {
+		console.log("Torrent Error : ", err);
+  	});
 	if (torrent) {
-		torrent.on('noPeers', function(announceType) {
-			res.send('No peers for ' + req.params.infoHash + '!');
-		});
 		if (torrent.files.length) {
 			var html = '<head>';
 			if (torrent.progress < 1) {
