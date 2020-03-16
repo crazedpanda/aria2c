@@ -81,9 +81,9 @@ app.get('/:infoHash', function(req, res) {
 			console.log('Adding torrent in client!');
 			var magnetURI = buildMagnetURI(req.params.infoHash);
 			client.add(magnetURI, function(torrent) {
-				console.log('Added:', req.params.infoHash);
-				res.redirect('/' + req.params.infoHash + '?redirect=1');
+				console.log('Added:', torrent);
 			});
+			res.redirect('/' + req.params.infoHash + '?redirect=1');
 		}
 	}
 });
@@ -148,13 +148,13 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 		} else {
 			var magnetURI = buildMagnetURI(req.params.infoHash);
 			client.add(magnetURI, function(torrent) {
-				console.log('Added:', req.params.infoHash);
-				var redirectURL = '/stream/' + req.params.infoHash;
-				if ('fileIndex' in req.params && req.params.fileIndex) {
-					redirectURL += '/' + req.params.fileIndex;
-				}
-				res.redirect(redirectURL + '?redirect=1');
+				console.log('Added:', torrent);
 			});
+			var redirectURL = '/stream/' + req.params.infoHash;
+			if ('fileIndex' in req.params && req.params.fileIndex) {
+				redirectURL += '/' + req.params.fileIndex;
+			}
+			res.redirect(redirectURL + '?redirect=1');
 		}
 	}
 });
