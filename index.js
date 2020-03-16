@@ -32,6 +32,9 @@ app.get('/clear', function(req, res) {
 		}
 	});
 });
+app.get('/favicon.ico', function(req, res) {
+	res.redirect('https://webtorrent.io/favicon-32x32.png');
+});
 app.get('/list', function(req, res) {
 	var html = '<title>MiPeerFlix - List</title>';
 	client.torrents.forEach(function(value, key) {
@@ -70,7 +73,6 @@ app.get('/:infoHash', function(req, res) {
 		if ('redirect' in req.query) {
 			res.send('No peers for ' + req.params.infoHash + '!');
 		} else {
-			console.log('c', req.params.infoHash);
 			var magnetURI = buildMagnetURI(req.params.infoHash);
 			client.add(magnetURI, function(torrent) {
 				console.log('Added:', req.params.infoHash);
@@ -93,11 +95,9 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 	if (torrent) {
 		if ('fileIndex' in req.params) {
 			var file = getFile(torrent, req.params.fileIndex);
-			console.log('a', file);
 		} else {
 			var file = getLargestFile(torrent);
-			console.log('b', file);
-		}		
+		}
 		if (file) {
 			var range = req.headers.range;
 			if (range) {
@@ -138,7 +138,6 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 		if ('redirect' in req.query) {
 			res.send('No peers for ' + req.params.infoHash + '!');
 		} else {
-			console.log('d', req.params.infoHash);
 			var magnetURI = buildMagnetURI(req.params.infoHash);
 			client.add(magnetURI, function(torrent) {
 				console.log('Added:', req.params.infoHash);
