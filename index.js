@@ -197,12 +197,14 @@ function removeTorrent(arg) {
         console.log(arg.infoHash, 'Removing torrent!');
         var magnetURI = buildMagnetURI(arg.infoHash);
         client.remove(magnetURI);
-        return Promise.delay(5000).then(checkTorrent).then(function(arg) {
-            console.log(arg.infoHash, 'Error removing torrent!');
-            return Promise.reject(arg);
-        }, function(arg) {
-            console.log(arg.infoHash, 'Torrent removed!');
-            return arg;
+        return Promise.delay(5000).then(function() {
+            return checkTorrent(arg).then(function(arg) {
+                console.log(arg.infoHash, 'Error removing torrent!');
+                return Promise.reject(arg);
+            }, function(arg) {
+                console.log(arg.infoHash, 'Torrent removed!');
+                return arg;
+            });
         });
     }, function(arg) {
         console.log(arg.infoHash, 'Torrent is already removed!');
