@@ -51,6 +51,9 @@ app.get('/:infoHash', function(req, res) {
   	torrent.on('error', function (err) {
 		console.log("Torrent Error : ", err);
   	});
+	torrent.on('done', function () {
+		console.log("Torrent Done!");
+	});
 	if (torrent) {
 		if (torrent.files.length) {
 			var html = '<head>';
