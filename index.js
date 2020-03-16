@@ -46,6 +46,7 @@ app.get('/:infoHash', function(req, res) {
 	var torrent = client.get(req.params.infoHash);
 	if (torrent) {
 		if (torrent.files.length) {
+			console.log('Torrent started in client!');
 			var html = '<head>';
 			if (torrent.progress < 1) {
 				html += '<meta http-equiv="refresh" content="15"/>';
@@ -67,14 +68,17 @@ app.get('/:infoHash', function(req, res) {
 				client.remove(req.params.infoHash);
 				res.send('No peers for ' + req.params.infoHash + '!');
 			} else {
+				console.log('No files in torrent! Trying again!');
 				res.redirect('/' + req.params.infoHash + '?redirect=1');
 			}
 		}
 	} else {
 		if ('redirect' in req.query) {
+			console.log('Tried to start torrent!');
 			client.remove(req.params.infoHash);
 			res.send('No peers for ' + req.params.infoHash + '!');
 		} else {
+			console.log('Adding torrent in client!');
 			var magnetURI = buildMagnetURI(req.params.infoHash);
 			client.add(magnetURI, function(torrent) {
 				console.log('Added:', req.params.infoHash);
