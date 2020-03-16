@@ -1,4 +1,5 @@
 var Promise = require('bluebird');
+var cookieParser = require('cookie-parser');
 var express = require('express');
 var WebTorrent = require('webtorrent-hybrid');
 var client = new WebTorrent();
@@ -19,6 +20,7 @@ var getLargestFile = function(torrent) {
 	return file;
 };
 var app = express();
+app.use(cookieParser());
 app.use(express.static(__dirname + '/public'));
 app.use('/download', express.static('/tmp/webtorrent'));
 app.get('/', function(req, res) {
@@ -65,7 +67,7 @@ app.get('/:infoHash', function(req, res) {
 			});
 			res.send(html);
 		} else {
-			if (req.headers.cookie.indexOf('retry') > -1) {
+			if ('retry' in req.cookies) {
 				client.remove(req.params.infoHash);
 				res.send('No peers for ' + req.params.infoHash + '!');
 			} else {
@@ -77,7 +79,7 @@ app.get('/:infoHash', function(req, res) {
 			}
 		}
 	} else {
-		if (req.headers.cookie.indexOf('retry') > -1) {
+		if ('retry' in req.cookies) {
 			console.log('Tried to start torrent!');
 			client.remove(req.params.infoHash);
 			res.send('No peers for ' + req.params.infoHash + '!');
@@ -135,7 +137,7 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 				}).pipe(res);
 			}
 		} else {
-			if (req.headers.cookie.indexOf('retry') > -1) {
+			if ('retry' in req.cookies) {
 				client.remove(req.params.infoHash);
 				res.send('No peers for ' + req.params.infoHash + '!');
 			} else {
@@ -150,7 +152,7 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 			}
 		}
 	} else {
-		if (req.headers.cookie.indexOf('retry') > -1) {
+		if ('retry' in req.cookies) {
 			client.remove(req.params.infoHash);
 			res.send('No peers for ' + req.params.infoHash + '!');
 		} else {
