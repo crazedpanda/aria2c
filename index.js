@@ -42,18 +42,14 @@ app.get('/list', function(req, res) {
 app.get('/:infoHash', function(req, res) {
 	var torrent = client.get(req.params.infoHash);
 	if (torrent) {
-		torrent.on('noPeers', function(err) {
-			console.log("noPeers", err);
+		torrent.on('noPeers', function() {
 			res.send('No peers for ' + req.params.infoHash + '!');
 		});
 		torrent.on('warning', function(err) {
-			console.log("Torrent Warning : ", err);
+			console.log("Torrent Warning : ", err.toString());
 		});
 		torrent.on('error', function(err) {
-			console.log("Torrent Error : ", err);
-		});
-		torrent.on('done', function() {
-			console.log("Torrent Done!");
+			console.log("Torrent Error : ", err.toString());
 		});
 		if (torrent.files.length) {
 			var html = '<head>';
