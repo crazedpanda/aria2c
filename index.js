@@ -40,6 +40,7 @@ app.get('/list', function(req, res) {
 	res.send(html);
 });
 app.get('/:infoHash', function(req, res) {
+	console.log('c', req.params.infoHash);
 	var torrent = client.get(req.params.infoHash);
 	if (torrent) {
 		if (torrent.files.length) {
@@ -88,6 +89,7 @@ app.get('/remove/:infoHash', function(req, res) {
 	}
 });
 app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
+	console.log('d', req.params.infoHash);
 	var torrent = client.get(req.params.infoHash);
 	if (torrent) {
 		if ('fileIndex' in req.params) {
