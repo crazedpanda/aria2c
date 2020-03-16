@@ -28,7 +28,7 @@ app.get('/clear', function(req, res) {
     var promises = [];
     client.torrents.forEach(function(value) {
         promises.push(removeTorrent(value));
-    }
+    });
     Promise.all(promises).then(function() {
         res.send('<title>MiPeerFlix - Clear</title>Removed all!');
     }).catch(function(err) {
@@ -114,7 +114,7 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
                 }).pipe(res);
             }
         } else {
-            console.log(arg.infoHash, 'File does not exist'!);
+            console.log(arg.infoHash, 'File does not exist!');
         }
     }, function(arg) {
 	    var torrent = client.get(arg.infoHash);
@@ -164,13 +164,8 @@ function checkTorrent(arg) {
         console.log(arg.infoHash, 'Checking torrent!');
         var torrent = client.get(arg.infoHash);
 	    if (torrent) {
-            if (torrent.files.length) {
-                console.log(arg.infoHash, 'Torrent is running in client!');
-                resolve(arg);
-            } else {
-                console.log(arg.infoHash, 'Client unable to get torrent files!');
-                reject(arg);
-            }
+            console.log(arg.infoHash, 'Torrent is running in client!');
+            resolve(arg);
         } else {
             console.log(arg.infoHash, 'Torrent is not running in client!');
             reject(arg);
