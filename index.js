@@ -182,13 +182,13 @@ function addTorrent(arg) {
         var magnetURI = buildMagnetURI(arg.infoHash);
         client.add(magnetURI);
         return Promise.delay(5000).then(function() {
-            return arg;
+            return checkTorrent(arg).then(function(arg) {
+                return arg;
+            }, function(arg) {
+                console.log(arg.infoHash, 'Error adding torrent!');
+                return Promise.reject(arg);
+            });
         });
-    }).then(checkTorrent).then(function(arg) {
-        return arg;
-    }, function(arg) {
-        console.log(arg.infoHash, 'Error adding torrent!');
-        return Promise.reject(arg);
     });
 }
 
