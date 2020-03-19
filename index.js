@@ -46,7 +46,7 @@ app.get('/list', function(req, res) {
 	res.send(html);
 });
 app.get('/:infoHash', function(req, res) {
-    addTorrent(req.params).then(checkPeers).then(function(arg) {
+    addTorrent(req.params).then(function(arg) {
 	    var torrent = client.get(arg.infoHash);
         var html = '<head>';
         if (torrent.progress < 1) {
@@ -86,7 +86,7 @@ app.get('/remove/:infoHash', function(req, res) {
     });
 });
 app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
-    addTorrent(req.params).then(checkPeers).then(function(arg) {
+    addTorrent(req.params).then(function(arg) {
         var torrent = client.get(arg.infoHash);
         if (torrent.files.length) {
             if ('fileIndex' in arg) {
@@ -143,21 +143,6 @@ app.listen(port, function() {
 	console.log('Server is running at ' + port);
 });
 
-function checkPeers(arg) {
-    return new Promise(function (resolve, reject) {
-        console.log(arg.infoHash, 'Checking peers!');
-        var torrent = client.get(arg.infoHash);
-	    if (torrent) {
-            console.log('torrent.received', typeof torrent.received);
-            console.log('torrent.received', torrent.received);
-            resolve(arg);
-        } else {
-            console.log(arg.infoHash, 'Torrent is not running in client!');
-            reject(arg);
-        }
-    });
-}
-
 function checkTorrent(arg) {
     return new Promise(function (resolve, reject) {
         console.log(arg.infoHash, 'Checking torrent!');
@@ -177,15 +162,12 @@ function addTorrent(arg) {
         console.log(arg.infoHash, 'Torrent is already added!');
         return arg;
     }, function(arg) {
-        console.log(arg.infoHash, 'Adding torrent!');
-        var magnetURI = buildMagnetURI(arg.infoHash);
-        client.add(magnetURI);
-        return Promise.delay(5000).then(function() {
-            return checkTorrent(arg).then(function(arg) {
-                return arg;
-            }, function(arg) {
-                console.log(arg.infoHash, 'Error adding torrent!');
-                return Promise.reject(arg);
+        return new Promise(function (resolve, reject) {
+            console.log(arg.infoHash, 'Adding torrent!');
+            var magnetURI = buildMagnetURI(arg.infoHash);
+            var torrent = client.add(magnetURI);
+            torrent.on('ready', function() {
+                resolve(arg);
             });
         });
     });
@@ -193,16 +175,17 @@ function addTorrent(arg) {
 
 function removeTorrent(arg) {
     return checkTorrent(arg).then(function(arg) {
-        console.log(arg.infoHash, 'Removing torrent!');
-        var magnetURI = buildMagnetURI(arg.infoHash);
-        client.remove(magnetURI);
-        return Promise.delay(5000).then(function() {
-            return checkTorrent(arg).then(function(arg) {
-                console.log(arg.infoHash, 'Error removing torrent!');
-                return Promise.reject(arg);
-            }, function(arg) {
-                console.log(arg.infoHash, 'Torrent removed!');
-                return arg;
+        return new Promise(function (resolve, reject) {
+            console.log(arg.infoHash, 'Removing torrent!');
+            var magnetURI = buildMagnetURI(arg.infoHash);
+            var torrent = client.remove(magnetURI, function(err) {
+                if (err) {
+                    console.log(arg.infoHash, 'Error removing torrent!');
+                    reject(arg);
+                } else {
+                    console.log(arg.infoHash, 'Torrent removed!');
+                    resolve(arg);
+                }
             });
         });
     }, function(arg) {
