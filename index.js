@@ -68,13 +68,8 @@ app.get('/:infoHash', function(req, res) {
 		}
 		res.send(html);
 	}, function(arg) {
-		var torrent = client.get(arg.infoHash);
-		if (torrent.numPeers == 0) {
-			removeTorrent(arg);
-			res.send('No peers for ' + arg.infoHash + '!');
-		} else {
-			res.redirect('/' + arg.infoHash);
-		}
+        removeTorrent(arg);
+        res.send('No peers for ' + arg.infoHash + '!');
 	});
 });
 app.get('/remove/:infoHash', function(req, res) {
@@ -124,17 +119,8 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 			res.send('Waiting for peers to load files!');
 		}
 	}, function(arg) {
-		var torrent = client.get(arg.infoHash);
-		if (torrent.numPeers == 0) {
-			removeTorrent(arg);
-			res.send('No peers for ' + arg.infoHash + '!');
-		} else {
-			var redirectURL = '/stream/' + arg.infoHash;
-			if ('fileIndex' in req.params) {
-				redirectURL += '/' + req.params.fileIndex;
-			}
-			res.redirect(redirectURL);
-		}
+        removeTorrent(arg);
+        res.send('No peers for ' + arg.infoHash + '!');
 	});
 });
 app.listen(port, function() {
