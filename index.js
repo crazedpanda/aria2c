@@ -148,20 +148,14 @@ function checkPeers(arg) {
         console.log(arg.infoHash, 'Checking peers!');
         var torrent = client.get(arg.infoHash);
 	    if (torrent) {
-            if (torrent.numPeers == 0) {
-                Promise.delay(15000).then(function() {
-                    if (torrent.numPeers == 0) {
-                        console.log(arg.infoHash, 'Torrent has no peers!');
-                        reject(arg);
-                    } else {
-                        console.log(arg.infoHash, 'Torrent has ' + torrent.numPeers + ' peers!');
-                        resolve(arg);
-                    }
-                });
-            } else {
-                console.log(arg.infoHash, 'Torrent has ' + torrent.numPeers + ' peers!');
+            torrent.discovery.tracker.on('scrape', function (data) {
+                arg.seeders = data.complete;
+                arg.leechers = data.incomplete;
+                console.log(typeof data.complete, data.complete);
+                console.log(typeof data.incomplete, data.incomplete);
                 resolve(arg);
-            }
+            });
+            torrent.discovery.tracker.scrape();
         } else {
             console.log(arg.infoHash, 'Torrent is not running in client!');
             reject(arg);
