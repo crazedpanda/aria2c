@@ -168,14 +168,14 @@ function addTorrent(arg) {
                 console.log(arg.infoHash, 'Torrent added!');
                 resolve(addTorrent(arg));
             });
-            torrent.on('error', function (err) {
+            torrent.on('error', function(err) {
                 console.log('err', err);
                 reject(arg);
             });
-            torrent.on('infoHash', function () {
+            torrent.on('infoHash', function(infoHash) {
                 console.log('infoHash', infoHash);
             });
-            torrent.on('metadata', function () {
+            torrent.on('metadata', function(metadata) {
                 console.log('metadata', metadata);
             });
         }
