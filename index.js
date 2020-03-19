@@ -178,6 +178,12 @@ function addTorrent(arg) {
             torrent.on('metadata', function(metadata) {
                 console.log('metadata', metadata);
             });
+            torrent.on('wire', function(wire) {
+                console.log('wire', wire);
+            });
+            torrent.on('noPeers', function(noPeers) {
+                console.log('noPeers', noPeers);
+            });
         }
 	});
 }
