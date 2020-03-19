@@ -163,24 +163,23 @@ function addTorrent(arg) {
         } else {
 			var magnetURI = buildMagnetURI(arg.infoHash);
             torrent = client.add(magnetURI);
-            // if ((Math.floor(Date.now() / 1000) - json.timestamp) > 10) {
-            torrent.on('ready', function() {
-                console.log(arg.infoHash, 'Torrent added!');
-                resolve(addTorrent(arg));
-            });
-            torrent.on('noPeers', function(noPeers) {
-                console.log(torrent.announce);
-                console.log('noPeers', noPeers);
-            });
+            console.log('a', torrent);
+            resolve(checkPeers(torrent, Math.floor(Date.now() / 1000));
         }
 	});
 }
 
-function checkPeers(torrent) {
+function checkPeers(torrent, startTime) {
     if (torrent.ready) {
         return torrent;
     } else {
-        return checkPeers(torrent);
+        if ((Math.floor(Date.now() / 1000) - startTime) < 15) {
+            return Promise.delay(1000).then(function() {
+                return checkPeers(torrent, startTime);
+            });
+        } else {
+            return Promise.reject(torrent);
+        }
     }
 }
 
