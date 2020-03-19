@@ -30,7 +30,7 @@ app.get('/', function(req, res) {
 app.get('/clear', function(req, res) {
 	var hashes = [];
 	client.torrents.forEach(function(value) {
-		hashes.push(value);
+		hashes.push(value.infoHash);
     });
     Promise.map(hashes, function(hash) {
         return removeTorrent({ infoHash: hash });
