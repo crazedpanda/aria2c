@@ -148,13 +148,14 @@ function addTorrent(arg) {
 			console.log(arg.infoHash, 'Torrent is already added!');
 			resolve(torrent);
 		} else {
-			console.log(arg.infoHash, 'Adding torrent!');
 			var magnetURI = buildMagnetURI(arg.infoHash);
 			client.add(magnetURI, function(torrent) {
 				torrent.on('ready', function() {
+                    console.log(arg.infoHash, 'Torrent added!');
 					resolve(torrent);
 				});
 				setTimeout(function() {
+                    console.log(arg.infoHash, 'Torrent is not ready!');
 					reject(arg);
 				}, 20000);
 			});
