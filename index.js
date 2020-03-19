@@ -1,3 +1,4 @@
+var btClient = require('bittorrent-tracker');
 var Promise = require('bluebird');
 var cookieParser = require('cookie-parser');
 var express = require('express');
@@ -171,19 +172,18 @@ function addTorrent(arg) {
 }
 
 function checkPeers(torrent, startTime) {
-    if (torrent.ready) {
-        return torrent;
-    } else {
-        if ((Math.floor(Date.now() / 1000) - startTime) < 15) {
-            console.log(torrent.infoHash, 'Wait for torrent to load!');
-            return Promise.delay(1000).then(function() {
-                return checkPeers(torrent, startTime);
-            });
-        } else {
-            console.log(torrent.infoHash, 'Waited too long for torrent to load!');
-            return Promise.reject(torrent);
-        }
-    }
+	return new Promise(function(resolve, reject) {
+        torrent.discovery.tracker.on('update', function(data) {
+            console.log('got a scrape response from tracker: ' + data.announce);
+            console.log('number of seeders in the swarm: ' + data.complete);
+            console.log('number of leechers in the swarm: ' + data.incomplete);
+            if ((Math.floor(Date.now() / 1000) - startTime) > 15) {
+                console.log(torrent.infoHash, 'Waited too long for torrent to load!');
+                resolve(torrent);
+            }
+        });
+        torrent.discovery.tracker.update();
+    });
 }
 
 function removeTorrent(arg) {
