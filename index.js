@@ -138,7 +138,7 @@ function addTorrent(arg) {
             console.log(arg.infoHash, 'Torrent already added!');
         } else {
 			var magnetURI = buildMagnetURI(arg.infoHash);
-			client.add(magnetURI, function() {
+			torrent = client.add(magnetURI, function() {
                 console.log(arg.infoHash, 'Torrent added!');
 			});
         }
