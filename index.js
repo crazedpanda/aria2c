@@ -46,18 +46,17 @@ app.get('/list', function(req, res) {
 	res.send(html);
 });
 app.get('/:infoHash', function(req, res) {
-    addTorrent(req.params).then(function(arg) {
-	    var torrent = client.get(arg.infoHash);
+    addTorrent(req.params).then(function(torrent) {
         var html = '<head>';
         if (torrent.progress < 1) {
             html += '<meta http-equiv="refresh" content="15"/>';
         }
-        html += '<title>MiPeerFlix - ' + arg.infoHash.toLowerCase() + '</title><b>Torrent Menu:</b> <a href="/remove/' + arg.infoHash + '">Remove</a> | <a href="/' + arg.infoHash + '">Reload</a><br><b>Number of Peers:</b> ' + torrent.numPeers + '<hr>';
+        html += '<title>MiPeerFlix - ' + torrent.infoHash.toLowerCase() + '</title><b>Torrent Menu:</b> <a href="/remove/' + torrent.infoHash + '">Remove</a> | <a href="/' + torrent.infoHash + '">Reload</a><br><b>Number of Peers:</b> ' + torrent.numPeers + '<hr>';
         if (torrent.files.length) {
             torrent.files.forEach(function(file, key) {
-                html += '<table class="torrent" id="' + arg.infoHash.toLowerCase() + '" style="table-layout:fixed;width:100%"><tr class="filepath"><td style="font-weight:bold;width:140px;vertical-align:middle">File Path:</td><td>' + file.path + '</td></tr><tr class="filesize"><td style="font-weight:bold;width:140px;vertical-align:middle">File Size:</td><td>' + file.length + ' bytes</td></tr><tr class="fileprogress"><td style="font-weight:bold;width:140px;vertical-align:middle">Download Progress:</td><td>' + Math.floor(file.progress * 100) + '%</td></tr><tr class="buttons"><td></td><td><a href="/stream/' + arg.infoHash.toLowerCase() + '/' + (key + 1) + '">Stream</a>';
+                html += '<table class="torrent" id="' + torrent.infoHash.toLowerCase() + '" style="table-layout:fixed;width:100%"><tr class="filepath"><td style="font-weight:bold;width:140px;vertical-align:middle">File Path:</td><td>' + file.path + '</td></tr><tr class="filesize"><td style="font-weight:bold;width:140px;vertical-align:middle">File Size:</td><td>' + file.length + ' bytes</td></tr><tr class="fileprogress"><td style="font-weight:bold;width:140px;vertical-align:middle">Download Progress:</td><td>' + Math.floor(file.progress * 100) + '%</td></tr><tr class="buttons"><td></td><td><a href="/stream/' + torrent.infoHash.toLowerCase() + '/' + (key + 1) + '">Stream</a>';
                 if (file.progress == 1) {
-                    html += ' | <a href="/download/' + arg.infoHash.toLowerCase() + '/' + file.path + '">Download</a>';
+                    html += ' | <a href="/download/' + torrent.infoHash.toLowerCase() + '/' + file.path + '">Download</a>';
                 }
                 html += '</td></tr></table>';
                 if (torrent.files.length - 1 != key) {
@@ -86,8 +85,7 @@ app.get('/remove/:infoHash', function(req, res) {
     });
 });
 app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
-    addTorrent(req.params).then(function(arg) {
-        var torrent = client.get(arg.infoHash);
+    addTorrent(req.params).then(function(torrent) {
         if (torrent.files.length) {
             if ('fileIndex' in arg) {
                 var file = getFile(torrent, parseInt(arg.fileIndex) - 1);
@@ -136,45 +134,37 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
                 redirectURL += '/' + arg.fileIndex;
             }
             res.redirect(redirectURL);
-        }        
+        }
     });
 });
 app.listen(port, function() {
 	console.log('Server is running at ' + port);
 });
 
-function checkTorrent(arg) {
-    return new Promise(function (resolve, reject) {
-        console.log(arg.infoHash, 'Checking torrent!');
-        var torrent = client.get(arg.infoHash);
-	    if (torrent) {
-            console.log(arg.infoHash, 'Torrent is running in client!');
-            resolve(arg);
-        } else {
-            console.log(arg.infoHash, 'Torrent is not running in client!');
-            reject(arg);
-        }
-    });
-}
-
 function addTorrent(arg) {
-    return checkTorrent(arg).then(function(arg) {
+    var torrent = client.get(arg.infoHash);
+    if (torrent) {
         console.log(arg.infoHash, 'Torrent is already added!');
-        return arg;
-    }, function(arg) {
+        return torrent;
+    } else {
         return new Promise(function (resolve, reject) {
             console.log(arg.infoHash, 'Adding torrent!');
             var magnetURI = buildMagnetURI(arg.infoHash);
-            var torrent = client.add(magnetURI);
-            torrent.on('ready', function() {
-                resolve(arg);
+            client.add(magnetURI, function(torrent) {
+                torrent.on('ready', function() {
+                    resolve(torrent);
+                });
+                setTimeout(function() {
+                    reject(arg);
+                }, 20000);
             });
         });
-    });
+    }
 }
 
 function removeTorrent(arg) {
-    return checkTorrent(arg).then(function(arg) {
+    var torrent = client.get(arg.infoHash);
+    if (torrent) {
         return new Promise(function (resolve, reject) {
             console.log(arg.infoHash, 'Removing torrent!');
             var magnetURI = buildMagnetURI(arg.infoHash);
@@ -188,8 +178,8 @@ function removeTorrent(arg) {
                 }
             });
         });
-    }, function(arg) {
+    } else {
         console.log(arg.infoHash, 'Torrent is already removed!');
         return arg;
-    });
+    }
 }
