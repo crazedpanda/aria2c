@@ -151,7 +151,6 @@ app.listen(port, function() {
 
 function addTorrent(arg) {
 	return new Promise(function(resolve, reject) {
-        var 
 		var torrent = client.get(arg.infoHash);
 		if (torrent) {
             if (torrent.numPeers == 0) {
