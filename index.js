@@ -168,8 +168,8 @@ function addTorrent(arg) {
                 console.log(arg.infoHash, 'Torrent added!');
                 resolve(addTorrent(arg));
             });
-            console.log(torrent.announce);
             torrent.on('noPeers', function(noPeers) {
+                console.log(torrent.announce);
                 console.log('noPeers', noPeers);
             });
         }
