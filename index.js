@@ -155,36 +155,29 @@ app.listen(port, function() {
 });
 
 function addTorrent(arg) {
-	return new Promise(function(resolve, reject) {
-		var torrent = client.get(arg.infoHash);
-		if (torrent) {
-			if (torrent.numPeers == 0) {
-				console.log(arg.infoHash, 'No peers found for torrent!');
-				reject(arg);
-			} else {
-				console.log(arg.infoHash, 'Torrent already added!');
-				resolve(torrent);
-			}
-		} else {
-			var magnetURI = buildMagnetURI(arg.infoHash);
-			torrent = client.add(magnetURI);
-			resolve(checkPeers(torrent, Math.floor(Date.now() / 1000)));
-		}
-	});
+    var torrent = client.get(arg.infoHash);
+    if (!torrent) {
+        var magnetURI = buildMagnetURI(arg.infoHash);
+        torrent = client.add(magnetURI);
+    }     
+    return checkPeers(torrent, Math.floor(Date.now() / 1000));
 }
 
 function checkPeers(torrent, startTime) {
 	if (torrent.ready) {
         var magnetURI = buildMagnetURI(torrent.infoHash);
 		return WebTorrentHealth(magnetURI).then(function (data) {
-            console.log('average number of seeders: ' + data.seeds);
-            console.log('average number of leechers: ' + data.peers);
-            if (data.seeds > 0 || data.peers > 0) {
-                console.log('a');
-                return torrent;
-            } else {
-                console.log('b');
+            if (data.seeds == 0 && data.peers == 0) {
+                console.log(torrent.infoHash, 'No peers found for torrent!');
                 Promise.reject(torrent);
+            } else {
+                if (data.seeds > 0) {
+                    torrent.seeders = data.seeds;
+                }
+                if (data.peers > 0) {
+                    torrent.leechers = data.peers;
+                }
+                return torrent;
             }
         });
 	} else {
