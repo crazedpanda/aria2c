@@ -148,19 +148,20 @@ function checkPeers(arg) {
         console.log(arg.infoHash, 'Checking peers!');
         var torrent = client.get(arg.infoHash);
 	    if (torrent) {
+            arg.seeders = 0;
+            arg.leechers = 0;
+            torrent.discovery.tracker.scrape();
             torrent.discovery.tracker.on('scrape', function (data) {
-                console.log(data);
-                if (data.complete == 0) {
+                arg.seeders += data.complete;
+                arg.leechers += data.incomplete;
+            });
+            Promise.delay(15000).then(function() {
+                if (arg.seeders == 0) {
                     console.log(arg.infoHash, 'No seeders for torrent!');
                     reject(arg);
                 } else {
-                    arg.seeders = data.complete;
-                    arg.leechers = data.incomplete;
                     resolve(arg);
                 }
-            });
-            Promise.delay(15000).then(function() {
-                torrent.discovery.tracker.scrape();
             });
         } else {
             console.log(arg.infoHash, 'Torrent is not running in client!');
