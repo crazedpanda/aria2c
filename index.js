@@ -78,6 +78,7 @@ app.get('/:infoHash', function(req, res) {
 			res.clearCookie('retry');
 			res.send('No peers found for torrent!');
 		} else {
+            console.log(req.params.infoHash, 'Retrying!');
 			res.cookie('retry', 1);
 			res.redirect('/' + req.params.infoHash);
 		}
@@ -138,6 +139,7 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 			res.clearCookie('retry');
 			res.send('No peers found for torrent!');
 		} else {
+            console.log(req.params.infoHash, 'Retrying!');
 			res.cookie('retry', 1);
 			if ('fileIndex' in req.params) {
 				res.redirect('/' + req.params.infoHash + '/' + req.params.fileIndex);
@@ -176,7 +178,7 @@ function checkPeers(torrent, startTime) {
 	} else {
 		if ((Math.floor(Date.now() / 1000) - startTime) < 15) {
 			console.log(torrent.infoHash, 'Wait for torrent to load!');
-			return Promise.delay(1000).then(function() {
+			return Promise.delay(2000).then(function() {
 				return checkPeers(torrent, startTime);
 			});
 		} else {
