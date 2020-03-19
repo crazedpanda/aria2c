@@ -172,7 +172,9 @@ function addTorrent(arg) {
 }
 
 function checkPeers(torrent, startTime) {
+    console.log('checkPeers');
     if (torrent.ready) {
+        console.log('WOW');
 	    return new Promise(function(resolve, reject) {
             torrent.discovery.tracker.on('update', function(data) {
                 console.log('got a scrape response from tracker: ' + data.announce);
@@ -189,6 +191,7 @@ function checkPeers(torrent, startTime) {
         if ((Math.floor(Date.now() / 1000) - startTime) < 15) {
             return checkPeers(torrent, startTime);
         } else {
+            console.log('Too long!');
             return Promise.reject(torrent);
         }
     }
