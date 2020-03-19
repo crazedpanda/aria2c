@@ -149,12 +149,11 @@ function checkPeers(arg) {
         var torrent = client.get(arg.infoHash);
 	    if (torrent) {
             torrent.discovery.tracker.on('scrape', function (data) {
+                console.log(data);
                 if (data.complete == 0) {
                     console.log(arg.infoHash, 'No seeders for torrent!');
                     reject(arg);
                 } else {
-                    console.log(arg.infoHash, 'Seeders: ' + data.complete);
-                    console.log(arg.infoHash, 'Leechers: ' + data.incomplete);
                     arg.seeders = data.complete;
                     arg.leechers = data.incomplete;
                     resolve(arg);
