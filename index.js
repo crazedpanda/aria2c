@@ -148,6 +148,9 @@ function checkPeers(arg) {
         console.log(arg.infoHash, 'Checking peers!');
         var torrent = client.get(arg.infoHash);
 	    if (torrent) {
+            torrent.on('wire', function (wire) {
+                console.log('wire', wire);
+            });
             torrent.discovery.tracker.on('scrape', function (data) {
                 if (data.complete == 0) {
                     console.log(arg.infoHash, 'No seeders for torrent!');
