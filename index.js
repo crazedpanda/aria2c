@@ -151,6 +151,7 @@ app.listen(port, function() {
 
 function addTorrent(arg) {
 	return new Promise(function(resolve, reject) {
+        var 
 		var torrent = client.get(arg.infoHash);
 		if (torrent) {
             if (torrent.numPeers == 0) {
@@ -162,10 +163,21 @@ function addTorrent(arg) {
             }
         } else {
 			var magnetURI = buildMagnetURI(arg.infoHash);
-			torrent = client.add(magnetURI);
+            torrent = client.add(magnetURI);
+            // if ((Math.floor(Date.now() / 1000) - json.timestamp) > 10) {
             torrent.on('ready', function() {
                 console.log(arg.infoHash, 'Torrent added!');
                 resolve(addTorrent(arg));
+            });
+            torrent.on('error', function (err) {
+                console.log('err', err);
+                reject(arg);
+            });
+            torrent.on('infoHash', function () {
+                console.log('infoHash', infoHash);
+            });
+            torrent.on('metadata', function () {
+                console.log('metadata', metadata);
             });
         }
 	});
