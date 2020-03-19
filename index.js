@@ -1,4 +1,5 @@
 var Promise = require('bluebird');
+var cookieParser = require('cookie-parser');
 var express = require('express');
 var WebTorrent = require('webtorrent-hybrid');
 var client = new WebTorrent();
@@ -19,6 +20,7 @@ var getLargestFile = function(torrent) {
 	return file;
 };
 var app = express();
+app.use(cookieParser());
 app.use(express.static(__dirname + '/public'));
 app.use('/download', express.static('/tmp/webtorrent'));
 app.get('/', function(req, res) {
@@ -47,6 +49,9 @@ app.get('/list', function(req, res) {
 });
 app.get('/:infoHash', function(req, res) {
 	addTorrent(req.params).then(function(torrent) {
+        if ('retry' in req.cookies) {
+            res.clearCookie('retry');
+        }
         var html = '<head>';
         if (torrent.progress < 1) {
             html += '<meta http-equiv="refresh" content="15"/>';
@@ -68,10 +73,12 @@ app.get('/:infoHash', function(req, res) {
         }
         res.send(html);
 	}, function(arg) {
-        if (res.status == 301) {
+        if ('retry' in req.cookies) {
+            res.clearCookie('retry');
             res.send('No peers found for torrent!');
         } else {
-            res.redirect(301, '/' + arg.infoHash);
+            res.cookie('retry', 1);
+            res.redirect('/' + arg.infoHash);
         }
     });
 });
@@ -84,6 +91,9 @@ app.get('/remove/:infoHash', function(req, res) {
 });
 app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 	addTorrent(req.params).then(function(torrent) {
+        if ('retry' in req.cookies) {
+            res.clearCookie('retry');
+        }
         if (torrent.files.length) {
             if ('fileIndex' in req.params) {
                 var file = getFile(torrent, parseInt(req.params.fileIndex) - 1);
@@ -122,13 +132,15 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
             res.send('Waiting for peers to load files!');
         }
 	}, function(arg) {
-        if (res.status == 301) {
+        if ('retry' in req.cookies) {
+            res.clearCookie('retry');
             res.send('No peers found for torrent!');
         } else {
+            res.cookie('retry', 1);
             if ('fileIndex' in req.params) {
-                res.redirect(301, '/' + arg.infoHash + '/' + req.params.fileIndex);
+                res.redirect('/' + arg.infoHash + '/' + req.params.fileIndex);
             } else {
-                res.redirect(301, '/' + arg.infoHash);
+                res.redirect('/' + arg.infoHash);
             }
         }
     });
