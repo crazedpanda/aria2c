@@ -148,15 +148,6 @@ function checkPeers(arg) {
         console.log(arg.infoHash, 'Checking peers!');
         var torrent = client.get(arg.infoHash);
 	    if (torrent) {
-            torrent.on('infoHash', function (infoHash) {
-                console.log('infoHash', infoHash);
-            });
-            torrent.on('metadata', function (metadata) {
-                console.log('metadata', metadata);
-            });
-            torrent.on('noPeers', function (wire) {
-                console.log('noPeers', wire);
-            });
             torrent.discovery.tracker.on('scrape', function (data) {
                 if (data.complete == 0) {
                     console.log(arg.infoHash, 'No seeders for torrent!');
@@ -169,7 +160,9 @@ function checkPeers(arg) {
                     resolve(arg);
                 }
             });
-            // torrent.discovery.tracker.scrape();
+            Promise.delay(15000).then(function() {
+                torrent.discovery.tracker.scrape();
+            });
         } else {
             console.log(arg.infoHash, 'Torrent is not running in client!');
             reject(arg);
