@@ -84,7 +84,7 @@ app.get('/:infoHash', function(req, res) {
 		if ('retry' in req.cookies) {
 			removeTorrent(req.params);
 			res.clearCookie('retry');
-			res.send('No peers found for torrent!');
+			res.send('<title>MiPeerFlix - Error</title>No peers found for torrent!');
 		} else {
 			console.log(req.params.infoHash, 'Retrying!');
 			res.cookie('retry', 1);
@@ -100,12 +100,14 @@ app.get('/remove/:infoHash', function(req, res) {
 	});
 });
 app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
+    console.log(req.params.fileIndex);
+    console.log(typeof req.params.fileIndex);
 	addTorrent(req.params).then(function(torrent) {
 		if ('retry' in req.cookies) {
 			res.clearCookie('retry');
 		}
 		if (torrent.files.length) {
-			if ('fileIndex' in req.params) {
+			if (req.params.fileIndex) {
 				var file = getFile(torrent, parseInt(req.params.fileIndex) - 1);
 			} else {
 				var file = getLargestFile(torrent);
@@ -136,23 +138,23 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 					}).pipe(res);
 				}
 			} else {
-				res.send('File does not exist!');
+				res.send('<title>MiPeerFlix - Error</title>File does not exist!');
 			}
 		} else {
-			res.send('Waiting for peers to load files!');
+			res.send('<title>MiPeerFlix - Error</title>Waiting for peers to load files!');
 		}
 	}, function() {
 		if ('retry' in req.cookies) {
 			removeTorrent(req.params);
 			res.clearCookie('retry');
-			res.send('No peers found for torrent!');
+			res.send('<title>MiPeerFlix - Error</title>No peers found for torrent!');
 		} else {
 			console.log(req.params.infoHash, 'Retrying!');
 			res.cookie('retry', 1);
-			if ('fileIndex' in req.params) {
-				res.redirect('/' + req.params.infoHash + '/' + req.params.fileIndex);
+			if (req.params.fileIndex) {
+				res.redirect('/stream/' + req.params.infoHash + '/' + req.params.fileIndex);
 			} else {
-				res.redirect('/' + req.params.infoHash);
+				res.redirect('/stream/' + req.params.infoHash);
 			}
 		}
 	});
