@@ -1,6 +1,7 @@
 var Promise = require('bluebird');
 var cookieParser = require('cookie-parser');
 var express = require('express');
+var WebTorrentHealth = require('webtorrent-health');
 var WebTorrent = require('webtorrent-hybrid');
 var client = new WebTorrent();
 var port = process.env.PORT ? process.env.PORT : 3000;
@@ -174,7 +175,18 @@ function addTorrent(arg) {
 
 function checkPeers(torrent, startTime) {
 	if (torrent.ready) {
-		return torrent;
+        var magnetURI = buildMagnetURI(torrent.infoHash);
+		return WebTorrentHealth(magnetURI).then(function (data) {
+            console.log('average number of seeders: ' + data.seeds);
+            console.log('average number of leechers: ' + data.peers);
+            if (data.seeds > 0 || data.peers > 0) {
+                console.log('a');
+                return torrent;
+            } else {
+                console.log('b');
+                Promise.reject(torrent);
+            }
+        });
 	} else {
 		if ((Math.floor(Date.now() / 1000) - startTime) < 15) {
 			console.log(torrent.infoHash, 'Wait for torrent to load!');

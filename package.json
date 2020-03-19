@@ -9,6 +9,7 @@
     "bluebird": "",
     "cookie-parser": "",
     "express": "",
+    "webtorrent-health": "",
     "webtorrent-hybrid": ""
   }
 }
