@@ -164,7 +164,7 @@ function addTorrent(arg) {
 			var magnetURI = buildMagnetURI(arg.infoHash);
             torrent = client.add(magnetURI);
             console.log('a', torrent);
-            resolve(checkPeers(torrent, Math.floor(Date.now() / 1000));
+            resolve(checkPeers(torrent, Math.floor(Date.now() / 1000)));
         }
 	});
 }
