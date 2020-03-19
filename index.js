@@ -177,7 +177,7 @@ function checkPeers(torrent, startTime) {
 		return WebTorrentHealth(magnetURI).then(function(data) {
 			if (data.seeds == 0 && data.peers == 0) {
 				console.log(torrent.infoHash, 'No peers found for torrent!');
-				Promise.reject(torrent);
+				return Promise.reject(torrent);
 			} else {
 				if (data.seeds > 0) {
 					torrent.seeders = data.seeds;
@@ -191,7 +191,7 @@ function checkPeers(torrent, startTime) {
 	} else {
 		if ((Math.floor(Date.now() / 1000) - startTime) < 15) {
 			console.log(torrent.infoHash, 'Wait for torrent to load!');
-			return Promise.delay(2000).then(function() {
+			return Promise.delay(5000).then(function() {
 				return checkPeers(torrent, startTime);
 			});
 		} else {
