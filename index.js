@@ -72,13 +72,14 @@ app.get('/:infoHash', function(req, res) {
             html += 'Waiting for peers to load files!';
         }
         res.send(html);
-	}, function(arg) {
+	}, function() {
         if ('retry' in req.cookies) {
+            removeTorrent(req.params);
             res.clearCookie('retry');
             res.send('No peers found for torrent!');
         } else {
             res.cookie('retry', 1);
-            res.redirect('/' + arg.infoHash);
+            res.redirect('/' + req.params.infoHash);
         }
     });
 });
@@ -131,16 +132,17 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
         } else {
             res.send('Waiting for peers to load files!');
         }
-	}, function(arg) {
+	}, function() {
         if ('retry' in req.cookies) {
+            removeTorrent(req.params);
             res.clearCookie('retry');
             res.send('No peers found for torrent!');
         } else {
             res.cookie('retry', 1);
             if ('fileIndex' in req.params) {
-                res.redirect('/' + arg.infoHash + '/' + req.params.fileIndex);
+                res.redirect('/' + req.params.infoHash + '/' + req.params.fileIndex);
             } else {
-                res.redirect('/' + arg.infoHash);
+                res.redirect('/' + req.params.infoHash);
             }
         }
     });
@@ -163,7 +165,6 @@ function addTorrent(arg) {
         } else {
 			var magnetURI = buildMagnetURI(arg.infoHash);
             torrent = client.add(magnetURI);
-            console.log('a', torrent);
             resolve(checkPeers(torrent, Math.floor(Date.now() / 1000)));
         }
 	});
@@ -174,12 +175,12 @@ function checkPeers(torrent, startTime) {
         return torrent;
     } else {
         if ((Math.floor(Date.now() / 1000) - startTime) < 15) {
-            console.log('Wait for torrent to load!');
+            console.log(torrent.infoHash, 'Wait for torrent to load!');
             return Promise.delay(1000).then(function() {
                 return checkPeers(torrent, startTime);
             });
         } else {
-            console.log('Waited too long for torrent to load!');
+            console.log(torrent.infoHash, 'Waited too long for torrent to load!');
             return Promise.reject(torrent);
         }
     }
