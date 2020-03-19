@@ -54,7 +54,7 @@ app.get('/:infoHash', function(req, res) {
 			res.clearCookie('retry');
 		}
 		var html = '<head>';
-		if (torrent.progress < 1) {
+		if (!torrent.done) {
 			html += '<meta http-equiv="refresh" content="15"/>';
 		}
 		html += '<title>MiPeerFlix - ' + torrent.infoHash.toLowerCase() + '</title><b>Torrent Menu:</b> <a href="/remove/' + torrent.infoHash + '">Remove</a> | <a href="/' + torrent.infoHash + '">Reload</a><br>';
