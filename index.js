@@ -142,12 +142,12 @@ app.listen(port, function() {
 });
 
 function addTorrent(arg) {
-    var torrent = client.get(arg.infoHash);
-    if (torrent) {
-        console.log(arg.infoHash, 'Torrent is already added!');
-        return torrent;
-    } else {
-        return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve, reject) {
+        var torrent = client.get(arg.infoHash);
+        if (torrent) {
+            console.log(arg.infoHash, 'Torrent is already added!');
+            resolve(torrent);
+        } else {
             console.log(arg.infoHash, 'Adding torrent!');
             var magnetURI = buildMagnetURI(arg.infoHash);
             client.add(magnetURI, function(torrent) {
@@ -158,28 +158,28 @@ function addTorrent(arg) {
                     reject(arg);
                 }, 20000);
             });
-        });
-    }
+        }
+    });
 }
 
 function removeTorrent(arg) {
-    var torrent = client.get(arg.infoHash);
-    if (torrent) {
-        return new Promise(function (resolve, reject) {
-            console.log(arg.infoHash, 'Removing torrent!');
-            var magnetURI = buildMagnetURI(arg.infoHash);
-            var torrent = client.remove(magnetURI, function(err) {
-                if (err) {
-                    console.log(arg.infoHash, 'Error removing torrent!');
-                    reject(arg);
-                } else {
-                    console.log(arg.infoHash, 'Torrent removed!');
-                    resolve(arg);
-                }
-            });
-        });
-    } else {
-        console.log(arg.infoHash, 'Torrent is already removed!');
-        return arg;
-    }
+    return new Promise(function (resolve, reject) {
+        var torrent = client.get(arg.infoHash);
+        if (torrent) {
+                console.log(arg.infoHash, 'Removing torrent!');
+                var magnetURI = buildMagnetURI(arg.infoHash);
+                var torrent = client.remove(magnetURI, function(err) {
+                    if (err) {
+                        console.log(arg.infoHash, 'Error removing torrent!');
+                        reject(arg);
+                    } else {
+                        console.log(arg.infoHash, 'Torrent removed!');
+                        resolve(arg);
+                    }
+                });
+        } else {
+            console.log(arg.infoHash, 'Torrent is already removed!');
+            resolve(arg);
+        }
+    });
 }
