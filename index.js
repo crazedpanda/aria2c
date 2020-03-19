@@ -67,8 +67,12 @@ app.get('/:infoHash', function(req, res) {
             html += 'Waiting for peers to load files!';
         }
         res.send(html);
-	}, function() {
-        res.send('No peers found for torrent!');
+	}, function(arg) {
+        if (res.status == 301) {
+            res.send('No peers found for torrent!');
+        } else {
+            res.redirect(301, '/' + arg.infoHash);
+        }
     });
 });
 app.get('/remove/:infoHash', function(req, res) {
@@ -118,7 +122,15 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
             res.send('Waiting for peers to load files!');
         }
 	}, function(arg) {
-        res.send('No peers found for torrent!');
+        if (res.status == 301) {
+            res.send('No peers found for torrent!');
+        } else {
+            if ('fileIndex' in req.params) {
+                res.redirect(301, '/' + arg.infoHash + '/' + req.params.fileIndex);
+            } else {
+                res.redirect(301, '/' + arg.infoHash);
+            }
+        }
     });
 });
 app.listen(port, function() {
@@ -129,19 +141,30 @@ function addTorrent(arg) {
 	return new Promise(function(resolve, reject) {
 		var torrent = client.get(arg.infoHash);
 		if (torrent) {
-            console.log(arg.infoHash, 'Torrent already added!');
+            if (torrent.numPeers == 0) {
+                console.log(arg.infoHash, 'No peers found for torrent!');
+                reject(arg);
+            } else {
+                console.log(arg.infoHash, 'Torrent already added!');
+                resolve(torrent);
+            }
         } else {
 			var magnetURI = buildMagnetURI(arg.infoHash);
-			torrent = client.add(magnetURI, function() {
+			torrent = client.add(magnetURI);
+            torrent.on('ready', function() {
                 console.log(arg.infoHash, 'Torrent added!');
-			});
-        }
-        if (torrent.numPeers == 0) {
-            reject(arg);
-        } else {
-            resolve(torrent);
+                resolve(addTorrent(arg));
+            });
         }
 	});
+}
+
+function checkPeers(torrent) {
+    if (torrent.ready) {
+        return torrent;
+    } else {
+        return checkPeers(torrent);
+    }
 }
 
 function removeTorrent(arg) {
