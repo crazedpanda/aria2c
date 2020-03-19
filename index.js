@@ -148,21 +148,33 @@ function checkPeers(arg) {
         console.log(arg.infoHash, 'Checking peers!');
         var torrent = client.get(arg.infoHash);
 	    if (torrent) {
-            arg.seeders = 0;
-            arg.leechers = 0;
-            torrent.discovery.tracker.scrape();
-            torrent.discovery.tracker.on('scrape', function (data) {
-                arg.seeders += data.complete;
-                arg.leechers += data.incomplete;
+            torrent.on('infoHash', function(infoHash) {
+                console.log('infoHash', infoHash);
             });
-            Promise.delay(15000).then(function() {
-                if (arg.seeders == 0) {
-                    console.log(arg.infoHash, 'No seeders for torrent!');
-                    reject(arg);
-                } else {
-                    resolve(arg);
-                }
+            torrent.on('metadata', function(metadata) {
+                console.log('metadata', metadata);
             });
+            torrent.on('ready', function(ready) {
+                console.log('ready', ready);
+            });
+            torrent.on('download', function(download) {
+                console.log('download', download);
+            });
+            // arg.seeders = 0;
+            // arg.leechers = 0;
+            // torrent.discovery.tracker.scrape();
+            // torrent.discovery.tracker.on('scrape', function (data) {
+            //     arg.seeders += data.complete;
+            //     arg.leechers += data.incomplete;
+            // });
+            // Promise.delay(15000).then(function() {
+            //     if (arg.seeders == 0) {
+            //         console.log(arg.infoHash, 'No seeders for torrent!');
+            //         reject(arg);
+            //     } else {
+            //         resolve(arg);
+            //     }
+            // });
         } else {
             console.log(arg.infoHash, 'Torrent is not running in client!');
             reject(arg);
