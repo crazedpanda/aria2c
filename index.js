@@ -151,6 +151,10 @@ function addTorrent(arg) {
 			var magnetURI = buildMagnetURI(arg.infoHash);
 			client.add(magnetURI, function(torrent) {
                 console.log(arg.infoHash, 'Torrent added!');
+				var timer = setTimeout(function() {
+                    console.log(arg.infoHash, 'Torrent is not ready!');
+					reject(arg);
+				}, 20000);
                 torrent.on('wire', function(wire) {
                     wire.on('bitfield', function(bitfield) {
                         var setBits = 0;
@@ -161,16 +165,13 @@ function addTorrent(arg) {
                         }
                         if (fullBits === setBits) {
                             console.log(arg.infoHash, 'Seeder found!');
+                            clearTimeout(timer);
                             resolve(torrent);
                         } else {
                             console.log(arg.infoHash, 'Leecher found with Pieces ' + setBits + '/' + fullBits + '!');
                         }
                     });
                 });
-				setTimeout(function() {
-                    console.log(arg.infoHash, 'Torrent is not ready!');
-					reject(arg);
-				}, 20000);
 			});
 		}
 	});
