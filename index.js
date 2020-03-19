@@ -87,39 +87,43 @@ app.get('/remove/:infoHash', function(req, res) {
 });
 app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
     addTorrent(req.params).then(checkPeers).then(function(arg) {
-	    var torrent = client.get(arg.infoHash);
-        if ('fileIndex' in arg) {
-            var file = getFile(torrent, parseInt(arg.fileIndex) - 1);
-        } else {
-            var file = getLargestFile(torrent);
-        }
-        if (file) {
-            var range = req.headers.range;
-            if (range) {
-                var parts = range.replace(/bytes=/, "").split("-");
-                var start = parseInt(parts[0], 10);
-                var end = parts[1] ? parseInt(parts[1], 10) : file.length - 1;
-                var chunksize = end - start + 1;
-                var stream = file.createReadStream({
-                    start: start,
-                    end: end
-                });
-                var head = {
-                    'Content-Range': `bytes ${start}-${end}/${file.length}`,
-                    'Accept-Ranges': 'bytes',
-                    'Content-Length': chunksize,
-                    'Content-Type': 'video/mp4',
-                };
-                res.writeHead(206, head);
-                stream.pipe(res);
+        var torrent = client.get(arg.infoHash);
+        if (torrent.files.length) {
+            if ('fileIndex' in arg) {
+                var file = getFile(torrent, parseInt(arg.fileIndex) - 1);
             } else {
-                file.createReadStream({
-                    start: 0,
-                    end: file.length
-                }).pipe(res);
+                var file = getLargestFile(torrent);
+            }
+            if (file) {
+                var range = req.headers.range;
+                if (range) {
+                    var parts = range.replace(/bytes=/, "").split("-");
+                    var start = parseInt(parts[0], 10);
+                    var end = parts[1] ? parseInt(parts[1], 10) : file.length - 1;
+                    var chunksize = end - start + 1;
+                    var stream = file.createReadStream({
+                        start: start,
+                        end: end
+                    });
+                    var head = {
+                        'Content-Range': `bytes ${start}-${end}/${file.length}`,
+                        'Accept-Ranges': 'bytes',
+                        'Content-Length': chunksize,
+                        'Content-Type': 'video/mp4',
+                    };
+                    res.writeHead(206, head);
+                    stream.pipe(res);
+                } else {
+                    file.createReadStream({
+                        start: 0,
+                        end: file.length
+                    }).pipe(res);
+                }
+            } else {
+                res.send('File does not exist!');
             }
         } else {
-            console.log(arg.infoHash, 'File does not exist!');
+            res.send('Waiting for peers to load files!');
         }
     }, function(arg) {
 	    var torrent = client.get(arg.infoHash);
