@@ -145,35 +145,34 @@ function addTorrent(arg) {
 	return new Promise(function(resolve, reject) {
 		var torrent = client.get(arg.infoHash);
 		if (torrent) {
-			console.log(arg.infoHash, 'Torrent is already added!');
-			resolve(torrent);
-		} else {
+            console.log(arg.infoHash, 'Torrent already added!');
+        } else {
 			var magnetURI = buildMagnetURI(arg.infoHash);
-			client.add(magnetURI, function(torrent) {
+			client.add(magnetURI, function() {
                 console.log(arg.infoHash, 'Torrent added!');
-				var timer = setTimeout(function() {
-                    console.log(arg.infoHash, 'Torrent is not ready!');
-					reject(arg);
-				}, 20000);
-                torrent.on('wire', function(wire) {
-                    wire.on('bitfield', function(bitfield) {
-                        var setBits = 0;
-                        var maxBits = bitfield.buffer.length << 3;
-                        var fullBits = torrent.pieces.length;
-                        for (i = 0; i <= maxBits; i++) {
-                            if (bitfield.get(i)) setBits++;
-                        }
-                        if (fullBits === setBits) {
-                            console.log(arg.infoHash, 'Seeder found!');
-                            clearTimeout(timer);
-                            resolve(torrent);
-                        } else {
-                            console.log(arg.infoHash, 'Leecher found with Pieces ' + setBits + '/' + fullBits + '!');
-                        }
-                    });
-                });
 			});
-		}
+        }
+        var timer = setTimeout(function() {
+            console.log(arg.infoHash, 'Unable to find a seeder!');
+            reject(arg);
+        }, 20000);
+        torrent.on('wire', function(wire) {
+            wire.on('bitfield', function(bitfield) {
+                var setBits = 0;
+                var maxBits = bitfield.buffer.length << 3;
+                var fullBits = torrent.pieces.length;
+                for (i = 0; i <= maxBits; i++) {
+                    if (bitfield.get(i)) setBits++;
+                }
+                if (fullBits === setBits) {
+                    console.log(arg.infoHash, 'Seeder found!');
+                    clearTimeout(timer);
+                    resolve(torrent);
+                } else {
+                    console.log(arg.infoHash, 'Leecher found with Pieces ' + setBits + '/' + fullBits + '!');
+                }
+            });
+        });
 	});
 }
 
