@@ -69,7 +69,7 @@ app.get('/:infoHash', function(req, res) {
 		res.send(html);
 	}, function(arg) {
         removeTorrent(arg);
-        res.send('No peers for ' + arg.infoHash + '!');
+        res.send('No seeders for ' + arg.infoHash + '!');
 	});
 });
 app.get('/remove/:infoHash', function(req, res) {
