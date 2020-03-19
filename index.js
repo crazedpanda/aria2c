@@ -57,7 +57,14 @@ app.get('/:infoHash', function(req, res) {
 		if (torrent.progress < 1) {
 			html += '<meta http-equiv="refresh" content="15"/>';
 		}
-		html += '<title>MiPeerFlix - ' + torrent.infoHash.toLowerCase() + '</title><b>Torrent Menu:</b> <a href="/remove/' + torrent.infoHash + '">Remove</a> | <a href="/' + torrent.infoHash + '">Reload</a><br><b>Number of Peers:</b> ' + torrent.numPeers + '<hr>';
+        html += '<title>MiPeerFlix - ' + torrent.infoHash.toLowerCase() + '</title><b>Torrent Menu:</b> <a href="/remove/' + torrent.infoHash + '">Remove</a> | <a href="/' + torrent.infoHash + '">Reload</a><br>';
+        if ('seeders' in torrent) {
+            html += '<b>Number of Seeders:</b> ' + torrent.seeders;
+        }
+        if ('leechers' in torrent) {
+            html += '<br><b>Number of Leechers:</b> ' + torrent.leechers;
+        }
+        html += '<hr>';
 		if (torrent.files.length) {
 			torrent.files.forEach(function(file, key) {
 				html += '<table class="torrent" id="' + torrent.infoHash.toLowerCase() + '" style="table-layout:fixed;width:100%"><tr class="filepath"><td style="font-weight:bold;width:140px;vertical-align:middle">File Path:</td><td>' + file.path + '</td></tr><tr class="filesize"><td style="font-weight:bold;width:140px;vertical-align:middle">File Size:</td><td>' + file.length + ' bytes</td></tr><tr class="fileprogress"><td style="font-weight:bold;width:140px;vertical-align:middle">Download Progress:</td><td>' + Math.floor(file.progress * 100) + '%</td></tr><tr class="buttons"><td></td><td><a href="/stream/' + torrent.infoHash.toLowerCase() + '/' + (key + 1) + '">Stream</a>';
