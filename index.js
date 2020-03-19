@@ -172,18 +172,26 @@ function addTorrent(arg) {
 }
 
 function checkPeers(torrent, startTime) {
-	return new Promise(function(resolve, reject) {
-        torrent.discovery.tracker.on('update', function(data) {
-            console.log('got a scrape response from tracker: ' + data.announce);
-            console.log('number of seeders in the swarm: ' + data.complete);
-            console.log('number of leechers in the swarm: ' + data.incomplete);
-            if ((Math.floor(Date.now() / 1000) - startTime) > 15) {
-                console.log(torrent.infoHash, 'Waited too long for torrent to load!');
-                resolve(torrent);
-            }
+    if (torrent.ready) {
+	    return new Promise(function(resolve, reject) {
+            torrent.discovery.tracker.on('update', function(data) {
+                console.log('got a scrape response from tracker: ' + data.announce);
+                console.log('number of seeders in the swarm: ' + data.complete);
+                console.log('number of leechers in the swarm: ' + data.incomplete);
+                if ((Math.floor(Date.now() / 1000) - startTime) > 15) {
+                    console.log(torrent.infoHash, 'Waited too long for torrent to load!');
+                    resolve(torrent);
+                }
+            });
+            torrent.discovery.tracker.update();
         });
-        torrent.discovery.tracker.update();
-    });
+    } else {
+        if ((Math.floor(Date.now() / 1000) - startTime) < 15) {
+            return checkPeers(torrent, startTime);
+        } else {
+            return Promise.reject(torrent);
+        }
+    }
 }
 
 function removeTorrent(arg) {
