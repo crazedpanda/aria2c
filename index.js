@@ -155,9 +155,21 @@ function addTorrent(arg) {
 					resolve(torrent);
                 });
                 torrent.discovery.tracker.on('scrape', function(data) {
-                    console.log(data);
+                    console.log('scrape', data);
                 });
-                trackerClient.scrape();
+                torrent.discovery.tracker.scrape();
+                torrent.on('wire', function(wire) {
+                    wire.on('bitfield', function(bitfield) {
+                        var setBits = 0;
+                        var maxBits = bitfield.buffer.length << 3;
+                        var fullBits = torrent.pieces.length;
+                        for (i = 0; i <= maxBits; i++) {
+                            if (bitfield.get(i)) setBits++;
+                        }
+                        var state = fullBits === setBits ? "SEEDER" : "LEECHER";
+                        console.log(`[${torrent.infoHash}][${wire.peerId}] Pieces ${setBits}/${fullBits} - ${state}`);
+                    });
+                });
 				setTimeout(function() {
                     console.log(arg.infoHash, 'Torrent is not ready!');
 					reject(arg);
