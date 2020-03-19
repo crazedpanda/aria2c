@@ -153,7 +153,11 @@ function addTorrent(arg) {
 				torrent.on('ready', function() {
                     console.log(arg.infoHash, 'Torrent added!');
 					resolve(torrent);
-				});
+                });
+                torrent.discovery.tracker.on('scrape', function(data) {
+                    console.log(data);
+                });
+                trackerClient.scrape();
 				setTimeout(function() {
                     console.log(arg.infoHash, 'Torrent is not ready!');
 					reject(arg);
