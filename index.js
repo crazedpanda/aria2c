@@ -28,11 +28,13 @@ app.get('/', function(req, res) {
 	res.send('<title>MiPeerFlix</title>Hello World!');
 });
 app.get('/clear', function(req, res) {
-	var promises = [];
+	var hashes = [];
 	client.torrents.forEach(function(value) {
-		promises.push(removeTorrent(value));
-	});
-	Promise.all(promises).then(function() {
+		hashes.push(value);
+    });
+    Promise.map(hashes, function(hash) {
+        return removeTorrent({ infoHash: hash });
+    }, { concurrency: 1 }).then(function() {
 		res.send('<title>MiPeerFlix - Clear</title>Removed all!');
 	}).catch(function(err) {
 		res.send('<title>MiPeerFlix - Error</title>' + err.toString());
