@@ -174,10 +174,12 @@ function checkPeers(torrent, startTime) {
         return torrent;
     } else {
         if ((Math.floor(Date.now() / 1000) - startTime) < 15) {
+            console.log('Wait for torrent to load!');
             return Promise.delay(1000).then(function() {
                 return checkPeers(torrent, startTime);
             });
         } else {
+            console.log('Waited too long for torrent to load!');
             return Promise.reject(torrent);
         }
     }
