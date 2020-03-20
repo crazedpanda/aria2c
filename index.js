@@ -57,7 +57,7 @@ app.get('/:infoHash', function(req, res) {
 		}
 		var html = '<head>';
 		if (!torrent.done) {
-			html += '<meta http-equiv="refresh" content="15"/>';
+			html += '<meta http-equiv="refresh" content="20"/>';
 		}
 		html += '<title>MiPeerFlix - ' + torrent.infoHash.toLowerCase() + '</title><b>Torrent Menu:</b> <a href="/remove/' + torrent.infoHash + '">Remove</a> | <a href="/' + torrent.infoHash + '">Reload</a><br>';
 		if ('seeders' in torrent) {
@@ -102,8 +102,6 @@ app.get('/remove/:infoHash', function(req, res) {
 	});
 });
 app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
-    console.log(req.params.fileIndex);
-    console.log(typeof req.params.fileIndex);
 	addTorrent(req.params).then(function(torrent) {
 		if ('retry' in req.cookies) {
 			res.clearCookie('retry');
