@@ -58,7 +58,7 @@ app.get('/:infoHash', function(req, res) {
 		if (!torrent.done) {
 			html += '<meta http-equiv="refresh" content="20"/>';
 		}
-		html += '<title>MiPeerFlix - ' + torrent.infoHash.toLowerCase() + '</title><b>Torrent Menu:</b> <a href="/remove/' + torrent.infoHash + '">Remove</a> | <a href="/' + torrent.infoHash + '">Reload</a><br><b>Peers:</b> ' + torrent.numPeers + '<hr>';
+		html += '<title>MiPeerFlix - ' + torrent.infoHash.toLowerCase() + '</title><b>Menu:</b> <a href="/remove/' + torrent.infoHash + '">Remove</a> | <a href="/' + torrent.infoHash + '">Reload</a><br><b>Peers:</b> ' + torrent.numPeers + '<hr>';
 		if (torrent.files.length) {
 			torrent.files.forEach(function(file, key) {
 				html += '<table class="torrent" id="' + torrent.infoHash.toLowerCase() + '" style="table-layout:fixed;width:100%"><tr class="filepath"><td style="font-weight:bold;width:140px;vertical-align:middle">File Path:</td><td>' + file.path + '</td></tr><tr class="filesize"><td style="font-weight:bold;width:140px;vertical-align:middle">File Size:</td><td>' + file.length + ' bytes</td></tr><tr class="fileprogress"><td style="font-weight:bold;width:140px;vertical-align:middle">Download Progress:</td><td>' + Math.floor(file.progress * 100) + '%</td></tr><tr class="buttons"><td></td><td><a href="/stream/' + torrent.infoHash.toLowerCase() + '/' + (key + 1) + '">Stream</a>';
@@ -167,7 +167,7 @@ function addTorrent(arg) {
 
 function checkPeers(torrent, startTime) {
 	if (torrent.ready) {
-        return torrent;
+        return Promise.resolve(torrent);
 	} else {
 		if ((Math.floor(Date.now() / 1000) - startTime) < 15) {
 			console.log(torrent.infoHash, 'Wait for torrent to load!');
