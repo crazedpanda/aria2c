@@ -109,7 +109,7 @@ app.get('/remove/:infoHash', function(req, res) {
 			}
 		});
 	} else {
-		res.send('<title>MiPeerFlix - Remove</title>Torrent does not exist!');
+		res.send('<title>MiPeerFlix - Remove</title>Torrent does not exist in client!');
 	}
 });
 app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
