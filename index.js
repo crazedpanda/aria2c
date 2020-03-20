@@ -32,7 +32,21 @@ app.get('/clear', function(req, res) {
 		hashes.push(value.infoHash);
     });
     Promise.map(hashes, function(hash) {
-        return removeTorrent({ infoHash: hash });
+        return new Promise(function (resolve, reject) {
+            console.log(hash, 'Removing torrent!');
+            var torrent = client.get(hash);
+            if (torrent) {
+                client.remove(hash, function(err) {
+                    if (err) {
+                        reject();
+                    } else {
+                        resolve();
+                    }
+                });
+            } else {
+                resolve();
+            }
+        });
     }, { concurrency: 1 }).then(function() {
 		res.send('<title>MiPeerFlix - Clear</title>Removed all!');
 	}).catch(function(err) {
@@ -50,15 +64,23 @@ app.get('/list', function(req, res) {
 	res.send(html);
 });
 app.get('/:infoHash', function(req, res) {
-	addTorrent(req.params).then(function(torrent) {
+    var torrent = client.get(req.params.infoHash);
+	if (!torrent) {
+		console.log(req.params.infoHash, 'Adding torrent!');
+		// var magnetURI = buildMagnetURI(req.params.infoHash);
+        // torrent = client.add(magnetURI);
+        torrent = client.add(req.params.infoHash);
+    }
+    var html = '<head>';
+    if (!torrent.done) {
+        html += '<meta http-equiv="refresh" content="15"/>';
+    }
+    html += '<title>MiPeerFlix - ' + req.params.infoHash.toLowerCase() + '</title><b>Menu:</b> <a href="/remove/' + req.params.infoHash + '">Remove</a> | <a href="/' + req.params.infoHash + '">Reload</a>';
+	if (torrent.ready) {
 		if ('retry' in req.cookies) {
 			res.clearCookie('retry');
-		}
-		var html = '<head>';
-		if (!torrent.done) {
-			html += '<meta http-equiv="refresh" content="20"/>';
-		}
-		html += '<title>MiPeerFlix - ' + torrent.infoHash.toLowerCase() + '</title><b>Menu:</b> <a href="/remove/' + torrent.infoHash + '">Remove</a> | <a href="/' + torrent.infoHash + '">Reload</a><br><b>Peers:</b> ' + torrent.numPeers + '<hr>';
+        }
+        html += '<br><b>Peers:</b> ' + torrent.numPeers + '<hr>';
 		if (torrent.files.length) {
 			torrent.files.forEach(function(file, key) {
 				html += '<table class="torrent" id="' + torrent.infoHash.toLowerCase() + '" style="table-layout:fixed;width:100%"><tr class="filepath"><td style="font-weight:bold;width:140px;vertical-align:middle">File Path:</td><td>' + file.path + '</td></tr><tr class="filesize"><td style="font-weight:bold;width:140px;vertical-align:middle">File Size:</td><td>' + file.length + ' bytes</td></tr><tr class="fileprogress"><td style="font-weight:bold;width:140px;vertical-align:middle">Download Progress:</td><td>' + Math.floor(file.progress * 100) + '%</td></tr><tr class="buttons"><td></td><td><a href="/stream/' + torrent.infoHash.toLowerCase() + '/' + (key + 1) + '">Stream</a>';
@@ -73,25 +95,25 @@ app.get('/:infoHash', function(req, res) {
 		} else {
 			html += 'Waiting for peers to load files!';
 		}
-		res.send(html);
-	}, function() {
-		if ('retry' in req.cookies) {
-			removeTorrent(req.params);
-			res.clearCookie('retry');
-			res.send('<title>MiPeerFlix - Error</title>No peers found for torrent!');
-		} else {
-			console.log(req.params.infoHash, 'Retrying!');
-			res.cookie('retry', 1);
-			res.redirect('/' + req.params.infoHash);
-		}
-	});
+	} else {
+		html += '<hr>Torrent is not ready!';
+	}
+    res.send(html);
 });
 app.get('/remove/:infoHash', function(req, res) {
-	removeTorrent(req.params).then(function(arg) {
-		res.send('<title>MiPeerFlix - Remove</title>Removed: ' + arg.infoHash);
-	}, function() {
-		res.send('<title>MiPeerFlix - Remove</title>Error removing torrent!');
-	});
+    var torrent = client.get(req.params.infoHash);
+    if (torrent) {
+        console.log(req.params.infoHash, 'Removing torrent!');
+        client.remove(req.params.infoHash, function(err) {
+            if (err) {
+		        res.send('<title>MiPeerFlix - Remove</title>Error removing torrent!');
+            } else {
+                res.send('<title>MiPeerFlix - Remove</title>Removed: ' + arg.infoHash);
+            }
+        });
+    } else {
+		res.send('<title>MiPeerFlix - Remove</title>Torrent does not exist!');
+    }
 });
 app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 	addTorrent(req.params).then(function(torrent) {
@@ -154,51 +176,3 @@ app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
 app.listen(port, function() {
 	console.log('Server is running at ' + port);
 });
-
-function addTorrent(arg) {
-	var torrent = client.get(arg.infoHash);
-	if (!torrent) {
-		console.log(arg.infoHash, 'Adding torrent!');
-		var magnetURI = buildMagnetURI(arg.infoHash);
-		torrent = client.add(magnetURI);
-	}
-	return checkPeers(torrent, Math.floor(Date.now() / 1000));
-}
-
-function checkPeers(torrent, startTime) {
-	if (torrent.ready) {
-        return Promise.resolve(torrent);
-	} else {
-		if ((Math.floor(Date.now() / 1000) - startTime) < 15) {
-			console.log(torrent.infoHash, 'Wait for torrent to load!');
-			return Promise.delay(5000).then(function() {
-				return checkPeers(torrent, startTime);
-			});
-		} else {
-			console.log(torrent.infoHash, 'Waited too long for torrent to load!');
-			return Promise.reject(torrent);
-		}
-	}
-}
-
-function removeTorrent(arg) {
-    return new Promise(function (resolve, reject) {
-        var torrent = client.get(arg.infoHash);
-        if (torrent) {
-            console.log(arg.infoHash, 'Removing torrent!');
-            var magnetURI = buildMagnetURI(arg.infoHash);
-            client.remove(magnetURI, function(err) {
-                if (err) {
-                    console.log(arg.infoHash, 'Error removing torrent!');
-                    reject(arg);
-                } else {
-                    console.log(arg.infoHash, 'Torrent removed!');
-                    resolve(arg);
-                }
-            });
-        } else {
-            console.log(arg.infoHash, 'Torrent does not exist!');
-            resolve(arg);
-        }
-    });
-}
