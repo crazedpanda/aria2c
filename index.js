@@ -94,14 +94,20 @@ app.get('/:infoHash', function(req, res) {
 				if (torrent.files.length - 1 != key) {
 					html += '<hr>';
 				}
-			});
+            });
+            res.send(html);
 		} else {
-			html += 'Wait for peers to load files!';
+            Promise.delay(10000).then(function() {
+			    html += 'Wait for peers to load files!';
+                res.send(html);
+            });
 		}
 	} else {
-		html += '<hr>Wait for torrent to load!';
+		Promise.delay(10000).then(function() {
+            html += '<hr>Wait for torrent to load!';
+            res.send(html);
+        });
 	}
-	res.send(html);
 });
 app.get('/remove/:infoHash', function(req, res) {
 	var torrent = client.get(req.params.infoHash);
