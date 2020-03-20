@@ -82,7 +82,7 @@ app.get('/:infoHash', function(req, res) {
 			torrent.files.forEach(function(file, key) {
 				html += '<table class="torrent" id="' + torrent.infoHash.toLowerCase() + '" style="table-layout:fixed;width:100%"><tr class="filepath"><td style="font-weight:bold;width:140px;vertical-align:middle">File Path:</td><td>' + file.path + '</td></tr><tr class="filesize"><td style="font-weight:bold;width:140px;vertical-align:middle">File Size:</td><td>' + file.length + ' bytes</td></tr><tr class="fileprogress"><td style="font-weight:bold;width:140px;vertical-align:middle">Download Progress:</td><td>' + Math.floor(file.progress * 100) + '%</td></tr><tr class="buttons"><td></td><td><a href="/stream/' + torrent.infoHash.toLowerCase() + '/' + (key + 1) + '">Stream</a>';
 				if (file.progress == 1) {
-					html += ' | <a href="/download/' + torrent.infoHash.toLowerCase() + '/' + file.path + '">Download</a>';
+					html += ' | <a href="/download/' + torrent.infoHash.toLowerCase() + '/' + encodeURIComponent(file.path) + '">Download</a>';
 				}
 				html += '</td></tr></table>';
 				if (torrent.files.length - 1 != key) {
