@@ -75,9 +75,6 @@ app.get('/:infoHash', function(req, res) {
     }
     html += '<title>MiPeerFlix - ' + req.params.infoHash.toLowerCase() + '</title><b>Menu:</b> <a href="/remove/' + req.params.infoHash + '">Remove</a> | <a href="/' + req.params.infoHash + '">Reload</a>';
 	if (torrent.ready) {
-		if ('retry' in req.cookies) {
-			res.clearCookie('retry');
-        }
         html += '<br><b>Peers:</b> ' + torrent.numPeers + '<hr>';
 		if (torrent.files.length) {
 			torrent.files.forEach(function(file, key) {
