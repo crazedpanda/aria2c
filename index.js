@@ -67,8 +67,6 @@ app.get('/:infoHash', function(req, res) {
     var torrent = client.get(req.params.infoHash);
 	if (!torrent) {
 		console.log(req.params.infoHash, 'Adding torrent!');
-		// var magnetURI = buildMagnetURI(req.params.infoHash);
-        // torrent = client.add(magnetURI);
         torrent = client.add(req.params.infoHash);
     }
     var html = '<head>';
@@ -93,10 +91,10 @@ app.get('/:infoHash', function(req, res) {
 				}
 			});
 		} else {
-			html += 'Waiting for peers to load files!';
+			html += 'Wait for peers to load files!';
 		}
 	} else {
-		html += '<hr>Torrent is not ready!';
+		html += '<hr>Wait for torrent to load!';
 	}
     res.send(html);
 });
@@ -108,7 +106,7 @@ app.get('/remove/:infoHash', function(req, res) {
             if (err) {
 		        res.send('<title>MiPeerFlix - Remove</title>Error removing torrent!');
             } else {
-                res.send('<title>MiPeerFlix - Remove</title>Removed: ' + arg.infoHash);
+                res.send('<title>MiPeerFlix - Remove</title>Removed: ' + req.params.infoHash);
             }
         });
     } else {
@@ -116,62 +114,60 @@ app.get('/remove/:infoHash', function(req, res) {
     }
 });
 app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
-	addTorrent(req.params).then(function(torrent) {
-		if ('retry' in req.cookies) {
-			res.clearCookie('retry');
-		}
-		if (torrent.files.length) {
-			if (req.params.fileIndex) {
-				var file = getFile(torrent, parseInt(req.params.fileIndex) - 1);
-			} else {
-				var file = getLargestFile(torrent);
-			}
-			if (file) {
-				var range = req.headers.range;
-				if (range) {
-					var parts = range.replace(/bytes=/, "").split("-");
-					var start = parseInt(parts[0], 10);
-					var end = parts[1] ? parseInt(parts[1], 10) : file.length - 1;
-					var chunksize = end - start + 1;
-					var stream = file.createReadStream({
-						start: start,
-						end: end
-					});
-					var head = {
-						'Content-Range': `bytes ${start}-${end}/${file.length}`,
-						'Accept-Ranges': 'bytes',
-						'Content-Length': chunksize,
-						'Content-Type': 'video/mp4',
-					};
-					res.writeHead(206, head);
-					stream.pipe(res);
-				} else {
-					file.createReadStream({
-						start: 0,
-						end: file.length
-					}).pipe(res);
-				}
-			} else {
-				res.send('<title>MiPeerFlix - Error</title>File does not exist!');
-			}
-		} else {
-			res.send('<title>MiPeerFlix - Error</title>Waiting for peers to load files!');
-		}
-	}, function() {
-		if ('retry' in req.cookies) {
-			removeTorrent(req.params);
-			res.clearCookie('retry');
-			res.send('<title>MiPeerFlix - Error</title>No peers found for torrent!');
-		} else {
-			console.log(req.params.infoHash, 'Retrying!');
-			res.cookie('retry', 1);
-			if (req.params.fileIndex) {
-				res.redirect('/stream/' + req.params.infoHash + '/' + req.params.fileIndex);
-			} else {
-				res.redirect('/stream/' + req.params.infoHash);
-			}
-		}
-	});
+    var torrent = client.get(req.params.infoHash);
+	if (!torrent) {
+		console.log(req.params.infoHash, 'Adding torrent!');
+        torrent = client.add(req.params.infoHash);
+    }
+    if (torrent.files.length) {
+        if (req.params.fileIndex) {
+            var file = getFile(torrent, parseInt(req.params.fileIndex) - 1);
+        } else {
+            var file = getLargestFile(torrent);
+        }
+        if (file) {
+            var range = req.headers.range;
+            if (range) {
+                var parts = range.replace(/bytes=/, "").split("-");
+                var start = parseInt(parts[0], 10);
+                var end = parts[1] ? parseInt(parts[1], 10) : file.length - 1;
+                var chunksize = end - start + 1;
+                var stream = file.createReadStream({
+                    start: start,
+                    end: end
+                });
+                var head = {
+                    'Content-Range': `bytes ${start}-${end}/${file.length}`,
+                    'Accept-Ranges': 'bytes',
+                    'Content-Length': chunksize,
+                    'Content-Type': 'video/mp4',
+                };
+                res.writeHead(206, head);
+                stream.pipe(res);
+            } else {
+                file.createReadStream({
+                    start: 0,
+                    end: file.length
+                }).pipe(res);
+            }
+        } else {
+            Promise.delay(10000).then(function() {
+                if (req.params.fileIndex) {
+                    res.redirect('/stream/' + req.params.infoHash + '/' + req.params.fileIndex);
+                } else {
+                    res.redirect('/stream/' + req.params.infoHash);
+                }
+            });
+        }
+    } else {
+        Promise.delay(10000).then(function() {
+            if (req.params.fileIndex) {
+                res.redirect('/stream/' + req.params.infoHash + '/' + req.params.fileIndex);
+            } else {
+                res.redirect('/stream/' + req.params.infoHash);
+            }
+        });
+    }
 });
 app.listen(port, function() {
 	console.log('Server is running at ' + port);
