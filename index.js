@@ -30,24 +30,26 @@ app.get('/clear', function(req, res) {
 	var hashes = [];
 	client.torrents.forEach(function(value) {
 		hashes.push(value.infoHash);
-    });
-    Promise.map(hashes, function(hash) {
-        return new Promise(function (resolve, reject) {
-            console.log(hash, 'Removing torrent!');
-            var torrent = client.get(hash);
-            if (torrent) {
-                client.remove(hash, function(err) {
-                    if (err) {
-                        reject();
-                    } else {
-                        resolve();
-                    }
-                });
-            } else {
-                resolve();
-            }
-        });
-    }, { concurrency: 1 }).then(function() {
+	});
+	Promise.map(hashes, function(hash) {
+		return new Promise(function(resolve, reject) {
+			console.log(hash, 'Removing torrent!');
+			var torrent = client.get(hash);
+			if (torrent) {
+				client.remove(hash, function(err) {
+					if (err) {
+						reject();
+					} else {
+						resolve();
+					}
+				});
+			} else {
+				resolve();
+			}
+		});
+	}, {
+		concurrency: 1
+	}).then(function() {
 		res.send('<title>MiPeerFlix - Clear</title>Removed all!');
 	}).catch(function(err) {
 		res.send('<title>MiPeerFlix - Error</title>' + err.toString());
@@ -64,18 +66,18 @@ app.get('/list', function(req, res) {
 	res.send(html);
 });
 app.get('/:infoHash', function(req, res) {
-    var torrent = client.get(req.params.infoHash);
+	var torrent = client.get(req.params.infoHash);
 	if (!torrent) {
 		console.log(req.params.infoHash, 'Adding torrent!');
-        torrent = client.add(req.params.infoHash);
-    }
-    var html = '<head>';
-    if (!torrent.done) {
-        html += '<meta http-equiv="refresh" content="15"/>';
-    }
-    html += '<title>MiPeerFlix - ' + req.params.infoHash.toLowerCase() + '</title><b>Menu:</b> <a href="/remove/' + req.params.infoHash + '">Remove</a> | <a href="/' + req.params.infoHash + '">Reload</a>';
+		torrent = client.add(req.params.infoHash);
+	}
+	var html = '<head>';
+	if (!torrent.done) {
+		html += '<meta http-equiv="refresh" content="15"/>';
+	}
+	html += '<title>MiPeerFlix - ' + req.params.infoHash.toLowerCase() + '</title><b>Menu:</b> <a href="/remove/' + req.params.infoHash + '">Remove</a> | <a href="/' + req.params.infoHash + '">Reload</a>';
 	if (torrent.ready) {
-        html += '<br><b>Peers:</b> ' + torrent.numPeers + '<hr>';
+		html += '<br><b>Peers:</b> ' + torrent.numPeers + '<hr>';
 		if (torrent.files.length) {
 			torrent.files.forEach(function(file, key) {
 				html += '<table class="torrent" id="' + torrent.infoHash.toLowerCase() + '" style="table-layout:fixed;width:100%"><tr class="filepath"><td style="font-weight:bold;width:140px;vertical-align:middle">File Path:</td><td>' + file.path + '</td></tr><tr class="filesize"><td style="font-weight:bold;width:140px;vertical-align:middle">File Size:</td><td>' + file.length + ' bytes</td></tr><tr class="fileprogress"><td style="font-weight:bold;width:140px;vertical-align:middle">Download Progress:</td><td>' + Math.floor(file.progress * 100) + '%</td></tr><tr class="buttons"><td></td><td><a href="/stream/' + torrent.infoHash.toLowerCase() + '/' + (key + 1) + '">Stream</a>';
@@ -93,78 +95,78 @@ app.get('/:infoHash', function(req, res) {
 	} else {
 		html += '<hr>Wait for torrent to load!';
 	}
-    res.send(html);
+	res.send(html);
 });
 app.get('/remove/:infoHash', function(req, res) {
-    var torrent = client.get(req.params.infoHash);
-    if (torrent) {
-        console.log(req.params.infoHash, 'Removing torrent!');
-        client.remove(req.params.infoHash, function(err) {
-            if (err) {
-		        res.send('<title>MiPeerFlix - Remove</title>Error removing torrent!');
-            } else {
-                res.send('<title>MiPeerFlix - Remove</title>Removed: ' + req.params.infoHash);
-            }
-        });
-    } else {
+	var torrent = client.get(req.params.infoHash);
+	if (torrent) {
+		console.log(req.params.infoHash, 'Removing torrent!');
+		client.remove(req.params.infoHash, function(err) {
+			if (err) {
+				res.send('<title>MiPeerFlix - Remove</title>Error removing torrent!');
+			} else {
+				res.send('<title>MiPeerFlix - Remove</title>Removed: ' + req.params.infoHash);
+			}
+		});
+	} else {
 		res.send('<title>MiPeerFlix - Remove</title>Torrent does not exist!');
-    }
+	}
 });
 app.get('/stream/:infoHash/:fileIndex?', function(req, res) {
-    var torrent = client.get(req.params.infoHash);
+	var torrent = client.get(req.params.infoHash);
 	if (!torrent) {
 		console.log(req.params.infoHash, 'Adding torrent!');
-        torrent = client.add(req.params.infoHash);
-    }
-    if (torrent.files.length) {
-        if (req.params.fileIndex) {
-            var file = getFile(torrent, parseInt(req.params.fileIndex) - 1);
-        } else {
-            var file = getLargestFile(torrent);
-        }
-        if (file) {
-            var range = req.headers.range;
-            if (range) {
-                var parts = range.replace(/bytes=/, "").split("-");
-                var start = parseInt(parts[0], 10);
-                var end = parts[1] ? parseInt(parts[1], 10) : file.length - 1;
-                var chunksize = end - start + 1;
-                var stream = file.createReadStream({
-                    start: start,
-                    end: end
-                });
-                var head = {
-                    'Content-Range': `bytes ${start}-${end}/${file.length}`,
-                    'Accept-Ranges': 'bytes',
-                    'Content-Length': chunksize,
-                    'Content-Type': 'video/mp4',
-                };
-                res.writeHead(206, head);
-                stream.pipe(res);
-            } else {
-                file.createReadStream({
-                    start: 0,
-                    end: file.length
-                }).pipe(res);
-            }
-        } else {
-            Promise.delay(10000).then(function() {
-                if (req.params.fileIndex) {
-                    res.redirect('/stream/' + req.params.infoHash + '/' + req.params.fileIndex);
-                } else {
-                    res.redirect('/stream/' + req.params.infoHash);
-                }
-            });
-        }
-    } else {
-        Promise.delay(10000).then(function() {
-            if (req.params.fileIndex) {
-                res.redirect('/stream/' + req.params.infoHash + '/' + req.params.fileIndex);
-            } else {
-                res.redirect('/stream/' + req.params.infoHash);
-            }
-        });
-    }
+		torrent = client.add(req.params.infoHash);
+	}
+	if (torrent.files.length) {
+		if (req.params.fileIndex) {
+			var file = getFile(torrent, parseInt(req.params.fileIndex) - 1);
+		} else {
+			var file = getLargestFile(torrent);
+		}
+		if (file) {
+			var range = req.headers.range;
+			if (range) {
+				var parts = range.replace(/bytes=/, "").split("-");
+				var start = parseInt(parts[0], 10);
+				var end = parts[1] ? parseInt(parts[1], 10) : file.length - 1;
+				var chunksize = end - start + 1;
+				var stream = file.createReadStream({
+					start: start,
+					end: end
+				});
+				var head = {
+					'Content-Range': `bytes ${start}-${end}/${file.length}`,
+					'Accept-Ranges': 'bytes',
+					'Content-Length': chunksize,
+					'Content-Type': 'video/mp4',
+				};
+				res.writeHead(206, head);
+				stream.pipe(res);
+			} else {
+				file.createReadStream({
+					start: 0,
+					end: file.length
+				}).pipe(res);
+			}
+		} else {
+			Promise.delay(10000).then(function() {
+				if (req.params.fileIndex) {
+					res.redirect('/stream/' + req.params.infoHash + '/' + req.params.fileIndex);
+				} else {
+					res.redirect('/stream/' + req.params.infoHash);
+				}
+			});
+		}
+	} else {
+		Promise.delay(10000).then(function() {
+			if (req.params.fileIndex) {
+				res.redirect('/stream/' + req.params.infoHash + '/' + req.params.fileIndex);
+			} else {
+				res.redirect('/stream/' + req.params.infoHash);
+			}
+		});
+	}
 });
 app.listen(port, function() {
 	console.log('Server is running at ' + port);
