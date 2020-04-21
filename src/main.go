@@ -42,7 +42,7 @@ func handleSignals() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {
-		for _ = range c {
+		for range c {
 			procQuit <- true
 		}
 	}()
@@ -66,6 +66,7 @@ func main() {
 	settings.Seed = false
 	handleSignals()
 	cl := startTorrent(settings)
+	fmt.Println(settings.Host + ":" + settings.Port)
 	srv := startHTTPServer(settings.Host + ":" + settings.Port, cl)
 	select {
 	case err := <-procError:
@@ -235,10 +236,9 @@ func incFileClients(path string) int {
 		v++
 		fileClients[path] = v
 		return v
-	} else {
-		fileClients[path] = 1
-		return 1
 	}
+	fileClients[path] = 1
+	return 1
 }
 
 func decFileClients(path string) int {
@@ -246,10 +246,9 @@ func decFileClients(path string) int {
 		v--
 		fileClients[path] = v
 		return v
-	} else {
-		fileClients[path] = 0
-		return 0
 	}
+	fileClients[path] = 0
+	return 0
 }
 
 func addMagnet(uri string, cl *torrent.Client) *torrent.Torrent {
@@ -259,17 +258,18 @@ func addMagnet(uri string, cl *torrent.Client) *torrent.Torrent {
 		return nil
 	}
 	infoHash := spec.InfoHash.String()
-	if t, ok := torrents[infoHash]; ok {
+	t, ok := torrents[infoHash]
+	if ok {
 		return t
 	}
-	if t, err := cl.AddMagnet(uri); err != nil {
+	t, err = cl.AddMagnet(uri)
+	if err != nil {
 		fmt.Println(err)
 		return nil
-	} else {
-		<-t.GotInfo()
-		torrents[t.InfoHash().String()] = t
-		return t
 	}
+	<-t.GotInfo()
+	torrents[t.InfoHash().String()] = t
+	return t
 }
 
 func stopDownloadFile(file *torrent.File) {
