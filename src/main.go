@@ -134,6 +134,8 @@ func handleAPI(cl *torrent.Client) {
 					stopDownloadFile(file)
 				}
 			}
+			fmt.Println("Error: /stream/{hash}")
+			return
 		}
 	})
 	routerAPI.HandleFunc("/stream/{hash}/{base64path}", func(w http.ResponseWriter, r *http.Request) {
@@ -167,8 +169,9 @@ func handleAPI(cl *torrent.Client) {
 					io.WriteString(w, "Error: File is incorrect!")
 				}
 			}
+			fmt.Println("Error: /stream/{hash}/{base64path}")
+			return
 		}
-		return
 	})
 	routerAPI.HandleFunc("/{hash}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
