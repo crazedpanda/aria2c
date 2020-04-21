@@ -18,7 +18,7 @@ import (
 
 type serviceSettings struct {
 	Host           string
-	Port           int
+	Port           string
 	DownloadDir    string
 	DownloadRate   int
 	UploadRate     int
@@ -53,7 +53,10 @@ func main() {
 	procError = make(chan string)
 	var settings serviceSettings
 	settings.Host = ""
-	settings.Port = 8080
+	settings.Port = os.Getenv("PORT")
+	if settings.Port == "" {
+		settings.Port = "8080"
+	}
 	settings.DownloadDir = "/tmp/torrents/"
 	settings.DownloadRate = -1
 	settings.UploadRate = -1
@@ -63,7 +66,7 @@ func main() {
 	settings.Seed = false
 	handleSignals()
 	cl := startTorrent(settings)
-	srv := startHTTPServer(fmt.Sprintf("%s:%d", settings.Host, settings.Port), cl)
+	srv := startHTTPServer(settings.Host + ":" + settings.Port, cl)
 	select {
 	case err := <-procError:
 		fmt.Println(err)
