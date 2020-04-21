@@ -133,8 +133,6 @@ func handleAPI(cl *torrent.Client) {
 				if decFileClients(path) <= 0 {
 					stopDownloadFile(file)
 				}
-			} else {
-				http.Redirect(w, r, "/stream/" + vars["hash"], http.StatusMovedPermanently)
 			}
 		}
 	})
@@ -168,8 +166,6 @@ func handleAPI(cl *torrent.Client) {
 				} else {
 					io.WriteString(w, "Error: File is incorrect!")
 				}
-			} else {
-				http.Redirect(w, r, "/stream/" + vars["hash"] + "/" + vars["base64path"], http.StatusMovedPermanently)
 			}
 		}
 		return
