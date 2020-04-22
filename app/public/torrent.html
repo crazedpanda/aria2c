@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>MiPeerFlix</title>
+	<link href="./torrent.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+	<div id="toolbar">
+		<span class="title">Menu:</span> <a href="javascript:void(0)" id="remove" onclick="removeTorrent()">Remove</a> | <a href="javascript:void(0)" id="reload">Reload</a>
+	</div>
+	<hr>
+	<span id="loading">Loading Torrent!</span>
+	<div id="torrent">
+		<table>
+			<tr>
+				<td class="title">Torrent Name:</td>
+				<td id="name"></td>
+			</tr>
+			<tr>
+				<td class="title">Torrent State:</td>
+				<td id="status"></td>
+			</tr>
+			<tr>
+				<td class="title">Peers:</td>
+				<td id="peers"></td>
+			</tr>
+			<tr>
+				<td class="title">Download Rate:</td>
+				<td id="speed"></td>
+			</tr>
+			<tr>
+				<td class="title">Time Remaining:</td>
+				<td id="remaining"></td>
+			</tr>
+		</table>
+		<hr>
+	</div>
+	<div id="files"></div>
+	<script src="torrent.js" type="text/javascript">
+	</script>
+</body>
+</html>
