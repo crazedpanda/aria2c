@@ -1,16 +1,17 @@
 {
-	"name": "mipeerflix",
-	"version": "0.0.0",
-	"scripts": {
-		"start": "node main.js"
-	},
-	"dependencies": {
-		"bluebird": "",
-		"body-parser": "",
-		"compression": "",
-		"express": "",
-		"file-type": "",
-		"fs-extra": "",
-		"webtorrent": ""
-	}
+  "name": "mipeerflix",
+  "version": "0.0.0",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "dependencies": {
+    "bluebird": "",
+    "body-parser": "",
+    "compression": "",
+    "express": "",
+    "file-type": "",
+    "fs-extra": "",
+    "webtorrent": ""
+  },
+  "main": "main.js"
 }
