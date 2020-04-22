@@ -1,0 +1,11 @@
+.title {
+	font-weight: bold;
+}
+table {
+	table-layout: fixed;
+	width: 100%;
+}
+td.title {
+	width: 140px;
+	vertical-align: middle;
+}
