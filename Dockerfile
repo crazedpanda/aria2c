@@ -6,6 +6,6 @@ RUN set -ex \
     && apk update \
     && apk add nodejs npm
 
-WORKDIR /app/nodejs
+WORKDIR /app
 
-CMD ["node", "/app/nodejs/server.js"]
+CMD ["npm", "start"]
