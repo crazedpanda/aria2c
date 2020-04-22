@@ -1,11 +1,11 @@
-FROM golang:latest
+FROM alpine:latest
 
-ENV GO111MODULE=on
+COPY /app /app
 
-COPY /src /go/src
+RUN set -ex \
+    && apk update \
+    && apk add nodejs npm
 
-WORKDIR /go/src
+WORKDIR /app/nodejs
 
-RUN go mod download
-
-CMD ["go","run","main.go"]
+CMD ["node", "/app/nodejs/server.js"]
