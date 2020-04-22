@@ -10,9 +10,9 @@ RUN adduser --disabled-password --home /app/nodejs ubuntu
 
 RUN echo "ubuntu:ubuntu" | chpasswd
 
+RUN chmod +x /app/entrypoint.sh
+
 USER ubuntu
-WORKDIR /app/nodejs
+WORKDIR /app/ubuntu
 
-RUN npm install
-
-CMD ["npm", "start"]
+CMD ["/app/entrypoint.sh"]
