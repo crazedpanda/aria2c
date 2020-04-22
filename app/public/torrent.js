@@ -84,9 +84,6 @@ function getStatus() {
 		console.log('getStatus');
 		var json = JSON.parse(request.responseText);
 		if (!json.error && json.message.name) {
-			document.getElementById("loading").style.display = "none";
-			document.getElementById("torrent").style.display = "block";
-			document.getElementById("files").style.display = "block";
 			var data = json.message;
 			document.title = "MiPeerFlix - " + data.name;
 			document.getElementById("reload").href = "/" + infoHash;
