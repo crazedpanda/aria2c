@@ -53,7 +53,7 @@ function loadTorent() {
 			document.getElementById("files").innerHTML = html;
 		}
 		return new Promise(function(resolve) {
-			setTimeout(resolve, 15000);
+			setTimeout(resolve, 10000);
 		}).then(function() {
 			if (!removed) {
 				return getStatus();
@@ -105,7 +105,7 @@ function getStatus() {
 			document.getElementById("files").innerHTML = html;
 		}
 		return new Promise(function(resolve) {
-			setTimeout(resolve, 15000);
+			setTimeout(resolve, 10000);
 		}).then(function() {
 			if (!removed) {
 				return getStatus();
@@ -114,7 +114,7 @@ function getStatus() {
 	}).catch(function(error) {
 		console.log('getStatus', error);
 		return new Promise(function(resolve) {
-			setTimeout(resolve, 15000);
+			setTimeout(resolve, 10000);
 		}).then(function() {
 			if (!removed) {
 				return getStatus();
