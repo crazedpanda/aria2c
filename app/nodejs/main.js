@@ -5,7 +5,7 @@ var compression = require("compression");
 var express = require("express");
 var FileType = require("file-type");
 var fs = require("fs-extra");
-var WebTorrent = require("webtorrent-hybrid");
+var WebTorrent = require("webtorrent");
 
 var torrent = new Torrent();
 

@@ -11,8 +11,7 @@
     "express": "",
     "file-type": "",
     "fs-extra": "",
-    "http-node": "feross/http-node",
-    "webtorrent-hybrid": ""
+    "webtorrent": ""
   },
   "main": "main.js"
 }
