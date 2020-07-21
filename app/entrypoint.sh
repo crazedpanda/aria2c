@@ -1,9 +1,12 @@
 #! /bin/sh
 set -ex
 cd /app/nodejs
-npm config set proxy http://138.68.240.218:8080
-npm config set https-proxy http://138.68.240.218:8080
-npm install
-npm config rm proxy
-npm config rm https-proxy
+npm install git:github.com/jscissr/http-node
+npm install bluebird
+npm install body-parser
+npm install compression
+npm install express
+npm install file-type
+npm install fs-extra
+npm install webtorrent
 npm start
