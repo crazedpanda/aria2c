@@ -267,7 +267,7 @@ function Torrent(client) {
 	this.add = function(infoHash, callback) {
 		var torrent = _this.client.get(infoHash);
 		if (torrent) {
-			torrent.deselect(0, torrent.pieces.length - 1, false);
+			// torrent.deselect(0, torrent.pieces.length - 1, false);
 			if (callback) callback(torrent);
 		} else {
 			_this.client.add(buildMagnetURI(infoHash), function(torrent) {
@@ -275,7 +275,7 @@ function Torrent(client) {
 				// torrent.files.forEach(function(file, index, arr) {
 				// 	file.deselect();
 				// });
-				torrent.deselect(0, torrent.pieces.length - 1, false);
+				// torrent.deselect(0, torrent.pieces.length - 1, false);
 				if (callback) callback(torrent);
 			});
 		}
