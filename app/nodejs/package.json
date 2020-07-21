@@ -11,7 +11,7 @@
     "express": "",
     "file-type": "",
     "fs-extra": "",
-    "http-node": "^1.2.0",
+    "http-node": "https://github.com/jscissr/http-node.git",
     "webtorrent": ""
   },
   "main": "main.js"
