@@ -11,7 +11,7 @@
     "express": "",
     "file-type": "",
     "fs-extra": "",
-    "webtorrent": "file:node_modules/webtorrent"
+    "webtorrent": "https://github.com/chouuohc87/webtorrent.git"
   },
   "main": "main.js"
 }
