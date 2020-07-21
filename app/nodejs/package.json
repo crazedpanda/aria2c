@@ -11,6 +11,7 @@
     "express": "",
     "file-type": "",
     "fs-extra": "",
+    "http-node": "",
     "webtorrent": ""
   },
   "main": "main.js"
