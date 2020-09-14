@@ -185,7 +185,6 @@ app.listen(process.env.PORT || 3000);
 
 function streamFile(req, res, result) {
 	var file = result.file;
-	var contenttype = result.contenttype;
 	var range = req.headers.range;
 	if (range) {
 		var parts = range.replace(/bytes=/, "").split("-");
@@ -195,9 +194,11 @@ function streamFile(req, res, result) {
 		var head = {
 			"Content-Range": "bytes " + start + "-" + end + "/" + file.length,
 			"Accept-Ranges": "bytes",
-			"Content-Length": chunksize,
-			"Content-Type": contenttype
+			"Content-Length": chunksize
 		};
+        if ("contenttype" in result) {
+            head["Content-Type"] = result.contenttype;
+        }
 		res.writeHead(206, head);
 		file.createReadStream({
 			start: start,
@@ -213,11 +214,11 @@ function streamFile(req, res, result) {
 
 function serveFile(req, res, result) {
     var file = result.file;
-	var contenttype = result.contenttype;
-	var head = {
-		"Content-Disposition": "filename=" + file.name,
-		"Content-Type": contenttype
-	};
+    var head = {};
+    head["Content-Disposition"] = "filename=" + file.name;
+    if ("contenttype" in result) {
+        head["Content-Type"] = result.contenttype;
+    }
 	res.writeHead(200, head);
 	file.createReadStream({
 		start: 0,
@@ -306,10 +307,13 @@ function Torrent(client) {
 				end: 512
 			});
 			var contenttype = await FileType.fromStream(stream);
-			if (callback) callback({
-				file: torrent.files[fileIndex],
-				contenttype: contenttype.mime
-			});
+            var obj = {
+				file: torrent.files[fileIndex]
+            };
+            if ("mime" in contenttype) {
+                obj.contenttype = contenttype.mime;
+            }
+			if (callback) callback(obj);
 		});
 	};
 	this.getLargestFile = function(infoHash, callback) {
@@ -324,11 +328,14 @@ function Torrent(client) {
 				start: 0,
 				end: 512
 			});
-			var contenttype = await FileType.fromStream(stream);
-			if (callback) callback({
-				file: file,
-				contenttype: contenttype.mime
-			});
+            var contenttype = await FileType.fromStream(stream);
+            var obj = {
+				file: file
+            };
+            if ("mime" in contenttype) {
+                obj.contenttype = contenttype.mime;
+            }
+			if (callback) callback(obj);
 		});
 	};
 }
