@@ -62,8 +62,8 @@ app.get("/download/:infoHash/:index?", async function(req, res) {
 	var link = req.params.infoHash.toLowerCase();
 	if (link.length == 40) {
 		try {
-			if (req.params.fileIndex) {
-				torrent.getFile(link, parseInt(req.params.fileIndex) - 1, function(result) {
+			if (req.params.index) {
+				torrent.getFile(link, parseInt(req.params.index) - 1, function(result) {
 					return serveFile(req, res, result);
 				});
 			} else {
@@ -154,8 +154,8 @@ app.get("/stream/:infoHash/:index?", async function(req, res) {
 	var link = req.params.infoHash.toLowerCase();
 	if (link.length == 40) {
 		try {
-			if (req.params.fileIndex) {
-				torrent.getFile(link, parseInt(req.params.fileIndex) - 1, function(result) {
+			if (req.params.index) {
+				torrent.getFile(link, parseInt(req.params.index) - 1, function(result) {
 					return streamFile(req, res, result);
 				});
 			} else {
@@ -186,7 +186,6 @@ app.listen(process.env.PORT || 3000);
 function streamFile(req, res, result) {
 	var file = result.file;
 	var contenttype = result.contenttype;
-    console.log("contenttype", result.contenttype);
 	var range = req.headers.range;
 	if (range) {
 		var parts = range.replace(/bytes=/, "").split("-");
@@ -215,7 +214,6 @@ function streamFile(req, res, result) {
 function serveFile(req, res, result) {
     var file = result.file;
 	var contenttype = result.contenttype;
-    console.log("contenttype", result.contenttype);
 	var head = {
 		"Content-Disposition": "filename=" + file.name,
 		"Content-Type": contenttype
