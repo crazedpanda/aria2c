@@ -185,6 +185,7 @@ app.listen(process.env.PORT || 3000);
 
 function streamFile(req, res, result) {
 	var file = result.file;
+    console.log("file", file);
 	var contenttype = result.contenttype;
 	var range = req.headers.range;
 	if (range) {
@@ -212,7 +213,8 @@ function streamFile(req, res, result) {
 }
 
 function serveFile(req, res, result) {
-	var file = result.file;
+    var file = result.file;
+    console.log("file", file);
 	var contenttype = result.contenttype;
 	var head = {
 		"Content-Disposition": "filename=" + file.name,
