@@ -310,7 +310,7 @@ function Torrent(client) {
             var obj = {
 				file: torrent.files[fileIndex]
             };
-            if ("mime" in contenttype) {
+            if (contenttype && "mime" in contenttype) {
                 obj.contenttype = contenttype.mime;
             }
 			if (callback) callback(obj);
@@ -332,7 +332,7 @@ function Torrent(client) {
             var obj = {
 				file: file
             };
-            if ("mime" in contenttype) {
+            if (contenttype && "mime" in contenttype) {
                 obj.contenttype = contenttype.mime;
             }
 			if (callback) callback(obj);
