@@ -170,13 +170,13 @@ app.get("/:infoHash", async function(req, res) {
 app.listen(process.env.PORT || 3000);
 
 function serveFile(req, res, file) {
-    if (file.progress == 1) {
+    // if (file.progress == 1) {
         res.sendSeekable(file.createReadStream(), {
             length: file.length
         });
-    } else {
-        file.createReadStream().pipe(res);
-    }    
+    // } else {
+    //     file.createReadStream().pipe(res);
+    // }    
 }
 
 function buildMagnetURI(infoHash) {
