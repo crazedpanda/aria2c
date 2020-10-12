@@ -10,7 +10,7 @@ var WebTorrent = require("webtorrent");
 var torrent = new Torrent();
 
 var app = express();
-app.use(express.static(__dirname + '/public'));
+app.use(express.static('/tmp'));
 app.use(compression());
 app.use(bodyParser.json());
 
