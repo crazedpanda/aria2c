@@ -4,7 +4,7 @@ COPY /app /app
 
 RUN set -ex \
     && apk update \
-    && apk add build-base nodejs npm
+    && apk add bash nodejs npm
 
 RUN adduser --disabled-password --home /app/nodejs ubuntu
 
