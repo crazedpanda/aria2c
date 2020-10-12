@@ -10,7 +10,7 @@ var WebTorrent = require("webtorrent");
 var torrent = new Torrent();
 
 var app = express();
-app.use(express.static('/public'));
+app.use(express.static('/tmp'));
 app.use(compression());
 app.use(bodyParser.json());
 
@@ -87,6 +87,14 @@ app.get("/download/:infoHash/:index?", async function(req, res) {
 
 app.get("/favicon.ico", function(req, res) {
 	res.redirect("https://webtorrent.io/favicon-32x32.png");
+});
+
+app.get("/torrent.js", function(req, res) {
+	res.sendFile(__dirname + '/public/torrent.js');
+});
+
+app.get("/torrent.css", function(req, res) {
+	res.sendFile(__dirname + '/public/torrent.css');
 });
 
 app.get("/list", function(req, res) {
