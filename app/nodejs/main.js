@@ -148,22 +148,15 @@ app.get("/status/:infoHash", function(req, res) {
 app.get("/stream/:infoHash/:index?", async function(req, res) {
 	var link = req.params.infoHash.toLowerCase();
 	if (link.length == 40) {
-		try {
-			if (req.params.index) {
-				torrent.getFile(link, parseInt(req.params.index) - 1, function(file) {
-					return streamFile(req, res, file);
-				});
-			} else {
-				torrent.getLargestFile(link, function(file) {
-					return streamFile(req, res, file);
-				});
-			}
-		} catch (e) {
-			res.send({
-				error: true,
-				message: e.message
-			});
-		}
+        if (req.params.index) {
+            torrent.getFile(link, parseInt(req.params.index) - 1, function(file) {
+                return streamFile(req, res, file);
+            });
+        } else {
+            torrent.getLargestFile(link, function(file) {
+                return streamFile(req, res, file);
+            });
+        }
 	} else {
 		res.send({
 			error: true,
