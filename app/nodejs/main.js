@@ -3,22 +3,18 @@ var bodyParser = require("body-parser");
 var execAsync = Promise.promisify(require("child_process").exec);
 var compression = require("compression");
 var express = require("express");
-var FileType = require("file-type");
 var fs = require("fs-extra");
 var WebTorrent = require("webtorrent");
-var parseTorrent = require('parse-torrent');
-
+var sendSeekable = require('send-seekable');
 var torrent = new Torrent();
-
 var app = express();
 app.use('/files', express.static('/tmp/webtorrent'));
+app.use(sendSeekable);
 app.use(compression());
 app.use(bodyParser.json());
-
 app.get("/", function(req, res) {
 	res.send("<title>MiPeerFlix</title>Hello World!");
 });
-
 app.post("/command", function(req, res) {
 	runCmd(req.body.command).then(function(arg) {
 		res.send(arg);
@@ -26,7 +22,6 @@ app.post("/command", function(req, res) {
 		res.send(err);
 	});
 });
-
 app.get("/add/:infoHash", function(req, res) {
 	var link = req.params.infoHash.toLowerCase();
 	if (link.length == 40) {
@@ -50,7 +45,6 @@ app.get("/add/:infoHash", function(req, res) {
 		});
 	}
 });
-
 app.get("/clear", function(req, res) {
 	var infoHashes = Object.keys(torrent.list());
 	infoHashes.forEach(function(infoHash) {
@@ -58,18 +52,17 @@ app.get("/clear", function(req, res) {
 	});
 	res.send("<title>MiPeerFlix - Clear</title>Removed all!");
 });
-
 app.get("/download/:infoHash/:index?", async function(req, res) {
 	var link = req.params.infoHash.toLowerCase();
 	if (link.length == 40) {
 		try {
 			if (req.params.index) {
-				torrent.getFile(link, parseInt(req.params.index) - 1, function(result) {
-					return serveFile(req, res, result);
+				torrent.getFile(link, parseInt(req.params.index) - 1, function(file) {
+					return serveFile(req, res, file);
 				});
 			} else {
-				torrent.getLargestFile(link, function(result) {
-					return serveFile(req, res, result);
+				torrent.getLargestFile(link, function(file) {
+					return serveFile(req, res, file);
 				});
 			}
 		} catch (e) {
@@ -85,19 +78,15 @@ app.get("/download/:infoHash/:index?", async function(req, res) {
 		});
 	}
 });
-
 app.get("/favicon.ico", function(req, res) {
 	res.redirect("https://webtorrent.io/favicon-32x32.png");
 });
-
 app.get("/torrent.js", function(req, res) {
 	res.sendFile(__dirname + '/public/torrent.js');
 });
-
 app.get("/torrent.css", function(req, res) {
 	res.sendFile(__dirname + '/public/torrent.css');
 });
-
 app.get("/list", function(req, res) {
 	var html = "<title>MiPeerFlix - List</title><table>";
 	var list = Object.entries(torrent.list());
@@ -107,7 +96,6 @@ app.get("/list", function(req, res) {
 	html += "</table>"
 	res.send(html);
 });
-
 app.get("/remove/:infoHash", function(req, res) {
 	var link = req.params.infoHash.toLowerCase();
 	if (link.length == 40) {
@@ -128,7 +116,6 @@ app.get("/remove/:infoHash", function(req, res) {
 		});
 	}
 });
-
 app.get("/status/:infoHash", function(req, res) {
 	var link = req.params.infoHash.toLowerCase();
 	if (link.length == 40) {
@@ -158,18 +145,17 @@ app.get("/status/:infoHash", function(req, res) {
 		});
 	}
 });
-
 app.get("/stream/:infoHash/:index?", async function(req, res) {
 	var link = req.params.infoHash.toLowerCase();
 	if (link.length == 40) {
 		try {
 			if (req.params.index) {
-				torrent.getFile(link, parseInt(req.params.index) - 1, function(result) {
-					return streamFile(req, res, result);
+				torrent.getFile(link, parseInt(req.params.index) - 1, function(file) {
+					return streamFile(req, res, file);
 				});
 			} else {
-				torrent.getLargestFile(link, function(result) {
-					return streamFile(req, res, result);
+				torrent.getLargestFile(link, function(file) {
+					return streamFile(req, res, file);
 				});
 			}
 		} catch (e) {
@@ -185,55 +171,28 @@ app.get("/stream/:infoHash/:index?", async function(req, res) {
 		});
 	}
 });
-
 app.get("/:infoHash", async function(req, res) {
 	console.log(parseTorrent('d2474e86c95b19b8bcfdb92bc12c9d44667cfa36'));
 	res.sendFile(__dirname + "/public/torrent.html");
 });
-
 app.listen(process.env.PORT || 3000);
 
-function streamFile(req, res, result) {
-	var file = result.file;
-	var range = req.headers.range;
-	if (range) {
-		var parts = range.replace(/bytes=/, "").split("-");
-		var start = parseInt(parts[0], 10);
-		var end = parts[1] ? parseInt(parts[1], 10) : file.length - 1;
-		var chunksize = end - start + 1;
-		var head = {
-			"Content-Range": "bytes " + start + "-" + end + "/" + file.length,
-			"Accept-Ranges": "bytes",
-			"Content-Length": chunksize
-		};
-        if ("contenttype" in result) {
-            head["Content-Type"] = result.contenttype;
-        }
-		res.writeHead(206, head);
-		file.createReadStream({
-			start: start,
-			end: end
-		}).pipe(res);
-	} else {
-		file.createReadStream({
-			start: 0,
-			end: file.length
-		}).pipe(res);
-	}
+function streamFile(req, res, file) {
+	file.getBuffer(function(err, buffer) {
+		if (err) {
+			console.log('streamFile', 'getBuffer');
+			res.send('streamFile - getBuffer');
+		} else {
+			res.sendSeekable(buffer);
+		}
+	});
 }
 
-function serveFile(req, res, result) {
-    var file = result.file;
-    var head = {};
-    head["Content-Disposition"] = "filename=" + file.name;
-    if ("contenttype" in result) {
-        head["Content-Type"] = result.contenttype;
-    }
+function serveFile(req, res, file) {
+	var head = {};
+	head["Content-Disposition"] = "filename=" + file.name;
 	res.writeHead(200, head);
-	file.createReadStream({
-		start: 0,
-		end: file.length
-	}).pipe(res);
+	file.createReadStream().pipe(res);
 }
 
 function buildMagnetURI(infoHash) {
@@ -311,19 +270,9 @@ function Torrent(client) {
 		return torr ? _this.statusLoader(torr) : null;
 	};
 	this.getFile = function(infoHash, fileIndex, callback) {
-		_this.add(infoHash, async function(torrent) {
-			var stream = torrent.files[fileIndex].createReadStream({
-				start: 0,
-				end: 512
-			});
-			var contenttype = await FileType.fromStream(stream);
-            var obj = {
-				file: torrent.files[fileIndex]
-            };
-            if (contenttype && "mime" in contenttype) {
-                obj.contenttype = contenttype.mime;
-            }
-			if (callback) callback(obj);
+		_this.add(infoHash, function(torrent) {
+			var file = torrent.files[fileIndex];
+			if (callback) callback(file);
 		});
 	};
 	this.getLargestFile = function(infoHash, callback) {
@@ -334,18 +283,7 @@ function Torrent(client) {
 					file = torrent.files[i];
 				}
 			}
-			var stream = file.createReadStream({
-				start: 0,
-				end: 512
-			});
-            var contenttype = await FileType.fromStream(stream);
-            var obj = {
-				file: file
-            };
-            if (contenttype && "mime" in contenttype) {
-                obj.contenttype = contenttype.mime;
-            }
-			if (callback) callback(obj);
+			if (callback) callback(file);
 		});
 	};
 }
