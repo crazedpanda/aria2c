@@ -10,8 +10,8 @@
     "body-parser": "",
     "compression": "",
     "express": "",
-    "file-type": "",
     "fs-extra": "",
+    "send-seekable": "",
     "webtorrent": ""
   },
   "main": "main.js"
