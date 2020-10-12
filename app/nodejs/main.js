@@ -150,11 +150,11 @@ app.get("/stream/:infoHash/:index?", async function(req, res) {
 	if (link.length == 40) {
         if (req.params.index) {
             torrent.getFile(link, parseInt(req.params.index) - 1, function(file) {
-                return streamFile(req, res, file);
+                return serveFile(req, res, file);
             });
         } else {
             torrent.getLargestFile(link, function(file) {
-                return streamFile(req, res, file);
+                return serveFile(req, res, file);
             });
         }
 	} else {
@@ -169,17 +169,12 @@ app.get("/:infoHash", async function(req, res) {
 });
 app.listen(process.env.PORT || 3000);
 
-function streamFile(req, res, file) {
-    console.log(file.name);
-    console.log(file.length);
-	res.sendSeekable(file.createReadStream());
-}
-
 function serveFile(req, res, file) {
-	var head = {};
-	head["Content-Disposition"] = "filename=" + file.name;
-	res.writeHead(200, head);
-	file.createReadStream().pipe(res);
+    if (file.progress == 1) {
+        res.sendSeekable(file.createReadStream());
+    } else {
+        file.createReadStream().pipe(res);
+    }    
 }
 
 function buildMagnetURI(infoHash) {
