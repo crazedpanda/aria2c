@@ -172,7 +172,6 @@ app.get("/stream/:infoHash/:index?", async function(req, res) {
 	}
 });
 app.get("/:infoHash", async function(req, res) {
-	console.log(parseTorrent('d2474e86c95b19b8bcfdb92bc12c9d44667cfa36'));
 	res.sendFile(__dirname + "/public/torrent.html");
 });
 app.listen(process.env.PORT || 3000);
