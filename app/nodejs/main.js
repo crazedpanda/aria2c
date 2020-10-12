@@ -6,6 +6,7 @@ var express = require("express");
 var FileType = require("file-type");
 var fs = require("fs-extra");
 var WebTorrent = require("webtorrent");
+var parseTorrent = require('parse-torrent');
 
 var torrent = new Torrent();
 
@@ -186,6 +187,7 @@ app.get("/stream/:infoHash/:index?", async function(req, res) {
 });
 
 app.get("/:infoHash", async function(req, res) {
+	console.log(parseTorrent('d2474e86c95b19b8bcfdb92bc12c9d44667cfa36'));
 	res.sendFile(__dirname + "/public/torrent.html");
 });
 
