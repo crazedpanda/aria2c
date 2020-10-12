@@ -171,7 +171,9 @@ app.listen(process.env.PORT || 3000);
 
 function serveFile(req, res, file) {
     if (file.progress == 1) {
-        res.sendSeekable(file.createReadStream());
+        res.sendSeekable(file.createReadStream(), {
+            length: file.length
+        });
     } else {
         file.createReadStream().pipe(res);
     }    
