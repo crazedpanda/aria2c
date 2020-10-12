@@ -177,6 +177,8 @@ app.get("/:infoHash", async function(req, res) {
 app.listen(process.env.PORT || 3000);
 
 function streamFile(req, res, file) {
+    console.log(file.name);
+    console.log(file.length);
 	res.sendSeekable(file.createReadStream());
 }
 
