@@ -13,7 +13,6 @@
     "file-type": "",
     "fs-extra": "",
     "range-parser": "",
-    "send-seekable": "",
     "webtorrent": ""
   },
   "main": "main.js"

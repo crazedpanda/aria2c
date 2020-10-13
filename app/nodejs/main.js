@@ -182,7 +182,7 @@ function serveFile(req, res, file) {
             return serveFile(req, res, file);
         });
     } else {
-        res.send("Wait for download to complete. Or try streaming!");
+        res.send("Wait for file to completely download. Or try streaming!");
     }
 }
 
