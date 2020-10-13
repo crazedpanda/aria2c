@@ -165,18 +165,15 @@ app.get("/:infoHash", async function(req, res) {
 app.listen(process.env.PORT || 3000);
 
 async function serveFile(req, res, file) {
-    res.setHeader("Content-Type", "application/octet-stream");
     res.setHeader("Content-Length", file.length);
-    try {
-        var contenttype = await FileType.fromStream(file.createReadStream({
-            start: 0,
-            end: 512
-        }));
-        if (contenttype && "mime" in contenttype) {
-            res.setHeader("Content-Type", contenttype.mime);
-        }
-    } catch (e) {
-        console.log("Unable to get FileType");
+    var contenttype = await FileType.fromStream(file.createReadStream({
+        start: 0,
+        end: 512
+    }));
+    if (contenttype && "mime" in contenttype) {
+        res.setHeader("Content-Type", contenttype.mime);
+    } else {
+        res.setHeader("Content-Type", "application/octet-stream");
     }
     var range = req.headers.range;
     if (range) {
