@@ -187,37 +187,42 @@ function serveFile(req, res, file) {
 }
 
 function streamFile(req, res, file) {
-    FileType.fromStream(file.createReadStream({
-        start: 0,
-        end: 512
-    })).then(function(contenttype) {
-        if (contenttype && "mime" in contenttype) {
-            res.setHeader('Content-Type', contenttype.mime);
-        } else {
-            res.setHeader('Content-Type', 'application/octet-stream');
-        }
-        res.setHeader('Accept-Ranges', 'bytes');
-        res.setHeader('Content-Length', file.length);
-        var ranges = parseRange(file.length, req.headers.range, { combine: true });
-        console.log(ranges);
-        if (ranges === -1) {
-            console.log("416");
-            res.statusCode = 416;
-            res.end();
-        } else if (ranges === -2 || ranges.type !== 'bytes' || ranges.length > 1) {
-            console.log("Other");
-            file.createReadStream().pipe(res);
-        } else {
-            console.log("206");
-            var range = ranges[0];
-            res.statusCode = 206;
-            res.setHeader('Content-Length', 1 + range.end - range.start);
-            res.setHeader('Content-Range', `bytes ${range.start}-${range.end}/${file.length}`);
-            file.createReadStream(range).pipe(res);
-        }
-    }).catch(function(err) {
-        return streamFile(req, res, file);
-    });
+    var range = req.headers.range;
+	if (range) {
+        console.log("A");
+        FileType.fromStream(file.createReadStream({
+            start: 0,
+            end: 512
+        })).then(function(contenttype) {
+            if (contenttype && "mime" in contenttype) {
+                res.setHeader('Content-Type', contenttype.mime);
+            } else {
+                res.setHeader('Content-Type', 'application/octet-stream');
+            }
+            res.setHeader('Accept-Ranges', 'bytes');
+            res.setHeader('Content-Length', file.length);
+            var ranges = parseRange(file.length, range, { combine: true });
+            if (ranges === -1) {
+                console.log("416");
+                res.statusCode = 416;
+                res.end();
+            } else if (ranges === -2 || ranges.type !== 'bytes' || ranges.length > 1) {
+                console.log("Other");
+                file.createReadStream().pipe(res);
+            } else {
+                console.log("206");
+                res.statusCode = 206;
+                res.setHeader('Content-Length', 1 + ranges[0].end - ranges[0].start);
+                res.setHeader('Content-Range', `bytes ${ranges[0].start}-${ranges[0].end}/${file.length}`);
+                file.createReadStream(ranges[0]).pipe(res);
+            }
+        }).catch(function(err) {
+            return streamFile(req, res, file);
+        });
+    } else {
+        console.log("B");
+        file.createReadStream().pipe(res);
+    }
 }
 
 function buildMagnetURI(infoHash) {
