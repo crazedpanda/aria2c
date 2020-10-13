@@ -165,8 +165,8 @@ app.get("/:infoHash", async function(req, res) {
 app.listen(process.env.PORT || 3000);
 
 function serveFile(req, res, file) {
-    console.log(file.path);
-    res.sendFile(file.path);
+    console.log("/tmp/webtorrent/" + file.path);
+    res.sendFile("/tmp/webtorrent/" + file.path);
 }
 
 function streamFile(req, res, file) {
