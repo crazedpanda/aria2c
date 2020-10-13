@@ -165,6 +165,7 @@ app.get("/:infoHash", async function(req, res) {
 app.listen(process.env.PORT || 3000);
 
 function serveFile(req, res, file) {
+    res.setHeader("Content-Disposition", "filename=" + file.name);
     console.log("/tmp/webtorrent/" + req.params.infoHash.toLowerCase() + "/" + file.path);
     res.sendFile("/tmp/webtorrent/" + req.params.infoHash.toLowerCase() + "/" + file.path);
 }
