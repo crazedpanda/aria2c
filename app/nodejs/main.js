@@ -11,7 +11,7 @@ var WebTorrent = require("webtorrent");
 var torrent = new Torrent();
 
 var app = express();
-app.use('/files', express.static('/tmp/webtorrent'));
+app.use("/files", express.static("/tmp/webtorrent"));
 app.use(compression());
 app.use(bodyParser.json());
 app.get("/", function(req, res) {
@@ -77,10 +77,10 @@ app.get("/favicon.ico", function(req, res) {
 	res.redirect("https://webtorrent.io/favicon-32x32.png");
 });
 app.get("/torrent.js", function(req, res) {
-	res.sendFile(__dirname + '/public/torrent.js');
+	res.sendFile(__dirname + "/public/torrent.js");
 });
 app.get("/torrent.css", function(req, res) {
-	res.sendFile(__dirname + '/public/torrent.css');
+	res.sendFile(__dirname + "/public/torrent.css");
 });
 app.get("/list", function(req, res) {
 	var html = "<title>MiPeerFlix - List</title><table>";
@@ -169,33 +169,28 @@ function serveFile(req, res, file) {
         start: 0,
         end: 512
     })).then(function(contenttype) {
+        res.setHeader("Content-Length", file.length);
         if (contenttype && "mime" in contenttype) {
-            res.setHeader('Content-Type', contenttype.mime);
+            res.setHeader("Content-Type", contenttype.mime);
         } else {
-            res.setHeader('Content-Type', 'application/octet-stream');
+            res.setHeader("Content-Type", "application/octet-stream");
         }
         var range = req.headers.range;
         if (range) {
-            console.log("A");
-            res.setHeader('Accept-Ranges', 'bytes');
-            res.setHeader('Content-Length', file.length);
+            res.setHeader("Accept-Ranges", "bytes");
             var ranges = parseRange(file.length, range, { combine: true });
             if (ranges === -1) {
-                console.log("416");
                 res.statusCode = 416;
                 res.end();
-            } else if (ranges === -2 || ranges.type !== 'bytes' || ranges.length > 1) {
-                console.log("Other");
+            } else if (ranges === -2 || ranges.type !== "bytes" || ranges.length > 1) {
                 file.createReadStream().pipe(res);
             } else {
-                console.log("206");
                 res.statusCode = 206;
-                res.setHeader('Content-Length', 1 + ranges[0].end - ranges[0].start);
-                res.setHeader('Content-Range', `bytes ${ranges[0].start}-${ranges[0].end}/${file.length}`);
+                res.setHeader("Content-Length", 1 + ranges[0].end - ranges[0].start);
+                res.setHeader("Content-Range", `bytes ${ranges[0].start}-${ranges[0].end}/${file.length}`);
                 file.createReadStream(ranges[0]).pipe(res);
             }
         } else {
-            console.log("B");
             res.setHeader("Content-Disposition", "filename=" + file.name);
             res.statusCode = 200;
             file.createReadStream().pipe(res);
