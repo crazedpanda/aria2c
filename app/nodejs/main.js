@@ -172,6 +172,7 @@ app.listen(process.env.PORT || 3000);
 function serveFile(req, res, file) {
     // if (file.progress == 1) {
         res.sendSeekable(file.createReadStream(), {
+            type: 'application/octet-stream',
             length: file.length
         });
     // } else {
