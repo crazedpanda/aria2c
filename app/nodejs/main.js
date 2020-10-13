@@ -145,11 +145,11 @@ app.get("/stream/:infoHash/:index?", async function(req, res) {
 	if (link.length == 40) {
         if (req.params.index) {
             torrent.getFile(link, parseInt(req.params.index) - 1, function(file) {
-                return streamFile(req, res, file);
+                return serveFile(req, res, file);
             });
         } else {
             torrent.getLargestFile(link, function(file) {
-                return streamFile(req, res, file);
+                return serveFile(req, res, file);
             });
         }
 	} else {
@@ -165,40 +165,18 @@ app.get("/:infoHash", async function(req, res) {
 app.listen(process.env.PORT || 3000);
 
 function serveFile(req, res, file) {
-    if (file.progress == 1) {
-        FileType.fromStream(file.createReadStream({
-            start: 0,
-            end: 512
-        })).then(function(contenttype) {
-            if (contenttype && "mime" in contenttype) {
-                res.setHeader('Content-Type', contenttype.mime);
-            } else {
-                res.setHeader('Content-Type', 'application/octet-stream');
-            }
-            res.setHeader("Content-Disposition", "filename=" + file.name);
-            res.statusCode = 200;
-            file.createReadStream().pipe(res);
-        }).catch(function(err) {
-            return serveFile(req, res, file);
-        });
-    } else {
-        res.send("Wait for file to completely download. Or try streaming!");
-    }
-}
-
-function streamFile(req, res, file) {
-    var range = req.headers.range;
-	if (range) {
-        console.log("A");
-        FileType.fromStream(file.createReadStream({
-            start: 0,
-            end: 512
-        })).then(function(contenttype) {
-            if (contenttype && "mime" in contenttype) {
-                res.setHeader('Content-Type', contenttype.mime);
-            } else {
-                res.setHeader('Content-Type', 'application/octet-stream');
-            }
+    FileType.fromStream(file.createReadStream({
+        start: 0,
+        end: 512
+    })).then(function(contenttype) {
+        if (contenttype && "mime" in contenttype) {
+            res.setHeader('Content-Type', contenttype.mime);
+        } else {
+            res.setHeader('Content-Type', 'application/octet-stream');
+        }
+        var range = req.headers.range;
+        if (range) {
+            console.log("A");
             res.setHeader('Accept-Ranges', 'bytes');
             res.setHeader('Content-Length', file.length);
             var ranges = parseRange(file.length, range, { combine: true });
@@ -216,13 +194,16 @@ function streamFile(req, res, file) {
                 res.setHeader('Content-Range', `bytes ${ranges[0].start}-${ranges[0].end}/${file.length}`);
                 file.createReadStream(ranges[0]).pipe(res);
             }
-        }).catch(function(err) {
-            return streamFile(req, res, file);
-        });
-    } else {
-        console.log("B");
-        file.createReadStream().pipe(res);
-    }
+        } else {
+            console.log("B");
+            res.setHeader("Content-Disposition", "filename=" + file.name);
+            res.statusCode = 200;
+            file.createReadStream().pipe(res);
+        }
+    }).catch(function(err) {
+        console.log(err);
+        return serveFile(req, res, file);
+    });
 }
 
 function buildMagnetURI(infoHash) {
