@@ -180,7 +180,6 @@ async function serveFile(req, res, file) {
     if (range) {
         header["Accept-Ranges"] = "bytes";
         var ranges = parseRange(file.length, range, { combine: true });
-        console.log("B", ranges);
         if (ranges === -1) {
             res.writeHead(416, header);
             res.end();
@@ -197,7 +196,6 @@ async function serveFile(req, res, file) {
     } else {
         header["Content-Disposition"] = `filename="` + file.name + `"`;
 		res.writeHead(200, header);
-        console.log("C", res.getHeaders());
         file.createReadStream().pipe(res);
     }
 }
