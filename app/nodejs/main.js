@@ -165,21 +165,25 @@ app.get("/:infoHash", async function(req, res) {
 app.listen(process.env.PORT || 3000);
 
 function serveFile(req, res, file) {
-    FileType.fromStream(file.createReadStream({
-        start: 0,
-        end: 512
-    })).then(function(contenttype) {
-        if (contenttype && "mime" in contenttype) {
-            res.setHeader('Content-Type', contenttype.mime);
-        } else {
-            res.setHeader('Content-Type', 'application/octet-stream');
-        }
-        res.setHeader("Content-Disposition", "filename=" + file.name);
-        res.statusCode = 200;
-        return file.createReadStream().pipe(res);
-    }).catch(function(err) {
-        return serveFile(req, res, file);
-    });
+    if (file.progress == 1) {
+        FileType.fromStream(file.createReadStream({
+            start: 0,
+            end: 512
+        })).then(function(contenttype) {
+            if (contenttype && "mime" in contenttype) {
+                res.setHeader('Content-Type', contenttype.mime);
+            } else {
+                res.setHeader('Content-Type', 'application/octet-stream');
+            }
+            res.setHeader("Content-Disposition", "filename=" + file.name);
+            res.statusCode = 200;
+            file.createReadStream().pipe(res);
+        }).catch(function(err) {
+            return serveFile(req, res, file);
+        });
+    } else {
+        res.send("Wait for download to complete. Or try streaming!");
+    }
 }
 
 function streamFile(req, res, file) {
@@ -197,15 +201,15 @@ function streamFile(req, res, file) {
         var ranges = parseRange(file.length, req.headers.range, { combine: true });
         if (ranges === -1) {
             res.statusCode = 416;
-            return res.end();
+            res.end();
         } else if (ranges === -2 || ranges.type !== 'bytes' || ranges.length > 1) {
-            return file.createReadStream().pipe(res);
+            file.createReadStream().pipe(res);
         } else {
             var range = ranges[0];
             res.statusCode = 206;
             res.setHeader('Content-Length', 1 + range.end - range.start);
             res.setHeader('Content-Range', `bytes ${range.start}-${range.end}/${file.length}`);
-            return file.createReadStream(range).pipe(res);
+            file.createReadStream(range).pipe(res);
         }
     }).catch(function(err) {
         return streamFile(req, res, file);
