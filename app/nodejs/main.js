@@ -176,17 +176,17 @@ async function serveFile(req, res, file) {
             res.setHeader("Content-Type", contenttype.mime);
         }
     } catch (e) {
-        console.log("FileType", e);
+        console.log("Unable to get FileType");
     }
     var range = req.headers.range;
     if (range) {
-        console.log("A");
         res.setHeader("Accept-Ranges", "bytes");
         var ranges = parseRange(file.length, range, { combine: true });
         if (ranges === -1) {
             res.statusCode = 416;
             res.end();
         } else if (ranges === -2 || ranges.type !== "bytes" || ranges.length > 1) {
+            console.log("Other", ranges);
             file.createReadStream().pipe(res);
         } else {
             res.statusCode = 206;
@@ -195,7 +195,6 @@ async function serveFile(req, res, file) {
             file.createReadStream(ranges[0]).pipe(res);
         }
     } else {
-        console.log("B");
         res.setHeader("Content-Disposition", "filename=" + file.name);
         res.statusCode = 200;
         file.createReadStream().pipe(res);
