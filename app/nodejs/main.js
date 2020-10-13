@@ -200,11 +200,14 @@ function streamFile(req, res, file) {
         res.setHeader('Content-Length', file.length);
         var ranges = parseRange(file.length, req.headers.range, { combine: true });
         if (ranges === -1) {
+            console.log("416");
             res.statusCode = 416;
             res.end();
         } else if (ranges === -2 || ranges.type !== 'bytes' || ranges.length > 1) {
+            console.log("Other", ranges);
             file.createReadStream().pipe(res);
         } else {
+            console.log("206");
             var range = ranges[0];
             res.statusCode = 206;
             res.setHeader('Content-Length', 1 + range.end - range.start);
