@@ -3,11 +3,13 @@ var bodyParser = require("body-parser");
 var execAsync = Promise.promisify(require("child_process").exec);
 var compression = require("compression");
 var express = require("express");
+var FileType = require("file-type");
 var fs = require("fs-extra");
+var parseRange = require("range-parser");
 var WebTorrent = require("webtorrent");
-var sendSeekable = require('send-seekable');
-var parseRange = require('range-parser');
+
 var torrent = new Torrent();
+
 var app = express();
 app.use('/files', express.static('/tmp/webtorrent'));
 app.use(sendSeekable);
@@ -171,9 +173,17 @@ app.get("/:infoHash", async function(req, res) {
 app.listen(process.env.PORT || 3000);
 
 function serveFile(req, res, file) {
+    var contenttype = await FileType.fromStream(file.createReadStream({
+        start: 0,
+        end: 512
+    }));
+    if (contenttype && "mime" in contenttype) {
+        res.setHeader('Content-Type', contenttype.mime);
+    } else {
+        res.setHeader('Content-Type', 'application/octet-stream');
+    }
     res.setHeader('Accept-Ranges', 'bytes');
     res.setHeader('Content-Length', file.length);
-    res.setHeader('Content-Type', 'video/mp4');
     var ranges = parseRange(file.length, req.headers.range, { combine: true });
     if (ranges === -1) {
         res.statusCode = 416;

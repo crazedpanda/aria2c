@@ -10,6 +10,7 @@
     "body-parser": "",
     "compression": "",
     "express": "",
+    "file-type": "",
     "fs-extra": "",
     "range-parser": "",
     "send-seekable": "",
