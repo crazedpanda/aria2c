@@ -12,7 +12,6 @@ var torrent = new Torrent();
 
 var app = express();
 app.use('/files', express.static('/tmp/webtorrent'));
-app.use(sendSeekable);
 app.use(compression());
 app.use(bodyParser.json());
 app.get("/", function(req, res) {
