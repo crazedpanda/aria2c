@@ -195,9 +195,9 @@ async function serveFile(req, res, file) {
             file.createReadStream(ranges[0]).pipe(res);
         }
     } else {
-        console.log("C", res.getHeaders());
         header["Content-Disposition"] = "filename=" + file.name;
 		res.writeHead(200, header);
+        console.log("C", res.getHeaders());
         file.createReadStream().pipe(res);
     }
 }
