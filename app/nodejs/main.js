@@ -171,7 +171,8 @@ app.listen(process.env.PORT || 3000);
 
 function serveFile(req, res, file) {
     res.sendSeekable(file.createReadStream(), {
-        length: file.length
+        length: file.length,
+        type: 'video/mp4'
     });
 }
 
