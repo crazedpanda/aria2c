@@ -54,7 +54,7 @@ app.get("/clear", function(req, res) {
 	});
 	res.send("<title>MiPeerFlix - Clear</title>Removed all!");
 });
-app.get("/download/:infoHash/:index?", async function(req, res) {
+app.get("/download/:infoHash/:index?", function(req, res) {
 	var link = req.params.infoHash.toLowerCase();
 	if (link.length == 40) {
         if (req.params.index) {
@@ -164,43 +164,42 @@ app.get("/:infoHash", async function(req, res) {
 });
 app.listen(process.env.PORT || 3000);
 
-function serveFile(req, res, file) {
-    FileType.fromStream(file.createReadStream({
-        start: 0,
-        end: 512
-    })).then(function(contenttype) {
-        res.setHeader("Content-Length", file.length);
+async function serveFile(req, res, file) {
+    res.setHeader("Content-Type", "application/octet-stream");
+    res.setHeader("Content-Length", file.length);
+    try {
+        var contenttype = await FileType.fromStream(file.createReadStream({
+            start: 0,
+            end: 512
+        }));
         if (contenttype && "mime" in contenttype) {
             res.setHeader("Content-Type", contenttype.mime);
-        } else {
-            res.setHeader("Content-Type", "application/octet-stream");
         }
-        var range = req.headers.range;
-        if (range) {
-            console.log("A");
-            res.setHeader("Accept-Ranges", "bytes");
-            var ranges = parseRange(file.length, range, { combine: true });
-            if (ranges === -1) {
-                res.statusCode = 416;
-                res.end();
-            } else if (ranges === -2 || ranges.type !== "bytes" || ranges.length > 1) {
-                file.createReadStream().pipe(res);
-            } else {
-                res.statusCode = 206;
-                res.setHeader("Content-Length", 1 + ranges[0].end - ranges[0].start);
-                res.setHeader("Content-Range", `bytes ${ranges[0].start}-${ranges[0].end}/${file.length}`);
-                file.createReadStream(ranges[0]).pipe(res);
-            }
-        } else {
-            console.log("B");
-            res.setHeader("Content-Disposition", "filename=" + file.name);
-            res.statusCode = 200;
+    } catch (e) {
+        console.log("FileType", e);
+    }
+    var range = req.headers.range;
+    if (range) {
+        console.log("A");
+        res.setHeader("Accept-Ranges", "bytes");
+        var ranges = parseRange(file.length, range, { combine: true });
+        if (ranges === -1) {
+            res.statusCode = 416;
+            res.end();
+        } else if (ranges === -2 || ranges.type !== "bytes" || ranges.length > 1) {
             file.createReadStream().pipe(res);
+        } else {
+            res.statusCode = 206;
+            res.setHeader("Content-Length", 1 + ranges[0].end - ranges[0].start);
+            res.setHeader("Content-Range", `bytes ${ranges[0].start}-${ranges[0].end}/${file.length}`);
+            file.createReadStream(ranges[0]).pipe(res);
         }
-    }).catch(function(err) {
-        console.log(err);
-        return serveFile(req, res, file);
-    });
+    } else {
+        console.log("B");
+        res.setHeader("Content-Disposition", "filename=" + file.name);
+        res.statusCode = 200;
+        file.createReadStream().pipe(res);
+    }
 }
 
 function buildMagnetURI(infoHash) {
