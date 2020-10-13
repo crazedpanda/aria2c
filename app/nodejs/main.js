@@ -165,6 +165,7 @@ app.get("/:infoHash", async function(req, res) {
 app.listen(process.env.PORT || 3000);
 
 async function serveFile(req, res, file) {
+    res.setHeader("Content-Type", "application/octet-stream");
     res.setHeader("Content-Length", file.length);
     try {
         var contenttype = await FileType.fromStream(file.createReadStream({
@@ -174,30 +175,31 @@ async function serveFile(req, res, file) {
         if (contenttype && "mime" in contenttype) {
             res.setHeader("Content-Type", contenttype.mime);
         }
-        var range = req.headers.range;
-        if (range) {
-            res.setHeader("Accept-Ranges", "bytes");
-            var ranges = parseRange(file.length, range, { combine: true });
-            if (ranges === -1) {
-                res.statusCode = 416;
-                res.end();
-            } else if (ranges === -2 || ranges.type !== "bytes" || ranges.length > 1) {
-                console.log("Other", ranges);
-                file.createReadStream().pipe(res);
-            } else {
-                res.statusCode = 206;
-                res.setHeader("Content-Length", 1 + ranges[0].end - ranges[0].start);
-                res.setHeader("Content-Range", `bytes ${ranges[0].start}-${ranges[0].end}/${file.length}`);
-                file.createReadStream(ranges[0]).pipe(res);
-            }
-        } else {
-            res.setHeader("Content-Disposition", "filename=" + file.name);
-            res.statusCode = 200;
-            file.createReadStream().pipe(res);
-        }
     } catch (e) {
         console.log("Unable to get FileType");
-        res.setHeader("Content-Type", "application/octet-stream");
+        res.setHeader("Content-Disposition", "filename=" + file.name);
+        res.statusCode = 200;
+        file.createReadStream().pipe(res);
+    }
+    var range = req.headers.range;
+    if (range) {
+        console.log("B");
+        res.setHeader("Accept-Ranges", "bytes");
+        var ranges = parseRange(file.length, range, { combine: true });
+        if (ranges === -1) {
+            res.statusCode = 416;
+            res.end();
+        } else if (ranges === -2 || ranges.type !== "bytes" || ranges.length > 1) {
+            console.log("Other", ranges);
+            file.createReadStream().pipe(res);
+        } else {
+            res.statusCode = 206;
+            res.setHeader("Content-Length", 1 + ranges[0].end - ranges[0].start);
+            res.setHeader("Content-Range", `bytes ${ranges[0].start}-${ranges[0].end}/${file.length}`);
+            file.createReadStream(ranges[0]).pipe(res);
+        }
+    } else {
+        console.log("C");
         res.setHeader("Content-Disposition", "filename=" + file.name);
         res.statusCode = 200;
         file.createReadStream().pipe(res);
