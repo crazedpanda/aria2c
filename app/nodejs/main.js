@@ -165,7 +165,6 @@ app.get("/:infoHash", async function(req, res) {
 app.listen(process.env.PORT || 3000);
 
 async function serveFile(req, res, file) {
-    res.setHeader("Content-Length", file.length);
     var contenttype = await FileType.fromStream(file.createReadStream({
         start: 0,
         end: 512
@@ -175,10 +174,11 @@ async function serveFile(req, res, file) {
     } else {
         res.setHeader("Content-Type", "application/octet-stream");
     }
+    res.setHeader("Content-Length", file.length);
     var range = req.headers.range;
     if (range) {
         console.log("B");
-        console.log("E", req.header('Content-Disposition'));
+        console.log("D", res.get('Content-Disposition'));
         res.setHeader("Accept-Ranges", "bytes");
         var ranges = parseRange(file.length, range, { combine: true });
         if (ranges === -1) {
@@ -195,7 +195,7 @@ async function serveFile(req, res, file) {
         }
     } else {
         console.log("C");
-        console.log("D", req.header('Content-Disposition'));
+        console.log("D", res.get('Content-Disposition'));
         res.setHeader("Content-Disposition", "filename=" + file.name);
         res.statusCode = 200;
         file.createReadStream().pipe(res);
