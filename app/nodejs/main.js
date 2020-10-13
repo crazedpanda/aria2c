@@ -177,9 +177,6 @@ async function serveFile(req, res, file) {
         }
     } catch (e) {
         console.log("Unable to get FileType");
-        res.setHeader("Content-Disposition", "filename=" + file.name);
-        res.statusCode = 200;
-        file.createReadStream().pipe(res);
     }
     var range = req.headers.range;
     if (range) {
