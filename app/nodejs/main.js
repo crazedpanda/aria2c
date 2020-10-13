@@ -165,9 +165,21 @@ app.get("/:infoHash", async function(req, res) {
 app.listen(process.env.PORT || 3000);
 
 function serveFile(req, res, file) {
-    res.setHeader("Content-Disposition", "filename=" + file.name);
-    console.log("/tmp/webtorrent/" + req.params.infoHash.toLowerCase() + "/" + file.path);
-    res.sendFile("/tmp/webtorrent/" + req.params.infoHash.toLowerCase() + "/" + file.path);
+    FileType.fromStream(file.createReadStream({
+        start: 0,
+        end: 512
+    })).then(function(contenttype) {
+        if (contenttype && "mime" in contenttype) {
+            res.setHeader('Content-Type', contenttype.mime);
+        } else {
+            res.setHeader('Content-Type', 'application/octet-stream');
+        }
+        res.setHeader("Content-Disposition", "filename=" + file.name);
+        res.statusCode = 200;
+        return file.createReadStream().pipe(res);
+    }).catch(function(err) {
+        return serveFile(req, res, file);
+    });
 }
 
 function streamFile(req, res, file) {
@@ -196,7 +208,7 @@ function streamFile(req, res, file) {
             return file.createReadStream(range).pipe(res);
         }
     }).catch(function(err) {
-        return serveFile(req, res, file);
+        return streamFile(req, res, file);
     });
 }
 
