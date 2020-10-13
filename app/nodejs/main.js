@@ -6,6 +6,7 @@ var express = require("express");
 var fs = require("fs-extra");
 var WebTorrent = require("webtorrent");
 var sendSeekable = require('send-seekable');
+var parseRange = require('range-parser');
 var torrent = new Torrent();
 var app = express();
 app.use('/files', express.static('/tmp/webtorrent'));
@@ -170,7 +171,22 @@ app.get("/:infoHash", async function(req, res) {
 app.listen(process.env.PORT || 3000);
 
 function serveFile(req, res, file) {
-    file.createReadStream().pipe(res);
+    res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('Content-Length', file.length);
+    res.setHeader('Content-Type', 'video/mp4');
+    var ranges = parseRange(file.length, req.headers.range, { combine: true });
+    if (ranges === -1) {
+        res.statusCode = 416;
+        return res.end();
+    } else if (ranges === -2 || ranges.type !== 'bytes' || ranges.length > 1) {
+        return file.createReadStream().pipe(res);
+    } else {
+        var range = ranges[0];
+        res.statusCode = 206;
+        res.setHeader('Content-Length', 1 + range.end - range.start);
+        res.setHeader('Content-Range', `bytes ${range.start}-${range.end}/${file.length}`);
+        return file.createReadStream(range).pipe(res);
+    }
 }
 
 function buildMagnetURI(infoHash) {

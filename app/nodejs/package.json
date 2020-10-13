@@ -11,6 +11,7 @@
     "compression": "",
     "express": "",
     "fs-extra": "",
+    "range-parser": "",
     "send-seekable": "",
     "webtorrent": ""
   },
