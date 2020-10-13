@@ -170,10 +170,7 @@ app.get("/:infoHash", async function(req, res) {
 app.listen(process.env.PORT || 3000);
 
 function serveFile(req, res, file) {
-    res.sendSeekable(file.createReadStream(), {
-        length: file.length,
-        type: 'video/mp4'
-    });
+    file.createReadStream().pipe(res);
 }
 
 function buildMagnetURI(infoHash) {
