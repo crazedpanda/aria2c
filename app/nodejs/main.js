@@ -170,14 +170,9 @@ app.get("/:infoHash", async function(req, res) {
 app.listen(process.env.PORT || 3000);
 
 function serveFile(req, res, file) {
-    // if (file.progress == 1) {
-        res.sendSeekable(file.createReadStream(), {
-            type: 'application/octet-stream',
-            length: file.length
-        });
-    // } else {
-    //     file.createReadStream().pipe(res);
-    // }    
+    res.sendSeekable(file.createReadStream(), {
+        length: file.length
+    });
 }
 
 function buildMagnetURI(infoHash) {
