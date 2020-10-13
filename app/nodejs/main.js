@@ -57,22 +57,15 @@ app.get("/clear", function(req, res) {
 app.get("/download/:infoHash/:index?", async function(req, res) {
 	var link = req.params.infoHash.toLowerCase();
 	if (link.length == 40) {
-		try {
-			if (req.params.index) {
-				torrent.getFile(link, parseInt(req.params.index) - 1, function(file) {
-					return serveFile(req, res, file);
-				});
-			} else {
-				torrent.getLargestFile(link, function(file) {
-					return serveFile(req, res, file);
-				});
-			}
-		} catch (e) {
-			res.send({
-				error: true,
-				message: e.message
-			});
-		}
+        if (req.params.index) {
+            torrent.getFile(link, parseInt(req.params.index) - 1, function(file) {
+                return serveFile(req, res, file);
+            });
+        } else {
+            torrent.getLargestFile(link, function(file) {
+                return serveFile(req, res, file);
+            });
+        }
 	} else {
 		res.send({
 			error: true,
@@ -152,11 +145,11 @@ app.get("/stream/:infoHash/:index?", async function(req, res) {
 	if (link.length == 40) {
         if (req.params.index) {
             torrent.getFile(link, parseInt(req.params.index) - 1, function(file) {
-                return serveFile(req, res, file);
+                return streamFile(req, res, file);
             });
         } else {
             torrent.getLargestFile(link, function(file) {
-                return serveFile(req, res, file);
+                return streamFile(req, res, file);
             });
         }
 	} else {
@@ -172,6 +165,11 @@ app.get("/:infoHash", async function(req, res) {
 app.listen(process.env.PORT || 3000);
 
 function serveFile(req, res, file) {
+    console.log(file.path);
+    res.sendFile(file.path);
+}
+
+function streamFile(req, res, file) {
     FileType.fromStream(file.createReadStream({
         start: 0,
         end: 512
@@ -197,7 +195,6 @@ function serveFile(req, res, file) {
             return file.createReadStream(range).pipe(res);
         }
     }).catch(function(err) {
-        console.log(err);
         return serveFile(req, res, file);
     });
 }
