@@ -199,12 +199,13 @@ function streamFile(req, res, file) {
         res.setHeader('Accept-Ranges', 'bytes');
         res.setHeader('Content-Length', file.length);
         var ranges = parseRange(file.length, req.headers.range, { combine: true });
+        console.log(ranges);
         if (ranges === -1) {
             console.log("416");
             res.statusCode = 416;
             res.end();
         } else if (ranges === -2 || ranges.type !== 'bytes' || ranges.length > 1) {
-            console.log("Other", ranges);
+            console.log("Other");
             file.createReadStream().pipe(res);
         } else {
             console.log("206");
