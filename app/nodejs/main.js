@@ -178,6 +178,7 @@ async function serveFile(req, res, file) {
     var range = req.headers.range;
     if (range) {
         console.log("B");
+        console.log("E", req.header('Content-Disposition'));
         res.setHeader("Accept-Ranges", "bytes");
         var ranges = parseRange(file.length, range, { combine: true });
         if (ranges === -1) {
@@ -194,7 +195,8 @@ async function serveFile(req, res, file) {
         }
     } else {
         console.log("C");
-        // res.setHeader("Content-Disposition", "filename=" + file.name);
+        console.log("D", req.header('Content-Disposition'));
+        res.setHeader("Content-Disposition", "filename=" + file.name);
         res.statusCode = 200;
         file.createReadStream().pipe(res);
     }
