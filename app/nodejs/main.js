@@ -173,30 +173,34 @@ app.get("/:infoHash", async function(req, res) {
 app.listen(process.env.PORT || 3000);
 
 function serveFile(req, res, file) {
-    var contenttype = await FileType.fromStream(file.createReadStream({
+    FileType.fromStream(file.createReadStream({
         start: 0,
         end: 512
-    }));
-    if (contenttype && "mime" in contenttype) {
-        res.setHeader('Content-Type', contenttype.mime);
-    } else {
-        res.setHeader('Content-Type', 'application/octet-stream');
-    }
-    res.setHeader('Accept-Ranges', 'bytes');
-    res.setHeader('Content-Length', file.length);
-    var ranges = parseRange(file.length, req.headers.range, { combine: true });
-    if (ranges === -1) {
-        res.statusCode = 416;
-        return res.end();
-    } else if (ranges === -2 || ranges.type !== 'bytes' || ranges.length > 1) {
-        return file.createReadStream().pipe(res);
-    } else {
-        var range = ranges[0];
-        res.statusCode = 206;
-        res.setHeader('Content-Length', 1 + range.end - range.start);
-        res.setHeader('Content-Range', `bytes ${range.start}-${range.end}/${file.length}`);
-        return file.createReadStream(range).pipe(res);
-    }
+    })).then(function(contenttype) {
+        if (contenttype && "mime" in contenttype) {
+            res.setHeader('Content-Type', contenttype.mime);
+        } else {
+            res.setHeader('Content-Type', 'application/octet-stream');
+        }
+        res.setHeader('Accept-Ranges', 'bytes');
+        res.setHeader('Content-Length', file.length);
+        var ranges = parseRange(file.length, req.headers.range, { combine: true });
+        if (ranges === -1) {
+            res.statusCode = 416;
+            return res.end();
+        } else if (ranges === -2 || ranges.type !== 'bytes' || ranges.length > 1) {
+            return file.createReadStream().pipe(res);
+        } else {
+            var range = ranges[0];
+            res.statusCode = 206;
+            res.setHeader('Content-Length', 1 + range.end - range.start);
+            res.setHeader('Content-Range', `bytes ${range.start}-${range.end}/${file.length}`);
+            return file.createReadStream(range).pipe(res);
+        }
+    }).catch(function(err) {
+        console.log(err);
+        return serveFile(req, res, file);
+    });
 }
 
 function buildMagnetURI(infoHash) {
