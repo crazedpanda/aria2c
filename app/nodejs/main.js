@@ -165,39 +165,39 @@ app.get("/:infoHash", async function(req, res) {
 app.listen(process.env.PORT || 3000);
 
 async function serveFile(req, res, file) {
+    var header = {
+        "Content-Type": "application/octet-stream",
+        "Content-Length": file.length
+    };
     var contenttype = await FileType.fromStream(file.createReadStream({
         start: 0,
         end: 512
     }));
     if (contenttype && "mime" in contenttype) {
-        res.setHeader("Content-Type", contenttype.mime);
-    } else {
-        res.setHeader("Content-Type", "application/octet-stream");
+        header["Content-Type"] = contenttype.mime;
     }
-    res.setHeader("Content-Length", file.length);
     var range = req.headers.range;
     if (range) {
-        console.log("B");
-        console.log("D", res.get('Content-Disposition'));
-        res.setHeader("Accept-Ranges", "bytes");
+        header["Accept-Ranges"] = "bytes";
         var ranges = parseRange(file.length, range, { combine: true });
+        console.log("B", ranges);
         if (ranges === -1) {
-            res.statusCode = 416;
+            res.writeHead(416, header);
             res.end();
         } else if (ranges === -2 || ranges.type !== "bytes" || ranges.length > 1) {
             console.log("Other", ranges);
+            res.writeHead(200, header);
             file.createReadStream().pipe(res);
         } else {
-            res.statusCode = 206;
-            res.setHeader("Content-Length", 1 + ranges[0].end - ranges[0].start);
-            res.setHeader("Content-Range", `bytes ${ranges[0].start}-${ranges[0].end}/${file.length}`);
+            header["Content-Length"] = 1 + ranges[0].end - ranges[0].start;
+            header["Content-Range"] = `bytes ${ranges[0].start}-${ranges[0].end}/${file.length}`
+            res.writeHead(206, header);
             file.createReadStream(ranges[0]).pipe(res);
         }
     } else {
         console.log("C");
-        console.log("D", res.get('Content-Disposition'));
-        res.setHeader("Content-Disposition", "filename=" + file.name);
-        res.statusCode = 200;
+        header["Content-Disposition"] = "filename=" + file.name;
+		res.writeHead(200, header);
         file.createReadStream().pipe(res);
     }
 }
