@@ -194,7 +194,7 @@ async function serveFile(req, res, file) {
         }
     } else {
         console.log("C");
-        res.setHeader("Content-Disposition", "filename=" + file.name);
+        // res.setHeader("Content-Disposition", "filename=" + file.name);
         res.statusCode = 200;
         file.createReadStream().pipe(res);
     }
