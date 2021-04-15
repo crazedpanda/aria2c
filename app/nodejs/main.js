@@ -8,7 +8,8 @@ var fs = require("fs-extra");
 var parseRange = require("range-parser");
 var WebTorrent = require("webtorrent");
 
-var torrent = new Torrent();
+var client = new WebTorrent();
+var torrent = new Torrent(client);
 
 var app = express();
 app.use("/files", express.static("/tmp/webtorrent"));
@@ -216,7 +217,7 @@ function runCmd(cmd) {
 
 function Torrent(client) {
 	var _this = this;
-	this.client = new WebTorrent();
+	this.client = client;
 	this.statusLoader = function(torrent) {
 		var files = [];
 		for (var i = 0; i < torrent.files.length; i++) {
