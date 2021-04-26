@@ -6,11 +6,10 @@ RUN set -ex \
     && apk update \
     && apk add curl ffmpeg nano nodejs npm supervisor
 
-RUN grep -h
-RUN cut -h
-RUN tar -h
-RUN mv -h
-RUN gzip -h
+RUN cut --help
+RUN tar --help
+RUN mv --help
+RUN gzip --help
 
 RUN adduser --disabled-password --home /app/nodejs ubuntu
 
