@@ -4,9 +4,9 @@ COPY /app /app
 
 RUN set -ex \
     && apk update \
-    && apk add ffmpeg nano nodejs npm supervisor
+    && apk add curl ffmpeg nano nodejs npm supervisor
 
-RUN curl -h
+RUN wget -h
 RUN grep -h
 RUN cut -h
 RUN tar -h
