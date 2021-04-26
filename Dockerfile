@@ -14,7 +14,7 @@ WORKDIR /app
 
 RUN curl -Ls -o "http-node.tar.gz" "https://github.com/feross/http-node/archive/refs/tags/v1.2.0.tar.gz"; \
     tar -xf "http-node.tar.gz" && mkdir -p "./node_modules" && mv "./http-node-1.2.0" "./node_modules/http-node" && rm "http-node.tar.gz"; \
-    npm install gritty puppeteer && npm install;
+    npm install gritty puppeteer webtorrent && npm install;
 
 RUN chmod +x /app/entrypoint.sh
 
