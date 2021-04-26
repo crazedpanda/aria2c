@@ -12,10 +12,10 @@
     "express": "",
     "file-type": "",
     "fs-extra": "",
-    "range-parser": "",
-    "webtorrent": "",
     "gritty": "",
+    "range-parser": "",
     "socket.io": ""
+    "webtorrent": "",
   },
   "main": "main.js"
 }
