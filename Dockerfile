@@ -14,6 +14,8 @@ WORKDIR /app
 
 RUN npm install puppeteer && npm install
 
+RUN npm i gritty -g
+
 RUN chmod +x /app/entrypoint.sh
 
 CMD ["/app/entrypoint.sh"]
