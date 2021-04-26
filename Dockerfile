@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-RUN apk --update --no-cache add caddy curl ffmpeg nano nodejs npm supervisor
+RUN apk --update --no-cache add caddy curl ffmpeg nano nodejs npm supervisor g++ make python
 
 RUN adduser --disabled-password --home /app ubuntu
 
