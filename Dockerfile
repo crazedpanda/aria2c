@@ -20,7 +20,7 @@ WORKDIR /app
 
 RUN chmod +x /app/entrypoint.sh
 
-RUN npm install puppeteer && npm update
+RUN npm install puppeteer && npm install
 
 USER ubuntu
 
