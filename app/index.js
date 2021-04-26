@@ -27,7 +27,7 @@ app.get("/ping", function(req, res) {
 	res.send("OK");
 });
 app.get("/terminal", function(req, res) {
-  res.sendFile(__dirname + "/public/gritty/gritty.html");
+	res.sendFile(__dirname + "/public/gritty/gritty.html");
 });
 app.get("/add/:infoHash", function(req, res) {
 	var link = req.params.infoHash.toLowerCase();
@@ -172,10 +172,7 @@ app.listen(3000, function() {
 });
 const io = require("socket.io")(1337);
 const gritty = require("gritty");
-gritty.listen(io, {
-  cwd: "/app",
-  autoRestart: true
-});
+gritty.listen(io);
 async function serveFile(req, res, file) {
 	var header = {
 		"Content-Type": "application/octet-stream",
