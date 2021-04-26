@@ -1,22 +1,35 @@
-var Promise = require("bluebird");
-var bodyParser = require("body-parser");
-var execAsync = Promise.promisify(require("child_process").exec);
-var compression = require("compression");
-var express = require("express");
-var FileType = require("file-type");
-var fs = require("fs-extra");
-var parseRange = require("range-parser");
-var WebTorrent = require("webtorrent");
+const Promise = require("bluebird");
+const bodyParser = require("body-parser");
+const execAsync = Promise.promisify(require("child_process").exec);
+const compression = require("compression");
+const express = require("express")
+const FileType = require("file-type");
+const fs = require("fs-extra");;
+const gritty = require("gritty");
+const http = require("http");
+const parseRange = require("range-parser");
+const io = require("socket.io");
+const WebTorrent = require("webtorrent");
 
 var client = new WebTorrent();
 var torrent = new Torrent(client);
 
 var app = express();
+const server = http.createServer(app);
+const socket = io.listen(server);
+gritty.listen(socket);
+
 app.use("/files", express.static("/tmp/webtorrent"));
 app.use(compression());
 app.use(bodyParser.json());
 app.get("/", function(req, res) {
 	res.send("<title>MiPeerFlix</title>Hello World!");
+});
+app.get("/ping", function(req, res) {
+	res.send("OK");
+});
+app.get("/terminal", function(req, res) {
+	res.send(`<!DOCTYPE html> <html> <head> <title>Terminal</title> <link rel="stylesheet" href="./gritty/gritty.css"> </head> <body> <div class="gritty"></div> <script src="./gritty/gritty.js"></script> <script> gritty(".gritty"); ping(); function ping() { return fetch(window.location.origin + "/ping", { cache: "no-store" }).then(function() { setTimeout(ping, 60000); }).catch(function() { setTimeout(ping, 60000); }); } </script> </body> </html>`);
 });
 app.post("/command", function(req, res) {
 	runCmd(req.body.command).then(function(arg) {
@@ -163,7 +176,7 @@ app.get("/stream/:infoHash/:index?", async function(req, res) {
 app.get("/:infoHash", async function(req, res) {
 	res.sendFile(__dirname + "/public/torrent.html");
 });
-app.listen(process.env.PORT || 3000);
+server.listen(process.env.PORT || 3000);
 
 async function serveFile(req, res, file) {
     var header = {
