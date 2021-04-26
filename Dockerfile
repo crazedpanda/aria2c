@@ -12,8 +12,6 @@ COPY /app /app
 
 WORKDIR /app
 
-RUN npm install puppeteer && npm install
-
 RUN chmod +x /app/entrypoint.sh
 
 CMD ["/app/entrypoint.sh"]
