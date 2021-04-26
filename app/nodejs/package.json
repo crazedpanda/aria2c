@@ -13,7 +13,9 @@
     "file-type": "",
     "fs-extra": "",
     "range-parser": "",
-    "webtorrent": ""
+    "webtorrent": "",
+    "gritty": "",
+    "socket.io": ""
   },
   "main": "main.js"
 }
