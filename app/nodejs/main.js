@@ -1,27 +1,26 @@
-const Promise = require("bluebird");
-const bodyParser = require("body-parser");
-const execAsync = Promise.promisify(require("child_process").exec);
 const compression = require("compression");
+const cors = require("cors");
 const express = require("express")
 const FileType = require("file-type");
-const fs = require("fs-extra");;
+const fs = require("fs-extra");
 const gritty = require("gritty");
 const http = require("http");
 const parseRange = require("range-parser");
-const io = require("socket.io");
 const WebTorrent = require("webtorrent");
-
 var client = new WebTorrent();
 var torrent = new Torrent(client);
-
 var app = express();
 const server = http.createServer(app);
-const socket = io.listen(server);
-gritty.listen(socket);
-
-app.use("/files", express.static("/tmp/webtorrent"));
+const io = require("socket.io")(server);
+gritty.listen(io);
+app.use(cors());
 app.use(compression());
-app.use(bodyParser.json());
+app.use(express.urlencoded({
+	"extended": true,
+	"limit": "50mb"
+}));
+app.use(express.static(__dirname + "/public"));
+app.use("/files", express.static("/tmp/webtorrent"));
 app.get("/", function(req, res) {
 	res.send("<title>MiPeerFlix</title>Hello World!");
 });
@@ -30,13 +29,6 @@ app.get("/ping", function(req, res) {
 });
 app.get("/terminal", function(req, res) {
 	res.send(`<!DOCTYPE html> <html> <head> <title>Terminal</title> <link rel="stylesheet" href="./gritty/gritty.css"> </head> <body> <div class="gritty"></div> <script src="./gritty/gritty.js"></script> <script> gritty(".gritty"); ping(); function ping() { return fetch(window.location.origin + "/ping", { cache: "no-store" }).then(function() { setTimeout(ping, 60000); }).catch(function() { setTimeout(ping, 60000); }); } </script> </body> </html>`);
-});
-app.post("/command", function(req, res) {
-	runCmd(req.body.command).then(function(arg) {
-		res.send(arg);
-	}).catch(function(err) {
-		res.send(err);
-	});
 });
 app.get("/add/:infoHash", function(req, res) {
 	var link = req.params.infoHash.toLowerCase();
@@ -71,15 +63,15 @@ app.get("/clear", function(req, res) {
 app.get("/download/:infoHash/:index?", function(req, res) {
 	var link = req.params.infoHash.toLowerCase();
 	if (link.length == 40) {
-        if (req.params.index) {
-            torrent.getFile(link, parseInt(req.params.index) - 1, function(file) {
-                return serveFile(req, res, file);
-            });
-        } else {
-            torrent.getLargestFile(link, function(file) {
-                return serveFile(req, res, file);
-            });
-        }
+		if (req.params.index) {
+			torrent.getFile(link, parseInt(req.params.index) - 1, function(file) {
+				return serveFile(req, res, file);
+			});
+		} else {
+			torrent.getLargestFile(link, function(file) {
+				return serveFile(req, res, file);
+			});
+		}
 	} else {
 		res.send({
 			error: true,
@@ -157,15 +149,15 @@ app.get("/status/:infoHash", function(req, res) {
 app.get("/stream/:infoHash/:index?", async function(req, res) {
 	var link = req.params.infoHash.toLowerCase();
 	if (link.length == 40) {
-        if (req.params.index) {
-            torrent.getFile(link, parseInt(req.params.index) - 1, function(file) {
-                return serveFile(req, res, file);
-            });
-        } else {
-            torrent.getLargestFile(link, function(file) {
-                return serveFile(req, res, file);
-            });
-        }
+		if (req.params.index) {
+			torrent.getFile(link, parseInt(req.params.index) - 1, function(file) {
+				return serveFile(req, res, file);
+			});
+		} else {
+			torrent.getLargestFile(link, function(file) {
+				return serveFile(req, res, file);
+			});
+		}
 	} else {
 		res.send({
 			error: true,
@@ -177,55 +169,46 @@ app.get("/:infoHash", async function(req, res) {
 	res.sendFile(__dirname + "/public/torrent.html");
 });
 server.listen(process.env.PORT || 3000);
-
 async function serveFile(req, res, file) {
-    var header = {
-        "Content-Type": "application/octet-stream",
-        "Content-Length": file.length
-    };
-    var contenttype = await FileType.fromStream(file.createReadStream({
-        start: 0,
-        end: 512
-    }));
-    if (contenttype && "mime" in contenttype) {
-        header["Content-Type"] = contenttype.mime;
-    }
-    var range = req.headers.range;
-    if (range) {
-        header["Accept-Ranges"] = "bytes";
-        var ranges = parseRange(file.length, range, { combine: true });
-        if (ranges === -1) {
-            res.writeHead(416, header);
-            res.end();
-        } else if (ranges === -2 || ranges.type !== "bytes" || ranges.length > 1) {
-            console.log("Other", ranges);
-            res.writeHead(200, header);
-            file.createReadStream().pipe(res);
-        } else {
-            header["Content-Length"] = 1 + ranges[0].end - ranges[0].start;
-            header["Content-Range"] = `bytes ${ranges[0].start}-${ranges[0].end}/${file.length}`
-            res.writeHead(206, header);
-            file.createReadStream(ranges[0]).pipe(res);
-        }
-    } else {
-        header["Content-Disposition"] = `filename="` + file.name + `"`;
+	var header = {
+		"Content-Type": "application/octet-stream",
+		"Content-Length": file.length
+	};
+	var contenttype = await FileType.fromStream(file.createReadStream({
+		start: 0,
+		end: 512
+	}));
+	if (contenttype && "mime" in contenttype) {
+		header["Content-Type"] = contenttype.mime;
+	}
+	var range = req.headers.range;
+	if (range) {
+		header["Accept-Ranges"] = "bytes";
+		var ranges = parseRange(file.length, range, {
+			combine: true
+		});
+		if (ranges === -1) {
+			res.writeHead(416, header);
+			res.end();
+		} else if (ranges === -2 || ranges.type !== "bytes" || ranges.length > 1) {
+			console.log("Other", ranges);
+			res.writeHead(200, header);
+			file.createReadStream().pipe(res);
+		} else {
+			header["Content-Length"] = 1 + ranges[0].end - ranges[0].start;
+			header["Content-Range"] = `bytes ${ranges[0].start}-${ranges[0].end}/${file.length}`;
+			res.writeHead(206, header);
+			file.createReadStream(ranges[0]).pipe(res);
+		}
+	} else {
+		header["Content-Disposition"] = `filename="` + file.name + `"`;
 		res.writeHead(200, header);
-        file.createReadStream().pipe(res);
-    }
+		file.createReadStream().pipe(res);
+	}
 }
 
 function buildMagnetURI(infoHash) {
 	return "magnet:?xt=urn:btih:" + infoHash + "&tr=http%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2F9.rarbg.me%3A2710%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2710%2Fannounce&tr=udp%3A%2F%2Fp4p.arenabg.com%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337%2Fannounce&tr=udp%3A%2F%2Fexodus.desync.com%3A6969%2Fannounce&tr=udp%3A%2F%2Fopen.stealth.si%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.cyberia.is%3A6969%2Fannounce&tr=udp%3A%2F%2Fretracker.lanta-net.ru%3A2710%2Fannounce&tr=udp%3A%2F%2Ftracker.sbsub.com%3A2710%2Fannounce&tr=udp%3A%2F%2Ftracker.tiny-vps.com%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce&tr=udp%3A%2F%2Ftracker.moeking.me%3A6969%2Fannounce&tr=udp%3A%2F%2Fipv4.tracker.harry.lu%3A80%2Fannounce&tr=http%3A%2F%2Ftracker.nyap2p.com%3A8080%2Fannounce&tr=udp%3A%2F%2Fbt1.archive.org%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker3.itzmx.com%3A6961%2Fannounce&tr=udp%3A%2F%2Fbt2.archive.org%3A6969%2Fannounce&tr=http%3A%2F%2Ftracker1.itzmx.com%3A8080%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%2Fannounce&tr=udp%3A%2F%2Ftracker.istole.it%3A80&tr=udp%3A%2F%2Ftracker.kicks-ass.net%3A80%2Fannounce";
-}
-
-function runCmd(cmd) {
-	return execAsync(cmd).then(function(stdout) {
-		console.log(cmd, "Success!");
-		return stdout;
-	}).catch(function(err) {
-		console.log(cmd, "Failed!");
-		return Promise.reject(err);
-	});
 }
 
 function Torrent(client) {

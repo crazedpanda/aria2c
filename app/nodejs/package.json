@@ -6,8 +6,7 @@
     "start": "node main.js"
   },
   "dependencies": {
-    "bluebird": "",
-    "body-parser": "",
+    "cors": "",
     "compression": "",
     "express": "",
     "file-type": "",
@@ -15,7 +14,7 @@
     "gritty": "",
     "range-parser": "",
     "socket.io": "",
-    "webtorrent": "",
+    "webtorrent": ""
   },
   "main": "main.js"
 }
