@@ -1,0 +1,20 @@
+{
+  "name": "mipeerflix",
+  "description": "npm --prefix ./ install",
+  "version": "0.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "cors": "",
+    "compression": "",
+    "express": "",
+    "file-type": "",
+    "fs-extra": "",
+    "gritty": "",
+    "range-parser": "",
+    "socket.io": "",
+    "webtorrent": ""
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}

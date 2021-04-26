@@ -10,8 +10,10 @@ RUN version=$(curl -Ls "https://github.com/jpillora/chisel/releases/latest" | gr
 
 COPY /app /app
 
-RUN chmod +x /app/entrypoint.sh
+WORKDIR /app
 
-WORKDIR /app/ubuntu
+RUN npm install puppeteer && npm install
+
+RUN chmod +x /app/entrypoint.sh
 
 CMD ["/app/entrypoint.sh"]

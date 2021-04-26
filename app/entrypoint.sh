@@ -1,4 +1,3 @@
 #! /bin/sh
-set -ex
-cd /app/nodejs
-npm start
+sed -i -e 's/$PORT/'"$PORT"'/g' "Caddyfile"
+supervisord -c "supervisord.conf"
