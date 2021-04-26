@@ -8,20 +8,12 @@ RUN version=$(curl -Ls "https://github.com/jpillora/chisel/releases/latest" | gr
     mv "chisel" "/bin/chisel"; \
     chmod +x "/bin/chisel"
 
-RUN adduser --disabled-password --home /app ubuntu
-
-RUN echo "ubuntu:ubuntu" | chpasswd
-
-RUN chown -R ubuntu:ubuntu /app
-
 COPY /app /app
 
 WORKDIR /app
 
+RUN npm install puppeteer && npm install
+
 RUN chmod +x /app/entrypoint.sh
-
-RUN npm install
-
-USER ubuntu
 
 CMD ["/app/entrypoint.sh"]
