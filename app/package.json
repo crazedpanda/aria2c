@@ -9,10 +9,9 @@
     "express": "",
     "file-type": "",
     "fs-extra": "",
-    "http-node": "^1.2.0",
+    "gritty": "",
     "range-parser": "",
-    "socket.io": "",
-    "webtorrent": "^0.118.0"
+    "socket.io": ""
   },
   "scripts": {
     "start": "node index.js"
