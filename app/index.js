@@ -17,13 +17,17 @@ app.use(express.urlencoded({
 app.use(express.static(__dirname + "/public"));
 app.use("/files", express.static("/tmp/webtorrent"));
 app.get("/", function(req, res) {
-	res.send("<title>MiPeerFlix</title>Hello World!");
+	if ("HEROKU_APP_NAME" in process.env) {
+		res.send("<title>MiPeerFlix</title>Hello World from " + process.env.HEROKU_APP_NAME + "!");
+	} else {
+		res.send("<title>MiPeerFlix</title>Hello World!");
+	}
 });
 app.get("/ping", function(req, res) {
 	res.send("OK");
 });
 app.get("/terminal", function(req, res) {
-	res.send(`<!DOCTYPE html> <html> <head> <title>Terminal</title> <link rel="stylesheet" href="./gritty/gritty.css"> </head> <body> <div class="gritty"></div> <script src="./gritty/gritty.js"></script> <script> gritty(".gritty"); ping(); function ping() { return fetch(window.location.origin + "/ping", { cache: "no-store" }).then(function() { setTimeout(ping, 60000); }).catch(function() { setTimeout(ping, 60000); }); } </script> </body> </html>`);
+  res.sendFile(__dirname + "/public/gritty/gritty.html");
 });
 app.get("/add/:infoHash", function(req, res) {
 	var link = req.params.infoHash.toLowerCase();
