@@ -172,7 +172,10 @@ app.listen(3000, function() {
 });
 const io = require("socket.io")(1337);
 const gritty = require("gritty");
-gritty.listen(io);
+gritty.listen(io, {
+  cwd: "/app",
+  autoRestart: true
+});
 async function serveFile(req, res, file) {
 	var header = {
 		"Content-Type": "application/octet-stream",
