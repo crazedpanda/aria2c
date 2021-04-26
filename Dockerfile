@@ -6,7 +6,6 @@ RUN set -ex \
     && apk update \
     && apk add curl ffmpeg nano nodejs npm supervisor
 
-RUN wget -h
 RUN grep -h
 RUN cut -h
 RUN tar -h
