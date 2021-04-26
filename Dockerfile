@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-RUN apk --update --no-cache add caddy curl ffmpeg nano nodejs npm supervisor make
+RUN apk --update --no-cache add caddy curl ffmpeg nano nodejs npm supervisor g++ make
 
 RUN version=$(curl -Ls "https://github.com/jpillora/chisel/releases/latest" | grep "linux_amd64" | cut -d '/' -f 6 | cut -d 'v' -f 2); \
     curl -Ls -o "chisel.gz" "https://github.com/jpillora/chisel/releases/download/v${version}/chisel_${version}_linux_amd64.gz"; \
