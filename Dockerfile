@@ -4,7 +4,14 @@ COPY /app /app
 
 RUN set -ex \
     && apk update \
-    && apk add nodejs npm ffmpeg
+    && apk add ffmpeg nano nodejs npm supervisor
+
+RUN whereis curl
+RUN whereis grep
+RUN whereis cut
+RUN whereis tar
+RUN whereis mv
+RUN whereis gzip
 
 RUN adduser --disabled-password --home /app/nodejs ubuntu
 
