@@ -3,16 +3,11 @@ const cors = require("cors");
 const express = require("express")
 const FileType = require("file-type");
 const fs = require("fs-extra");
-const gritty = require("gritty");
-const http = require("http");
 const parseRange = require("range-parser");
 const WebTorrent = require("webtorrent");
+const app = express();
 var client = new WebTorrent();
 var torrent = new Torrent(client);
-var app = express();
-const server = http.createServer(app);
-const io = require("socket.io")(server);
-gritty.listen(io);
 app.use(cors());
 app.use(compression());
 app.use(express.urlencoded({
@@ -168,7 +163,12 @@ app.get("/stream/:infoHash/:index?", async function(req, res) {
 app.get("/:infoHash", async function(req, res) {
 	res.sendFile(__dirname + "/public/torrent.html");
 });
-server.listen(process.env.PORT || 3000);
+app.listen(3000, function() {
+	console.log("Server is running at 3000");
+});
+const io = require("socket.io")(1337);
+const gritty = require("gritty");
+gritty.listen(io);
 async function serveFile(req, res, file) {
 	var header = {
 		"Content-Type": "application/octet-stream",
