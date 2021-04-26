@@ -12,7 +12,7 @@ var torrent = new Torrent(client);
 var app = express();
 const server = http.createServer(app);
 const io = require("socket.io")(server);
-gritty.listen(io, { "destroy upgrade": false, "transports": ["websocket"] });
+gritty.listen(io);
 app.use(cors());
 app.use(compression());
 app.use(express.urlencoded({
