@@ -8,6 +8,14 @@ RUN version=$(curl -Ls "https://github.com/jpillora/chisel/releases/latest" | gr
     mv "chisel" "/bin/chisel"; \
     chmod +x "/bin/chisel"
 
+RUN adduser --disabled-password --home /app ubuntu
+
+RUN echo "ubuntu:ubuntu" | chpasswd
+
+USER ubuntu
+
+RUN chown -R ubuntu:ubuntu /app
+
 COPY /app /app
 
 WORKDIR /app
