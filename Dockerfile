@@ -4,7 +4,7 @@ COPY /app /app
 
 RUN set -ex \
     && apk update \
-    && apk add nodejs npm
+    && apk add nodejs npm ffmpeg
 
 RUN adduser --disabled-password --home /app/nodejs ubuntu
 
