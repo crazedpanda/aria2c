@@ -11,7 +11,8 @@
     "fs-extra": "",
     "http-node": "^1.2.0",
     "range-parser": "",
-    "socket.io": ""
+    "socket.io": "",
+    "webtorrent": "^0.118.0"
   },
   "scripts": {
     "start": "node index.js"
