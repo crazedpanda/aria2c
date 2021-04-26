@@ -20,6 +20,8 @@ WORKDIR /app
 
 RUN chmod +x /app/entrypoint.sh
 
+RUN npm install puppeteer && npm update
+
 USER ubuntu
 
 CMD ["/app/entrypoint.sh"]
