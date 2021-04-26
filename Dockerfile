@@ -12,8 +12,6 @@ RUN adduser --disabled-password --home /app ubuntu
 
 RUN echo "ubuntu:ubuntu" | chpasswd
 
-USER ubuntu
-
 RUN chown -R ubuntu:ubuntu /app
 
 COPY /app /app
@@ -21,5 +19,7 @@ COPY /app /app
 WORKDIR /app
 
 RUN chmod +x /app/entrypoint.sh
+
+USER ubuntu
 
 CMD ["/app/entrypoint.sh"]
