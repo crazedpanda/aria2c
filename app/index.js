@@ -175,6 +175,7 @@ const gritty = require("gritty");
 gritty.listen(io);
 async function serveFile(req, res, file) {
 	var header = {
+		"Content-Disposition": `filename="` + file.name + `"`,
 		"Content-Type": "application/octet-stream",
 		"Content-Length": file.length
 	};
@@ -195,9 +196,8 @@ async function serveFile(req, res, file) {
 			res.writeHead(416, header);
 			res.end();
 		} else if (ranges === -2 || ranges.type !== "bytes" || ranges.length > 1) {
-			console.log("Other", ranges);
-			res.writeHead(200, header);
-			file.createReadStream().pipe(res);
+			res.writeHead(400, header);
+			res.end();
 		} else {
 			header["Content-Length"] = 1 + ranges[0].end - ranges[0].start;
 			header["Content-Range"] = `bytes ${ranges[0].start}-${ranges[0].end}/${file.length}`;
@@ -205,7 +205,6 @@ async function serveFile(req, res, file) {
 			file.createReadStream(ranges[0]).pipe(res);
 		}
 	} else {
-		header["Content-Disposition"] = `filename="` + file.name + `"`;
 		res.writeHead(200, header);
 		file.createReadStream().pipe(res);
 	}
