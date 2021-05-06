@@ -175,9 +175,9 @@ const gritty = require("gritty");
 gritty.listen(io);
 async function serveFile(req, res, file) {
 	var header = {
-		"Content-Disposition": `filename="` + file.name + `"`,
-		"Content-Type": "application/octet-stream",
-		"Content-Length": file.length
+		"Content-Disposition": `filename="` + encodeURI(file.name) + `"`,
+		"Content-Length": file.length,
+		"Content-Type": "application/octet-stream"
 	};
 	var contenttype = await FileType.fromStream(file.createReadStream({
 		start: 0,
