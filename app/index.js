@@ -202,7 +202,7 @@ async function convertFile(req, res, file) {
 	try {
 		await exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\"");
 		await fs.ensureFile("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8");
-		res.redirect("/files/" + file.path + ".m3u8");
+		res.redirect("/files/" + req.params.infoHash + "/" + file.path + ".m3u8");
 	} catch (err) {
 		res.send(err.toString());
 	}
