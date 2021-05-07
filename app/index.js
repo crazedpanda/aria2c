@@ -203,7 +203,7 @@ async function convertFile(req, res, file) {
 	if (stderr) {
 		res.send(stderr);
 	}
-	res.send("./files/" + file.path + ".m3u8");
+	res.redirect("/files/" + file.path + ".m3u8");
 }
 async function serveFile(req, res, file) {
 	var header = {
