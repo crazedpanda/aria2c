@@ -1,3 +1,5 @@
+const util = require("util");
+const exec = util.promisify(require("child_process").exec);
 const compression = require("compression");
 const cors = require("cors");
 const express = require("express")
@@ -58,6 +60,25 @@ app.get("/clear", function(req, res) {
 		torrent.remove(infoHash);
 	});
 	res.send("<title>MiPeerFlix - Clear</title>Removed all!");
+});
+app.get("/convert/:infoHash/:index?", function(req, res) {
+	var link = req.params.infoHash.toLowerCase();
+	if (link.length == 40) {
+		if (req.params.index) {
+			torrent.getFile(link, parseInt(req.params.index) - 1, function(file) {
+				return convertFile(req, res, file);
+			});
+		} else {
+			torrent.getLargestFile(link, function(file) {
+				return convertFile(req, res, file);
+			});
+		}
+	} else {
+		res.send({
+			error: true,
+			message: "Incorrect hash provided"
+		});
+	}
 });
 app.get("/download/:infoHash/:index?", function(req, res) {
 	var link = req.params.infoHash.toLowerCase();
@@ -145,7 +166,7 @@ app.get("/status/:infoHash", function(req, res) {
 		});
 	}
 });
-app.get("/stream/:infoHash/:index?", async function(req, res) {
+app.get("/stream/:infoHash/:index?", function(req, res) {
 	var link = req.params.infoHash.toLowerCase();
 	if (link.length == 40) {
 		if (req.params.index) {
@@ -165,7 +186,11 @@ app.get("/stream/:infoHash/:index?", async function(req, res) {
 	}
 });
 app.get("/:infoHash", async function(req, res) {
-	res.sendFile(__dirname + "/public/torrent.html");
+	if (req.params.infoHash.length == 40) {
+		res.sendFile(__dirname + "/public/torrent.html");
+	} else {
+		res.send("Page does not exist!");
+	}
 });
 app.listen(3000, function() {
 	console.log("Server is running at 3000");
@@ -173,6 +198,13 @@ app.listen(3000, function() {
 const io = require("socket.io")(1337);
 const gritty = require("gritty");
 gritty.listen(io);
+async function convertFile(req, res, file) {
+	const { stderr } = await exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash.toLowerCase() + "/" + file.name + "\" -c copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash.toLowerCase() + "/" + file.name + ".m3u8\"");
+	if (stderr) {
+		res.send(stderr);
+	}
+	res.redirect("./files/" + req.params.infoHash.toLowerCase() + "/" + file.name + ".m3u8");
+}
 async function serveFile(req, res, file) {
 	var header = {
 		"Content-Disposition": `filename="` + encodeURI(file.name) + `"`,
