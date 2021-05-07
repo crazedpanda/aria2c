@@ -199,7 +199,7 @@ const io = require("socket.io")(1337);
 const gritty = require("gritty");
 gritty.listen(io);
 async function convertFile(req, res, file) {
-	const { stderr } = await exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash.toLowerCase() + "/" + file.name + "\" -c copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash.toLowerCase() + "/" + file.name + ".m3u8\"");
+	const { stdout, stderr } = await exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash.toLowerCase() + "/" + file.name + "\" -c copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash.toLowerCase() + "/" + file.name + ".m3u8\"");
 	if (stderr) {
 		res.send(stderr);
 	}
