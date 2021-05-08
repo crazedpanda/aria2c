@@ -258,13 +258,13 @@ function exec(cmd) {
 function convertFile(req, res, file) {
 	return exec("ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\"").then(function(vcodec) {
 		if (vcodec.trim() == "h264") {
-			exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c copy -movflags +faststart -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
+			exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c copy -movflags +faststart -tune zerolatency -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
 		} else {
 			exec("ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\"").then(function(height) {
 				if (parseInt(height.trim()) > 2160) {
-					return exec("ffmpeg -threads " + parseInt(Math.floor(os.cpus().length * 0.125)) + " -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v libx264 -profile:v baseline -vf \"scale=-2:2160:flags=lanczos\" -c:a copy -movflags +faststart -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
+					return exec("ffmpeg -threads " + parseInt(Math.floor(os.cpus().length * 0.125)) + " -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v libx264 -profile:v baseline -vf \"scale=-2:1080:flags=lanczos\" -c:a copy -movflags +faststart -tune zerolatency -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
 				} else {
-					return exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v copy -c:a copy -movflags +faststart -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
+					return exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v copy -c:a copy -movflags +faststart -tune zerolatency -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
 				}
 			});
 		}
