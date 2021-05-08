@@ -265,8 +265,6 @@ function convertFile(req, res, file) {
 				} else {
 					return exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
 				}
-			}).catch(function() {
-				res.send("Unable to get video height!");
 			});
 		}
 		if (req.params.index) {
@@ -275,7 +273,7 @@ function convertFile(req, res, file) {
 			res.redirect("/check/" + req.params.infoHash);
 		}
 	}).catch(function() {
-		res.send("Unable to get video codec!");
+		res.send("FFMPEG error!");
 	});
 }
 async function serveFile(req, res, file) {
