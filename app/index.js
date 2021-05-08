@@ -226,8 +226,8 @@ const io = require("socket.io")(1337);
 const gritty = require("gritty");
 gritty.listen(io);
 
-async function exec(cmd, limit) {
-	return new Promise(function(resolve, reject) {
+function exec(cmd, limit) {
+	return new Promise(async function(resolve, reject) {
 		let response = "";
 		let child = spawn(cmd, {
 			shell: true
