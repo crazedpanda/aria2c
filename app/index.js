@@ -1,5 +1,5 @@
 const util = require("util");
-const exec = util.promisify(require("child_process").exec);
+const spawn = require("child_process").spawn;
 const compression = require("compression");
 const cors = require("cors");
 const express = require("express")
@@ -59,19 +59,17 @@ app.get("/check/:infoHash/:index?", function(req, res) {
 	if (link.length == 40) {
 		if (req.params.index) {
 			torrent.getFile(link, parseInt(req.params.index) - 1, async function(file) {
-				try {
-					await fs.ensureFile("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done");
+				if (await fs.pathExists("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done")) {
 					res.redirect("/files/" + req.params.infoHash + "/" + file.path + ".m3u8");
-				} catch (err) {
+				} else {
 					res.send("<head><meta http-equiv=\"refresh\" content=\"20\"></head>");
 				}
 			});
 		} else {
 			torrent.getLargestFile(link, async function(file) {
-				try {
-					await fs.ensureFile("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done");
+				if (await fs.pathExists("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done")) {
 					res.redirect("/files/" + req.params.infoHash + "/" + file.path + ".m3u8");
-				} catch (err) {
+				} else {
 					res.send("<head><meta http-equiv=\"refresh\" content=\"20\"></head>");
 				}
 			});
@@ -228,19 +226,49 @@ const io = require("socket.io")(1337);
 const gritty = require("gritty");
 gritty.listen(io);
 
-async function convertFile(req, res, file) {
-	var { stdout, stderr } = await exec("ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\"", { shell: true });
-	console.log("vcodec", "||" + stdout + "||");
-	if (stdout == "h264") {
-		exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
-	} else {
-		exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v libx264 -profile:v high -level 4.1 -pix_fmt yuv420p -movflags +faststart -c:a copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
-	}
-	if (req.params.index) {
-		res.redirect("/check/" + req.params.infoHash + "/" + req.params.index);
-	} else {
-		res.redirect("/check/" + req.params.infoHash);
-	}
+function exec(cmd) {
+	return new Promise(function(resolve, reject) {
+		let response = "";
+		let child = spawn(cmd, {
+			shell: true
+		});
+		child.stdout.pipe(fs.createWriteStream("/dev/stdout", {
+			flags: "a"
+		}));
+		child.stdout.on("data", function(data) {
+			response += data;
+		});
+		child.stderr.pipe(fs.createWriteStream("/dev/stderr", {
+			flags: "a"
+		}));
+		child.stderr.on("data", function(data) {
+			response += data;
+		});
+		child.on("close", function(code) {
+			if (code === 0) {
+				resolve(response);
+			} else {
+				reject(response);
+			}
+		});
+	});
+}
+
+function convertFile(req, res, file) {
+	return exec("ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\"").then(function(vcodec) {
+		if (vcodec.trim() == "h264") {
+			exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
+		} else {
+			exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v libx264 -profile:v high -level 4.2 -pix_fmt yuv420p -movflags +faststart -c:a copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
+		}
+		if (req.params.index) {
+			res.redirect("/check/" + req.params.infoHash + "/" + req.params.index);
+		} else {
+			res.redirect("/check/" + req.params.infoHash);
+		}
+	}).catch(function() {
+		res.send("Unable to get video codec!");
+	});
 }
 async function serveFile(req, res, file) {
 	var header = {
