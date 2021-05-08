@@ -63,7 +63,7 @@ app.get("/check/:infoHash/:index?", function(req, res) {
 					await fs.ensureFile("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done");
 					res.redirect("/files/" + req.params.infoHash + "/" + file.path + ".m3u8");
 				} catch (err) {
-					res.redirect("/check/" + req.params.infoHash + "/" + req.params.index);
+					res.send("<head><meta http-equiv=\"refresh\" content=\"20\"></head>");
 				}
 			});
 		} else {
@@ -72,7 +72,7 @@ app.get("/check/:infoHash/:index?", function(req, res) {
 					await fs.ensureFile("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done");
 					res.redirect("/files/" + req.params.infoHash + "/" + file.path + ".m3u8");
 				} catch (err) {
-					res.redirect("/check/" + req.params.infoHash);
+					res.send("<head><meta http-equiv=\"refresh\" content=\"20\"></head>");
 				}
 			});
 		}
