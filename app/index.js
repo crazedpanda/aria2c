@@ -54,6 +54,35 @@ app.get("/add/:infoHash", function(req, res) {
 		});
 	}
 });
+app.get("/check/:infoHash/:index?", function(req, res) {
+	var link = req.params.infoHash.toLowerCase();
+	if (link.length == 40) {
+		if (req.params.index) {
+			torrent.getFile(link, parseInt(req.params.index) - 1, function(file) {
+				try {
+					await fs.ensureFile("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done");
+					res.redirect("/files/" + req.params.infoHash + "/" + file.path + ".m3u8");
+				} catch (err) {
+					res.redirect("/check/" + req.params.infoHash + "/" + req.params.index);
+				}
+			});
+		} else {
+			torrent.getLargestFile(link, function(file) {
+				try {
+					await fs.ensureFile("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done");
+					res.redirect("/files/" + req.params.infoHash + "/" + file.path + ".m3u8");
+				} catch (err) {
+					res.redirect("/check/" + req.params.infoHash);
+				}
+			});
+		}
+	} else {
+		res.send({
+			error: true,
+			message: "Incorrect hash provided"
+		});
+	}
+});
 app.get("/clear", function(req, res) {
 	var infoHashes = Object.keys(torrent.list());
 	infoHashes.forEach(function(infoHash) {
@@ -199,8 +228,12 @@ const io = require("socket.io")(1337);
 const gritty = require("gritty");
 gritty.listen(io);
 async function convertFile(req, res, file) {
-	exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\"");
-	res.send("Converting \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\"");
+	exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
+	if (req.params.index) {
+		res.redirect("/check/" + req.params.infoHash + "/" + req.params.index);
+	} else {
+		res.redirect("/check/" + req.params.infoHash);
+	}
 }
 async function serveFile(req, res, file) {
 	var header = {
