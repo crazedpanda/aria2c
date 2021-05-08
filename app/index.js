@@ -62,7 +62,7 @@ app.get("/check/:infoHash/:index?", function(req, res) {
 				if (await fs.pathExists("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done")) {
 					res.redirect("/files/" + req.params.infoHash + "/" + file.path + ".m3u8");
 				} else {
-					res.send("<head><meta http-equiv=\"refresh\" content=\"20\"></head>");
+					res.send("<head><meta http-equiv=\"refresh\" content=\"20\"></head>Converting \"" + file.path + "\"");
 				}
 			});
 		} else {
@@ -70,7 +70,7 @@ app.get("/check/:infoHash/:index?", function(req, res) {
 				if (await fs.pathExists("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done")) {
 					res.redirect("/files/" + req.params.infoHash + "/" + file.path + ".m3u8");
 				} else {
-					res.send("<head><meta http-equiv=\"refresh\" content=\"20\"></head>");
+					res.send("<head><meta http-equiv=\"refresh\" content=\"20\"></head>Converting \"" + file.path + "\"");
 				}
 			});
 		}
@@ -259,7 +259,11 @@ function convertFile(req, res, file) {
 		if (vcodec.trim() == "h264") {
 			exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
 		} else {
-			exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v libx264 -profile:v high -level 4.2 -pix_fmt yuv420p -movflags +faststart -c:a copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
+			var videofilter = "";
+			if (req.query.resolution && req.query.resolution.length && ["360", "480", "720", "1080"].indexOf(req.query.resolution) > -1) {
+				videofilter = " -vf \"scale=-2:" + req.query.resolution + ":flags=lanczos\"";
+			}
+			exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v libx264 -profile:v main -pix_fmt yuv420p -movflags +faststart" + videofilter + " -c:a copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
 		}
 		if (req.params.index) {
 			res.redirect("/check/" + req.params.infoHash + "/" + req.params.index);
