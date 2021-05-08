@@ -264,12 +264,6 @@ function convertFile(req, res, file) {
 				if (parseInt(height.trim()) > 2160) {
 					var ffmpeg = spawn("ffmpeg", ["-i", "pipe:0", "-threads", parseInt(Math.floor(os.cpus().length * 0.125)), "-c:v", "libx264", "-profile:v", "baseline", "-vf", "scale=-2:720:flags=lanczos", "-c:a", "copy", "-movflags", "+faststart", "-tune", "zerolatency", "-start_number", 0, "-hls_time", 10, "-hls_list_size", 0, "-f", "hls", "/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8"]);
 					file.createReadStream().pipe(ffmpeg.stdin);
-					ffmpeg.stdout.on("data", function(data) {
-						console.log("stdout", data.toString());
-					});
-					ffmpeg.stderr.on("data", function(data) {
-						console.log("stderr", data.toString());
-					});
 					ffmpeg.on("close", function(code) {
 						if (code === 0) {
 							exec("touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
