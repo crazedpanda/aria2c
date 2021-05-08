@@ -263,7 +263,7 @@ function convertFile(req, res, file) {
 			if (req.query.resolution && req.query.resolution.length && ["360", "480", "720", "1080"].indexOf(req.query.resolution) > -1) {
 				videofilter = " -vf \"scale=-2:" + req.query.resolution + ":flags=lanczos\"";
 			}
-			exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v libx264 -profile:v main -pix_fmt yuv420p -movflags +faststart" + videofilter + " -c:a copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
+			exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -threads 4 -c:v libx264 -pix_fmt yuv420p -movflags +faststart" + videofilter + " -c:a copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
 		}
 		if (req.params.index) {
 			res.redirect("/check/" + req.params.infoHash + "/" + req.params.index);
