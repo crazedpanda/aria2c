@@ -262,7 +262,7 @@ function convertFile(req, res, file) {
 		} else {
 			exec("ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\"").then(function(height) {
 				if (parseInt(height.trim()) > 2160) {
-					var ffmpeg = spawn("ffmpeg", ["-i", "pipe:0", "-threads", parseInt(Math.floor(os.cpus().length * 0.5)), "-c:v", "libx264", "-profile:v", "baseline", "-vf", "scale=-2:1080:flags=lanczos", "-c:a", "copy", "-movflags", "+faststart", "-tune", "zerolatency", "-start_number", 0, "-hls_time", 10, "-hls_list_size", 0, "-f", "hls", "/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8"], null);
+					var ffmpeg = spawn("ffmpeg", ["-i", "pipe:0", "-threads", parseInt(Math.floor(os.cpus().length * 0.5)), "-c:v", "libx264", "-profile:v", "baseline", "-vf", "scale=-2:1080:flags=lanczos", "-c:a", "copy", "-movflags", "+faststart", "-tune", "zerolatency", "-start_number", 0, "-hls_time", 10, "-hls_list_size", 0, "-f", "hls", "/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8"]);
 					file.createReadStream().pipe(ffmpeg.stdin);
 					ffmpeg.stdout.pipe(fs.createWriteStream("/dev/stdout", {
 						flags: "a"
