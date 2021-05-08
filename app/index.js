@@ -233,7 +233,7 @@ function exec(cmd, limit) {
 			shell: true
 		});
 		if (typeof limit == "number") {
-			await exec("cpulimit -e ffmpeg -l " + limit);
+			await exec("cpulimit -P /usr/bin/ffmpeg -l " + limit);
 		}
 		child.stdout.pipe(fs.createWriteStream("/dev/stdout", {
 			flags: "a"
