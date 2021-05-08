@@ -199,13 +199,8 @@ const io = require("socket.io")(1337);
 const gritty = require("gritty");
 gritty.listen(io);
 async function convertFile(req, res, file) {
-	try {
-		await exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\"");
-		await fs.ensureFile("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8");
-		res.redirect("/files/" + req.params.infoHash + "/" + file.path + ".m3u8");
-	} catch (err) {
-		res.send(err.toString());
-	}
+	exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\"");
+	res.send("Converting \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\"");
 }
 async function serveFile(req, res, file) {
 	var header = {
