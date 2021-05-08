@@ -263,7 +263,7 @@ function convertFile(req, res, file) {
 		} else {
 			exec("ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\"").then(function(height) {
 				if (parseInt(height.trim()) > 2160) {
-					ffmpeg(file.createReadStream()).inputOptions("-threads", parseInt(Math.floor(os.cpus().length * 0.125)), "-c:v", "libx264", "-profile:v", "baseline", "-vf", "scale=-2:720:flags=lanczos", "-c:a", "copy", "-movflags", "+faststart", "-tune", "zerolatency", "-start_number", 0, "-hls_time", 10, "-hls_list_size", 0, "-f", "hls").output("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8").on("error", function(err) {
+					ffmpeg(file.createReadStream()).outputOptions("-threads", parseInt(Math.floor(os.cpus().length * 0.125)), "-c:v", "libx264", "-profile:v", "baseline", "-vf", "scale=-2:720:flags=lanczos", "-c:a", "copy", "-movflags", "+faststart", "-tune", "zerolatency", "-start_number", 0, "-hls_time", 10, "-hls_list_size", 0, "-f", "hls").output("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8").on("error", function(err) {
 						console.log("An error occurred: " + err);
 					}).on("end", function() {
 						console.log("Processing finished!");
