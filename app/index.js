@@ -58,7 +58,7 @@ app.get("/check/:infoHash/:index?", function(req, res) {
 	var link = req.params.infoHash.toLowerCase();
 	if (link.length == 40) {
 		if (req.params.index) {
-			torrent.getFile(link, parseInt(req.params.index) - 1, function(file) {
+			torrent.getFile(link, parseInt(req.params.index) - 1, async function(file) {
 				try {
 					await fs.ensureFile("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done");
 					res.redirect("/files/" + req.params.infoHash + "/" + file.path + ".m3u8");
@@ -67,7 +67,7 @@ app.get("/check/:infoHash/:index?", function(req, res) {
 				}
 			});
 		} else {
-			torrent.getLargestFile(link, function(file) {
+			torrent.getLargestFile(link, async function(file) {
 				try {
 					await fs.ensureFile("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done");
 					res.redirect("/files/" + req.params.infoHash + "/" + file.path + ".m3u8");
@@ -227,7 +227,8 @@ app.listen(3000, function() {
 const io = require("socket.io")(1337);
 const gritty = require("gritty");
 gritty.listen(io);
-async function convertFile(req, res, file) {
+
+function convertFile(req, res, file) {
 	exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
 	if (req.params.index) {
 		res.redirect("/check/" + req.params.infoHash + "/" + req.params.index);
