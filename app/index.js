@@ -60,7 +60,7 @@ app.get("/check/:infoHash/:index?", function(req, res) {
 	if (link.length == 40) {
 		if (req.params.index) {
 			torrent.getFile(link, parseInt(req.params.index) - 1, async function(file) {
-				if (await fs.pathExists("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done")) {
+				if (file && await fs.pathExists("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done")) {
 					res.redirect("/files/" + req.params.infoHash + "/" + file.path + ".m3u8");
 				} else {
 					res.send("<head><title>" + file.name + "</title><meta http-equiv=\"refresh\" content=\"20\"></head>Converting \"" + file.path + "\" <a href=\"../files/" + req.params.infoHash + "/" + file.path + ".m3u8\">Preview</a>");
@@ -68,7 +68,7 @@ app.get("/check/:infoHash/:index?", function(req, res) {
 			});
 		} else {
 			torrent.getLargestFile(link, async function(file) {
-				if (await fs.pathExists("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done")) {
+				if (file && await fs.pathExists("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done")) {
 					res.redirect("/files/" + req.params.infoHash + "/" + file.path + ".m3u8");
 				} else {
 					res.send("<head><title>" + file.name + "</title><meta http-equiv=\"refresh\" content=\"20\"></head>Converting \"" + file.path + "\" <a href=\"../files/" + req.params.infoHash + "/" + file.path + ".m3u8\">Preview</a>");
@@ -262,12 +262,12 @@ function convertFile(req, res, file) {
 		} else {
 			exec("ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\"").then(function(height) {
 				if (parseInt(height.trim()) > 2160) {
-					var ffmpeg = spawn("ffmpeg", ["-i", "pipe:0", "-threads", parseInt(Math.floor(os.cpus().length * 0.125)), "-c:v", "libx264", "-profile:v", "baseline", "-vf", "scale=-2:1080:flags=lanczos", "-c:a", "copy", "-movflags", "+faststart", "-tune", "zerolatency", "-start_number", 0, "-hls_time", 10, "-hls_list_size", 0, "-f", "hls", "/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8"]);
+					var ffmpeg = spawn("ffmpeg", ["-i", "pipe:0", "-threads", parseInt(Math.floor(os.cpus().length * 0.125)), "-c:v", "libx264", "-profile:v", "baseline", "-vf", "scale=-2:720:flags=lanczos", "-c:a", "copy", "-movflags", "+faststart", "-tune", "zerolatency", "-start_number", 0, "-hls_time", 10, "-hls_list_size", 0, "-f", "hls", "/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8"]);
 					file.createReadStream().pipe(ffmpeg.stdin);
-					ffmpeg.stdout.on("data", function (data) {
+					ffmpeg.stdout.on("data", function(data) {
 						console.log("stdout", data.toString());
 					});
-					ffmpeg.stderr.on("data", function (data) {
+					ffmpeg.stderr.on("data", function(data) {
 						console.log("stderr", data.toString());
 					});
 					ffmpeg.on("close", function(code) {
