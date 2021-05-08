@@ -62,7 +62,7 @@ app.get("/check/:infoHash/:index?", function(req, res) {
 				if (await fs.pathExists("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done")) {
 					res.redirect("/files/" + req.params.infoHash + "/" + file.path + ".m3u8");
 				} else {
-					res.send("<head><meta http-equiv=\"cache-control\" content=\"no-cache\"><meta http-equiv=\"refresh\" content=\"20\"></head>Converting \"" + file.path + "\"");
+					res.send("<head><meta http-equiv=\"refresh\" content=\"20\"></head>Converting \"" + file.path + "\"");
 				}
 			});
 		} else {
@@ -70,7 +70,7 @@ app.get("/check/:infoHash/:index?", function(req, res) {
 				if (await fs.pathExists("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done")) {
 					res.redirect("/files/" + req.params.infoHash + "/" + file.path + ".m3u8");
 				} else {
-					res.send("<head><meta http-equiv=\"cache-control\" content=\"no-cache\"><meta http-equiv=\"refresh\" content=\"20\"></head>Converting \"" + file.path + "\"");
+					res.send("<head><meta http-equiv=\"refresh\" content=\"20\"></head>Converting \"" + file.path + "\"");
 				}
 			});
 		}
