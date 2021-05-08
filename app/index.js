@@ -5,6 +5,8 @@ const cors = require("cors");
 const express = require("express")
 const FileType = require("file-type");
 const fs = require("fs-extra");
+const os = require("os");
+const cpuCount = os.cpus().length;
 const parseRange = require("range-parser");
 const WebTorrent = require("webtorrent");
 const app = express();
@@ -19,6 +21,7 @@ app.use(express.urlencoded({
 app.use(express.static(__dirname + "/public"));
 app.use("/files", express.static("/tmp/webtorrent"));
 app.get("/", function(req, res) {
+	console.log("cpuCount", cpuCount);
 	if ("HEROKU_APP_NAME" in process.env) {
 		res.send("<title>MiPeerFlix</title>Hello World from " + process.env.HEROKU_APP_NAME + "!");
 	} else {
@@ -226,25 +229,21 @@ const io = require("socket.io")(1337);
 const gritty = require("gritty");
 gritty.listen(io);
 
-function exec(cmd, limit) {
+function exec(cmd) {
 	return new Promise(async function(resolve, reject) {
 		let response = "";
 		let child = spawn(cmd, {
 			shell: true
 		});
-		if (typeof limit == "number" && limit > 0) {
-			var pid = (await exec("pidof ffmpeg")).trim();
-			await exec("cpulimit -i -p " + pid + " -l " + limit);
-		}
-// 		child.stdout.pipe(fs.createWriteStream("/dev/stdout", {
-// 			flags: "a"
-// 		}));
+		child.stdout.pipe(fs.createWriteStream("/dev/stdout", {
+			flags: "a"
+		}));
 		child.stdout.on("data", function(data) {
 			response += data;
 		});
-// 		child.stderr.pipe(fs.createWriteStream("/dev/stderr", {
-// 			flags: "a"
-// 		}));
+		child.stderr.pipe(fs.createWriteStream("/dev/stderr", {
+			flags: "a"
+		}));
 		child.stderr.on("data", function(data) {
 			response += data;
 		});
@@ -265,7 +264,7 @@ function convertFile(req, res, file) {
 		} else {
 			exec("ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\"").then(function(height) {
 				if (parseInt(height.trim()) > 2160) {
-					return exec("ffmpeg -threads 4 -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v mpeg2video -qscale:v 2 -vf \"scale=-2:1080:flags=lanczos\" -c:a copy \"/tmp/webtorrent/" + req.params.infoHash + ".mkv\" && ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + ".mkv\" -c:v libx264 -c:a copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"", req.query.limit && req.query.limit.length ? parseInt(req.query.limit) : 0);
+					return exec("ffmpeg -threads 6 -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v mpeg2video -qscale:v 2 -vf \"scale=-2:1080:flags=lanczos\" -c:a copy \"/tmp/webtorrent/" + req.params.infoHash + ".mkv\" && ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + ".mkv\" -c:v libx264 -c:a copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"", req.query.limit && req.query.limit.length ? parseInt(req.query.limit) : 0);
 				} else {
 					return exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v copy -c:a copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
 				}
