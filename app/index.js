@@ -263,7 +263,7 @@ function convertFile(req, res, file) {
 		} else {
 			exec("ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\"").then(function(height) {
 				if (parseInt(height.trim()) > 2160) {
-					var outStream = fs.createWriteStream("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".mkv");
+					var outStream = fs.createWriteStream("/tmp/webtorrent/" + req.params.infoHash + ".mp4");
 					ffmpeg(file.createReadStream()).outputOptions("-threads", parseInt(Math.floor(os.cpus().length * 0.125)), "-c:v", "libx264", "-profile:v", "baseline", "-vf", "scale=-2:720:flags=lanczos", "-c:a", "copy", "-movflags", "+faststart").on("progress", function(progress) {
 						console.log("Processing: ", progress);
 					}).on("error", function(err) {
