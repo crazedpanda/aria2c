@@ -271,7 +271,7 @@ function convertFile(req, res, file) {
 					}).on("end", function() {
 						console.log("Processing finished!");
 						exec("touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
-					}).pipe(outStream, { end: true });
+					}).output(outStream, { end: true }).run();
 				} else {
 					return exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v copy -c:a copy -movflags +faststart -tune zerolatency -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
 				}
