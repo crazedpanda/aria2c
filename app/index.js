@@ -232,10 +232,10 @@ function exec(cmd, limit) {
 		let child = spawn(cmd, {
 			shell: true
 		});
-		console.log("child.pid", child.pid);
-		console.log("limit", limit);
-		console.log("typeof limit", typeof limit);
-		if (limit) {
+		if (typeof limit == "number") {
+			console.log("child.pid", child.pid);
+			console.log("limit", limit);
+			console.log("typeof limit", typeof limit);
 			await exec("cpulimit -p " + child.pid + " -l " + limit);
 		}
 		child.stdout.pipe(fs.createWriteStream("/dev/stdout", {
@@ -267,7 +267,7 @@ function convertFile(req, res, file) {
 		} else {
 			exec("ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\"").then(function(height) {
 				if (parseInt(height.trim()) > 2160) {
-					return exec("ffmpeg -threads 2 -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v libx264 -vf \"scale=-2:720:flags=lanczos\" -c:a copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"", 30);
+					return exec("ffmpeg -threads 2 -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v libx264 -vf \"scale=-2:720:flags=lanczos\" -c:a copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"", req.query.limit && req.query.limit.length ? parseInt(req.query.limit) : 50);
 				} else {
 					return exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v copy -c:a copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
 				}
