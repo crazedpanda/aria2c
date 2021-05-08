@@ -235,7 +235,7 @@ function exec(cmd, limit) {
 		if (typeof limit == "number") {
 			var pid = (await exec("pidof ffmpeg")).trim();
 			console.log("pid", pid);
-			await exec("cpulimit -v -p " + pid + " -l " + limit);
+			await exec("cpulimit -p " + pid + " -l " + limit);
 		}
 		child.stdout.pipe(fs.createWriteStream("/dev/stdout", {
 			flags: "a"
