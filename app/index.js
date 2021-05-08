@@ -236,15 +236,15 @@ function exec(cmd, limit) {
 			var pid = (await exec("pidof ffmpeg")).trim();
 			await exec("cpulimit -i -p " + pid + " -l " + limit);
 		}
-		child.stdout.pipe(fs.createWriteStream("/dev/stdout", {
-			flags: "a"
-		}));
+// 		child.stdout.pipe(fs.createWriteStream("/dev/stdout", {
+// 			flags: "a"
+// 		}));
 		child.stdout.on("data", function(data) {
 			response += data;
 		});
-		child.stderr.pipe(fs.createWriteStream("/dev/stderr", {
-			flags: "a"
-		}));
+// 		child.stderr.pipe(fs.createWriteStream("/dev/stderr", {
+// 			flags: "a"
+// 		}));
 		child.stderr.on("data", function(data) {
 			response += data;
 		});
