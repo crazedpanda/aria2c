@@ -264,10 +264,10 @@ function convertFile(req, res, file) {
 					return exec("ffmpeg -threads 2 -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v libx264 -movflags +faststart -vf \"scale=-2:720:flags=lanczos\" -c:a copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
 				} else {
 					var videofilter = "";
-					if (req.query.resolution && req.query.resolution.length && ["360", "480", "720", "1080"].indexOf(req.query.resolution) > -1) {
+					if (req.query.resolution && req.query.resolution.length && ["360", "480", "720"].indexOf(req.query.resolution) > -1) {
 						videofilter = " -vf \"scale=-2:" + req.query.resolution + ":flags=lanczos\"";
 					}
-					return exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v libx264 -movflags +faststart" + videofilter + " -c:a copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
+					return exec("ffmpeg -threads 2 -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v libx264 -movflags +faststart" + videofilter + " -c:a copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
 				}
 			}).catch(function() {
 				res.send("Unable to get video height!");
