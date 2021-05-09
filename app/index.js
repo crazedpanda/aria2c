@@ -56,6 +56,7 @@ app.get("/add/:infoHash", function(req, res) {
 	}
 });
 app.get("/check/:infoHash/:index?", function(req, res) {
+	res.set("Cache-Control", "no-store");
 	var link = req.params.infoHash.toLowerCase();
 	if (link.length == 40) {
 		if (req.params.index) {
@@ -63,7 +64,7 @@ app.get("/check/:infoHash/:index?", function(req, res) {
 				if (file && await fs.pathExists("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done")) {
 					res.redirect("/files/" + req.params.infoHash + "/" + file.path + ".m3u8");
 				} else {
-					res.send("<html><head><title>" + file.name + "</title></head><body>Converting \"" + file.path + "\" <a href=\"../files/" + req.params.infoHash + "/" + file.path + ".m3u8\">Preview</a><script>setTimeout(function() { location.reload(true); }, 20000);</script></body></html>");
+					res.send("<html><head><title>" + file.name + "</title><meta http-equiv=\"refresh\" content=\"20\"></head><body>Converting \"" + file.path + "\" <a href=\"../files/" + req.params.infoHash + "/" + file.path + ".m3u8\">Preview</a></body></html>");
 				}
 			});
 		} else {
@@ -71,7 +72,7 @@ app.get("/check/:infoHash/:index?", function(req, res) {
 				if (file && await fs.pathExists("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done")) {
 					res.redirect("/files/" + req.params.infoHash + "/" + file.path + ".m3u8");
 				} else {
-					res.send("<html><head><title>" + file.name + "</title></head><body>Converting \"" + file.path + "\" <a href=\"../files/" + req.params.infoHash + "/" + file.path + ".m3u8\">Preview</a><script>setTimeout(function() { location.reload(true); }, 20000);</script></body></html>");
+					res.send("<html><head><title>" + file.name + "</title><meta http-equiv=\"refresh\" content=\"20\"></head><body>Converting \"" + file.path + "\" <a href=\"../files/" + req.params.infoHash + "/" + file.path + ".m3u8\">Preview</a></body></html>");
 				}
 			});
 		}
