@@ -62,7 +62,7 @@ app.get("/check/:infoHash/:index?", function(req, res) {
 		if (req.params.index) {
 			torrent.getFile(link, parseInt(req.params.index) - 1, async function(file) {
 				if (file && await fs.pathExists("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done")) {
-					res.redirect("/files/" + req.params.infoHash + "/" + file.path + ".m3u8");
+					res.send("<html><head><title>" + file.name + "</title><meta http-equiv=\"refresh\" content=\"20\"></head><body>Done converting \"" + file.path + "\" <a href=\"../files/" + req.params.infoHash + "/" + file.path + ".m3u8\">Link</a></body></html>");
 				} else {
 					res.send("<html><head><title>" + file.name + "</title><meta http-equiv=\"refresh\" content=\"20\"></head><body>Converting \"" + file.path + "\" <a href=\"../files/" + req.params.infoHash + "/" + file.path + ".m3u8\">Preview</a></body></html>");
 				}
@@ -70,7 +70,7 @@ app.get("/check/:infoHash/:index?", function(req, res) {
 		} else {
 			torrent.getLargestFile(link, async function(file) {
 				if (file && await fs.pathExists("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done")) {
-					res.redirect("/files/" + req.params.infoHash + "/" + file.path + ".m3u8");
+					res.send("<html><head><title>" + file.name + "</title><meta http-equiv=\"refresh\" content=\"20\"></head><body>Done converting \"" + file.path + "\" <a href=\"../files/" + req.params.infoHash + "/" + file.path + ".m3u8\">Link</a></body></html>");
 				} else {
 					res.send("<html><head><title>" + file.name + "</title><meta http-equiv=\"refresh\" content=\"20\"></head><body>Converting \"" + file.path + "\" <a href=\"../files/" + req.params.infoHash + "/" + file.path + ".m3u8\">Preview</a></body></html>");
 				}
