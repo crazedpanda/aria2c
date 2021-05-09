@@ -263,7 +263,7 @@ function convertFile(req, res, file) {
 		} else {
 			exec("ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\"").then(function(height) {
 				if (parseInt(height.trim()) > 2160) {
-					fmpeg("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path).addOptions([
+					ffmpeg("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path).addOptions([
 						'-threads ' + parseInt(Math.floor(os.cpus().length * 0.125)),
 						'-profile:v baseline',
 						'-level 3.0',
