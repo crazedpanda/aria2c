@@ -263,16 +263,17 @@ function convertFile(req, res, file) {
 		} else {
 			exec("ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\"").then(function(height) {
 				if (parseInt(height.trim()) > 2160) {
+					const fileInput = file.createReadStream();
 					const converter = new Converter();
 					const input = converter.createInputStream();
 					converter.createOutputToFile("/tmp/webtorrent/" + req.params.infoHash + ".mp4", {
 						threads: parseInt(Math.floor(os.cpus().length * 0.125)),
 						vcodec: "libx264",
-						vf: "scale=-2:720:flags=lanczos",
+						vf: "scale=-2:1080:flags=lanczos",
 						acodec: "copy",
 						movflags: "+faststart",
 					});
-					file.createReadStream().pipe(input);
+					fileInput.pipe(input);
 					converter.run();
 				} else {
 					return exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v copy -c:a copy -movflags +faststart -tune zerolatency -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
