@@ -268,7 +268,7 @@ function convertFile(req, res, file) {
 					converter.createOutputToFile("/tmp/webtorrent/" + req.params.infoHash + ".mp4", {
 						threads: parseInt(Math.floor(os.cpus().length * 0.125)),
 						vcodec: "libx264",
-						vf: "scale=-2:1080:flags=lanczos",
+						vf: "scale=-2:720:flags=lanczos",
 						acodec: "copy",
 						movflags: "+faststart",
 					});
