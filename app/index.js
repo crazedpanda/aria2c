@@ -2,8 +2,7 @@ const util = require("util");
 const spawn = require("child_process").spawn;
 const compression = require("compression");
 const cors = require("cors");
-const express = require("express")
-const ffmpeg = require("fluent-ffmpeg");
+const express = require("express");
 const FileType = require("file-type");
 const fs = require("fs-extra");
 const os = require("os");
@@ -263,19 +262,7 @@ function convertFile(req, res, file) {
 		} else {
 			exec("ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\"").then(function(height) {
 				if (parseInt(height.trim()) > 2160) {
-					ffmpeg("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path).outputOptions([
-						'-threads ' + parseInt(Math.floor(os.cpus().length * 0.125)),
-						'-profile:v baseline',
-						'-level 3.0',
-						'-vf scale=-2:720:flags=lanczos',
-						'-acodec copy',
-						'-start_number 0',
-						'-hls_time 10',
-						'-hls_list_size 0',
-						'-f hls'
-					]).output("/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8").on("end", function() {
-						console.log("Done!");
-					}).run();
+					return exec("ffmpeg -threads " + parseInt(Math.floor(os.cpus().length * 0.5)) + " -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v libx264 -profile:v baseline -vf \"scale=-2:1080:flags=lanczos\" -c:a copy -movflags +faststart -tune zerolatency -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
 				} else {
 					return exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v copy -c:a copy -movflags +faststart -tune zerolatency -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
 				}
