@@ -7,7 +7,7 @@
     "compression": "",
     "cors": "",
     "express": "",
-    "fluent-ffmpeg": "",
+    "ffmpeg-stream": "",
     "file-type": "",
     "fs-extra": "",
     "gritty": "",
