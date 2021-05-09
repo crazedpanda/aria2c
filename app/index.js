@@ -255,28 +255,38 @@ function exec(cmd) {
 	});
 }
 
-function convertFile(req, res, file) {
+function handle(promise) {
+	return promise.then(function(data) {
+		return [data, undefined];
+	}).catch(function(err) {
+		return [undefined, err];
+	});
+}
+
+async function convertFile(req, res, file) {
 	if (file.downloaded) {
-		return exec("ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\"").then(function(vcodec) {
+		try {
+			var [vcodec, err] = await handle(exec("ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\""));
+			if(err) throw new Error("Unable to video codec!");
 			if (vcodec.trim() == "h264") {
 				exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
 			} else {
-				exec("ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\"").then(function(height) {
-					if (parseInt(height.trim()) > 2160) {
-						return exec("ffmpeg -threads " + parseInt(Math.floor(os.cpus().length * 0.25)) + " -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v libx264 -profile:v baseline -vf \"scale=-2:1080:flags=lanczos\" -c:a copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
-					} else {
-						return exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v copy -c:a copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
-					}
-				});
+				var [height, err1] = await handle(exec("ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\""));
+				if(err1) throw new Error("Unable to video height!");
+				if (parseInt(height.trim()) > 2160) {
+					exec("ffmpeg -threads " + parseInt(Math.floor(os.cpus().length * 0.25)) + " -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v libx264 -profile:v baseline -vf \"scale=-2:1080:flags=lanczos\" -c:a copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
+				} else {
+					exec("ffmpeg -i \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + "\" -c:v copy -c:a copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".m3u8\" && touch \"/tmp/webtorrent/" + req.params.infoHash + "/" + file.path + ".done\"");
+				}
 			}
 			if (req.params.index) {
 				res.redirect("/check/" + req.params.infoHash + "/" + req.params.index);
 			} else {
 				res.redirect("/check/" + req.params.infoHash);
 			}
-		}).catch(function() {
-			res.send("FFMPEG error!");
-		});
+		} catch(err) {
+			res.send(err);
+		}
 	} else {
 		res.send("<head><title>" + file.name + "</title><meta http-equiv=\"refresh\" content=\"20\"></head>Converting \"" + file.path + "\"");
 	}
