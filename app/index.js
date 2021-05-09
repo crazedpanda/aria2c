@@ -265,14 +265,13 @@ function convertFile(req, res, file) {
 				if (parseInt(height.trim()) > 2160) {
 					const converter = new Converter();
 					const input = converter.createInputStream();
-					const converterOutput = converter.createOutputStream({
+					converter.createOutputToFile("/tmp/webtorrent/" + req.params.infoHash + ".mp4", {
 						threads: parseInt(Math.floor(os.cpus().length * 0.125)),
 						vcodec: "libx264",
 						vf: "scale=-2:720:flags=lanczos",
 						acodec: "copy",
-						movflags: "+faststart"
+						movflags: "+faststart",
 					});
-					converterOutput.pipe(fs.createWriteStream("/tmp/webtorrent/" + req.params.infoHash + ".mp4"));
 					file.createReadStream().pipe(input);
 					converter.run();
 				} else {
