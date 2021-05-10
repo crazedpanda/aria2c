@@ -9,9 +9,8 @@
     "express": "",
     "file-type": "",
     "fs-extra": "",
-    "gritty": "",
-    "range-parser": "",
-    "socket.io": ""
+    "node-pty": "",
+    "range-parser": ""
   },
   "scripts": {
     "start": "node index.js"
