@@ -1,14 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>MiPeerFlix</title>
-	<link href="./torrent.css" rel="stylesheet" type="text/css">
+  <title>MiPeerFlix</title>
+  <style>
+  .title {
+    font-weight: bold;
+  }
+  table {
+    table-layout: fixed;
+    width: 100%;
+  }
+  td.title {
+    width: 140px;
+    vertical-align: middle;
+  }
+  </style>
 </head>
 <body>
-	<div id="toolbar">
-		<span class="title">Menu:</span> <a href="javascript:void(0)" id="remove" onclick="removeTorrent()">Remove</a> | <a href="javascript:void(0)" id="reload">Reload</a>
-	</div>
-	<hr>
 	<span id="loading">Loading Torrent!</span>
 	<div id="torrent">
 		<table>
