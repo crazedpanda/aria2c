@@ -24,7 +24,7 @@
 					document.getElementById("speed").innerHTML = data.payload.speed;
 					document.getElementById("remaining").innerHTML = data.payload.readableTimeRemaining;
 					document.getElementById("files").innerHTML = data.payload.files.map(function(file, index, array) {
-						return "<table id=\"" + (index + 1) + "\"><tr><td class=\"title\">File Path:</td><td>" + file.path + "</td></tr><tr><td class=\"title\">File Size:</td><td>" + file.total + "</td></tr><tr><td class=\"title\">Download Progress:</td><td>" + file.progress + "%</td></tr><tr><td class=\"title\"></td><td><a href=\"/stream/" + infoHash + "/" + (index + 1) + "\">Stream</a>" + (file.progress == 1 ? " <a href=\"/files/" + infoHash + "/" + (index + 1) + "\">Download</a>" : "") + "</td></tr></table>" + (index != array.length - 1 ? "<hr>" : "");
+						return "<table id=\"" + (index + 1) + "\"><tr><td class=\"title\">File Path:</td><td>" + file.path + "</td></tr><tr><td class=\"title\">File Size:</td><td>" + file.total + "</td></tr><tr><td class=\"title\">Download Progress:</td><td>" + file.progress + "%</td></tr><tr><td class=\"title\"></td><td><a href=\"/stream/" + infoHash + "/" + (index + 1) + "\">Stream</a>" + (file.progress == 1 ? " <a href=\"/download/" + infoHash + "/" + (index + 1) + "\">Download</a>" : "") + "</td></tr></table>" + (index != array.length - 1 ? "<hr>" : "");
 					}).join("");
 				} else if (data.type == "error") {
 					console.log("error", data.payload);
