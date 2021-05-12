@@ -51,7 +51,7 @@ router.ws("/convert/:infoHash/:index?", async function(ws, req) {
 				ws.on("close", function() {
 					controller.abort();
 				});
-				await convertVideo(signal, "https://mipeerflix.herokuapp.com/" + infoHash + "/" + index);
+				await convertVideo(signal, "https://mipeerflix.herokuapp.com/" + infoHash + "/" + (index + 1));
 				ws.send(JSON.stringify({
 					"type": "message",
 					"payload": "File converted!"
