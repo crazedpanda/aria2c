@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "abort-controller": "",
+    "axios": "",
     "compression": "",
     "cors": "",
     "express": "",
