@@ -190,7 +190,9 @@ function convertVideo(signal, input) {
 				await sleep(1000);
 			}
 		}
-		resolve();
+		await Promise.resolve().then(function() {
+			resolve();
+		});
 		signal.addEventListener("abort", function() {
 			reject();
 		});
@@ -207,7 +209,9 @@ function getKeyframes(signal, input) {
 		keyframes = Buffer.concat(keyframes).toString().split("\n").filter(function(el) {
 			return el.length;
 		});
-		resolve(keyframes);
+		await Promise.resolve().then(function() {
+			resolve(keyframes);
+		});
 		signal.addEventListener("abort", function() {
 			reject();
 		});
@@ -290,7 +294,9 @@ function splitVideo(signal, server, input, output, index, start, end) {
 		});
 		outputFile.end();
 		await runCommand(signal, server, "rm " + output);
-		resolve();
+		await Promise.resolve().then(function() {
+			resolve();
+		});
 		signal.addEventListener("abort", function() {
 			reject();
 		});
