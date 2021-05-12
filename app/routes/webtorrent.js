@@ -43,7 +43,7 @@ router.ws("/convert/:infoHash/:index?", async function(ws, req) {
 					return currentValue.length > arr[total].length ? currentIndex : total;
 				}, 0);
 			}
-			if (torrent.files[index]) {
+			if (torrent.files[index] && torrent.files[index].progress == 1) {
 				const controller = new AbortController();
 				const {
 					signal
