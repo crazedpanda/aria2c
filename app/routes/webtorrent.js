@@ -78,6 +78,41 @@ router.get("/clear", function(req, res) {
 	fs.emptyDir("/tmp/webtorrent/");
 	res.send("<title>MiPeerFlix - Clear</title>Removed all!");
 });
+
+router.get("/download/:infoHash/:index?", async function(req, res) {
+	const infoHash = req.params.infoHash.toLowerCase();
+	if (infoHash.length == 40) {
+		if (!(infoHash in clients)) {
+			clients[infoHash] = new WebTorrent();
+		}
+		var torrent = clients[infoHash].get(infoHash);
+		if (!torrent) {
+			torrent = clients[infoHash].add(buildMagnetURI(infoHash));
+		}
+		if (torrent.ready) {
+			var index;
+			if (req.params.index) {
+				index = parseInt(req.params.index) - 1;
+			} else {
+				index = torrent.files.reduce(function(total, currentValue, currentIndex, arr) {
+					return currentValue.length > arr[total].length ? currentIndex : total;
+				}, 0);
+			}
+			file = torrent.files[index];
+			if (file) {
+				res.redirect("/files/" + infoHash + "/" + file.path);
+			} else {
+				res.sendStatus(404);
+			}
+		} else {
+			setTimeout(function() {
+				res.redirect("/files/" + infoHash + (req.params.index ? "/" + req.params.index : ""));
+			}, 15000);
+		}
+	} else {
+		res.sendStatus(404);
+	}
+});
 router.get("/stream/:infoHash/:index?", async function(req, res) {
 	const infoHash = req.params.infoHash.toLowerCase();
 	if (infoHash.length == 40) {
