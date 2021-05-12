@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "main": "index.js",
   "dependencies": {
+    "abort-controller": "",
     "compression": "",
     "cors": "",
     "express": "",
@@ -12,7 +13,8 @@
     "fs-extra": "",
     "node-pty": "",
     "range-parser": "",
-    "webtorrent": "^0.118.0"
+    "webtorrent": "",
+    "ws": ""
   },
   "scripts": {
     "start": "node index.js"
