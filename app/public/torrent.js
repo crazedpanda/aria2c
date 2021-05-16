@@ -6,7 +6,7 @@
 		const infoHash = window.location.pathname.slice(1).toLowerCase();
 		const ws = new WebSocket("wss://" + window.location.host + "/" + infoHash);
 		ws.onopen = function() {
-			console.log("Connected!");
+			console.log("Connected!", Date.now());
 		};
 		ws.onmessage = function(e) {
 			try {
@@ -34,7 +34,7 @@
 			}
 		};
 		ws.onclose = function() {
-			console.log("Disconnected!");
+			console.log("Disconnected!", Date.now());
 			setTimeout(connect, 5000);
 		};
 		window.onbeforeunload = function() {
