@@ -96,7 +96,6 @@ router.get("/stream/:infoHash/:index?", async function(req, res) {
 						const readable = file.createReadStream(ranges[0]);
 						readable.pipe(res);
 						readable.on("data", function() {
-							console.log("lastUpdated", lastUpdated);
 							lastUpdated[infoHash] = Date.now();
 						});
 					}
@@ -105,7 +104,6 @@ router.get("/stream/:infoHash/:index?", async function(req, res) {
 					const readable = file.createReadStream();
 					readable.pipe(res);
 					readable.on("data", function() {
-						console.log("lastUpdated", lastUpdated);
 						lastUpdated[infoHash] = Date.now();
 					});
 				}
