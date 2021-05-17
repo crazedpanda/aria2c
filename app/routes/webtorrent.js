@@ -117,7 +117,7 @@ router.get("/remove/:infoHash", function(req, res) {
 		if (torrent) {
 			delete lastUpdated[infoHash];
 			torrent.destroy();
-			fs.remove("/tmp/webtorrent/" + req.params.infoHash);
+			fs.remove("/tmp/webtorrent/" + infoHash);
 		}
 		res.send("Removed!");
 	} else {
@@ -146,8 +146,6 @@ router.get("/:infoHash", function(req, res) {
 		res.send("Page does not exist!");
 	}
 });
-
-
 exports.routes = router;
 
 function getTorrent(infoHash) {
@@ -163,29 +161,31 @@ async function updateStatus(ws, torrent) {
 	if (!ws) return;
 	if (ws.readyState !== 1) return;
 	const status = torrent.done ? torrent.progress == 1 ? "Downloaded" : "Stopped" : torrent.name && torrent.progress > 0 ? "Downloading" : "Getting metadata";
-	ws.send(JSON.stringify({
-		"type": "message",
-		"payload": {
-			status: status,
-			infoHash: torrent.infoHash,
-			name: torrent.name,
-			numPeers: torrent.numPeers,
-			speed: prettyBytes(torrent.downloadSpeed) + "/s",
-			timeRemaining: parseInt(torrent.timeRemaining),
-			readableTimeRemaining: humanTime(torrent.timeRemaining),
-			files: torrent.files.map(function(file) {
-				return {
-					name: file.name,
-					path: file.path,
-					downloaded: prettyBytes(file.downloaded),
-					total: prettyBytes(file.length),
-					progress: parseInt(file.progress * 100)
-				};
-			})
-		}
-	}));
+	if (status != "Downloaded") {
+		ws.send(JSON.stringify({
+			"type": "message",
+			"payload": {
+				status: status,
+				infoHash: torrent.infoHash,
+				name: torrent.name,
+				numPeers: torrent.numPeers,
+				speed: prettyBytes(torrent.downloadSpeed) + "/s",
+				timeRemaining: parseInt(torrent.timeRemaining),
+				readableTimeRemaining: humanTime(torrent.timeRemaining),
+				files: torrent.files.map(function(file) {
+					return {
+						name: file.name,
+						path: file.path,
+						downloaded: prettyBytes(file.downloaded),
+						total: prettyBytes(file.length),
+						progress: parseInt(file.progress * 100)
+					};
+				})
+			}
+		}));
+	}
+	lastUpdated[torrent.infoHash] = Date.now();
 	await sleep(1000);
-	if (status == "Downloaded") return;
 	return updateStatus(ws, torrent);
 }
 
