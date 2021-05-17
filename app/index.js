@@ -1,12 +1,15 @@
-const compression = require("compression");
-const cors = require("cors");
 const express = require("express");
 const app = express();
 const expressWs = require("express-ws")(app);
+const compression = require("compression");
+const cors = require("cors");
+const promisify = require("util").promisify
+const sleep = promisify(setTimeout);
 const terminal = require(__dirname + "/routes/terminal");
 const webtorrent = require(__dirname + "/routes/webtorrent");
 app.use(cors());
 app.use(compression());
+app.use(express.json());
 app.use(express.urlencoded({
 	"extended": true,
 	"limit": "50mb"
@@ -85,11 +88,10 @@ app.listen(3000, function() {
 	console.log("Server is running at 3000");
 });
 
-function heartbeat(ws) {
+async function heartbeat(ws) {
 	if (!ws) return;
 	if (ws.readyState !== 1) return;
 	ws.ping(function() {});
-	setTimeout(function() {
-		return heartbeat(ws);
-	}, 30000);
+	await sleep(30000);
+	return heartbeat(ws);
 }
