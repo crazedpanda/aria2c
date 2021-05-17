@@ -141,7 +141,7 @@ router.get("/:infoHash", function(req, res) {
 });
 exports.routes = router;
 
-await function updateStatus(ws, torrent) {
+async function updateStatus(ws, torrent) {
 	if (!ws) return;
 	if (ws.readyState !== 1) return;
 	const status = torrent.done ? torrent.progress == 1 ? "Downloaded" : "Stopped" : torrent.name && torrent.progress > 0 ? "Downloading" : "Getting metadata";
