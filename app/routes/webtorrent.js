@@ -1,7 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const AbortController = require("abort-controller");
-const axios = require("axios");
 const crypto = require("crypto");
 const FileType = require("file-type");
 const fs = require("fs-extra");
@@ -9,7 +7,6 @@ const parseRange = require("range-parser");
 const promisify = require("util").promisify
 const sleep = promisify(setTimeout);
 const WebTorrent = require("webtorrent");
-const WebSocket = require("ws");
 var client = new WebTorrent();
 router.ws("/:infoHash", function(ws, req) {
 	const infoHash = req.params.infoHash.toLowerCase();
@@ -166,10 +163,9 @@ function updateStatus(ws, torrent) {
 			})
 		}
 	}));
-	setTimeout(function() {
-		if (status == "Downloaded") return;
-		return updateStatus(ws, torrent);
-	}, 1000);
+	await sleep(1000);
+	if (status == "Downloaded") return;
+	return updateStatus(ws, torrent);
 }
 
 function buildMagnetURI(infoHash) {
