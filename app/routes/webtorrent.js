@@ -118,7 +118,7 @@ router.get("/stream/:infoHash/:index?", async function(req, res) {
 router.get("/list", function(req, res) {
 	res.set("cache-control", "no-store");
 	var html = "<html><head><title>MiPeerFlix - List</title><meta http-equiv=\"refresh\" content=\"20\"></head><body>";
-	if (Object.keys(clients).length) {
+	if (client.torrents.length) {
 		html += "<table>" + client.torrents.map(function(torrent) {
 			return "<tr><td>" + torrent.infoHash + "</td><td><a href =\"/" + torrent.infoHash + "\">" + (torrent.name ? torrent.name : torrent.infoHash) + "</a></td></tr>";
 		}).join("") + "</table>";
