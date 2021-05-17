@@ -93,11 +93,21 @@ router.get("/stream/:infoHash/:index?", async function(req, res) {
 						header["Content-Length"] = 1 + ranges[0].end - ranges[0].start;
 						header["Content-Range"] = `bytes ${ranges[0].start}-${ranges[0].end}/${file.length}`;
 						res.writeHead(206, header);
-						file.createReadStream(ranges[0]).pipe(res);
+						const readable = file.createReadStream(ranges[0]);
+						readable.pipe(res);
+						readable.on("data", function() {
+							console.log("lastUpdated", lastUpdated);
+							lastUpdated[infoHash] = Date.now();
+						});
 					}
 				} else {
 					res.writeHead(200, header);
-					file.createReadStream().pipe(res);
+					const readable = file.createReadStream();
+					readable.pipe(res);
+					readable.on("data", function() {
+						console.log("lastUpdated", lastUpdated);
+						lastUpdated[infoHash] = Date.now();
+					});
 				}
 			} else {
 				res.sendStatus(404);
@@ -161,31 +171,33 @@ async function updateStatus(ws, torrent) {
 	if (!ws) return;
 	if (ws.readyState !== 1) return;
 	const status = torrent.done ? torrent.progress == 1 ? "Downloaded" : "Stopped" : torrent.name && torrent.progress > 0 ? "Downloading" : "Getting metadata";
-	if (status != "Downloaded") {
-		ws.send(JSON.stringify({
-			"type": "message",
-			"payload": {
-				status: status,
-				infoHash: torrent.infoHash,
-				name: torrent.name,
-				numPeers: torrent.numPeers,
-				speed: prettyBytes(torrent.downloadSpeed) + "/s",
-				timeRemaining: parseInt(torrent.timeRemaining),
-				readableTimeRemaining: humanTime(torrent.timeRemaining),
-				files: torrent.files.map(function(file) {
-					return {
-						name: file.name,
-						path: file.path,
-						downloaded: prettyBytes(file.downloaded),
-						total: prettyBytes(file.length),
-						progress: parseInt(file.progress * 100)
-					};
-				})
-			}
-		}));
-	}
+	ws.send(JSON.stringify({
+		"type": "message",
+		"payload": {
+			status: status,
+			infoHash: torrent.infoHash,
+			name: torrent.name,
+			numPeers: torrent.numPeers,
+			speed: prettyBytes(torrent.downloadSpeed) + "/s",
+			timeRemaining: parseInt(torrent.timeRemaining),
+			readableTimeRemaining: humanTime(torrent.timeRemaining),
+			files: torrent.files.map(function(file) {
+				return {
+					name: file.name,
+					path: file.path,
+					downloaded: prettyBytes(file.downloaded),
+					total: prettyBytes(file.length),
+					progress: parseInt(file.progress * 100)
+				};
+			})
+		}
+	}));
 	lastUpdated[torrent.infoHash] = Date.now();
-	await sleep(1000);
+	if (status == "Downloaded") {
+		await sleep(60000);
+	} else {
+		await sleep(1000);
+	}
 	return updateStatus(ws, torrent);
 }
 
