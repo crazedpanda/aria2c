@@ -8,12 +8,10 @@ const promisify = require("util").promisify
 const sleep = promisify(setTimeout);
 const WebTorrent = require("webtorrent");
 var client = new WebTorrent();
+var lastUpdated = {};
 router.ws("/:infoHash", function(ws, req) {
 	const infoHash = req.params.infoHash.toLowerCase();
-	var torrent = client.get(infoHash);
-	if (!torrent) {
-		torrent = client.add(buildMagnetURI(infoHash));
-	}
+	var torrent = getTorrent(infoHash);
 	updateStatus(ws, torrent).catch(function(err) {
 		console.log("updateStatus", err.toString());
 		ws.close();
@@ -28,10 +26,7 @@ router.get("/clear", function(req, res) {
 router.get("/download/:infoHash/:index?", async function(req, res) {
 	const infoHash = req.params.infoHash.toLowerCase();
 	if (infoHash.length == 40) {
-		var torrent = client.get(infoHash);
-		if (!torrent) {
-			torrent = client.add(buildMagnetURI(infoHash));
-		}
+		var torrent = getTorrent(infoHash);
 		if (torrent.ready) {
 			var index;
 			if (req.params.index) {
@@ -58,10 +53,7 @@ router.get("/download/:infoHash/:index?", async function(req, res) {
 router.get("/stream/:infoHash/:index?", async function(req, res) {
 	const infoHash = req.params.infoHash.toLowerCase();
 	if (infoHash.length == 40) {
-		var torrent = client.get(infoHash);
-		if (!torrent) {
-			torrent = client.add(buildMagnetURI(infoHash));
-		}
+		var torrent = getTorrent(infoHash);
 		if (torrent.ready) {
 			var index;
 			if (req.params.index) {
@@ -118,12 +110,27 @@ router.get("/stream/:infoHash/:index?", async function(req, res) {
 		res.sendStatus(404);
 	}
 });
+router.get("/remove/:infoHash", function(req, res) {
+	const infoHash = req.params.infoHash.toLowerCase();
+	if (infoHash.length == 40) {
+		var torrent = client.get(infoHash);
+		if (torrent) {
+			delete lastUpdated[infoHash];
+			torrent.destroy();
+			fs.remove("/tmp/webtorrent/" + req.params.infoHash);
+		}
+		res.send("Removed!");
+	} else {
+		res.send("Page does not exist!");
+	}
+});
 router.get("/list", function(req, res) {
 	res.set("cache-control", "no-store");
 	var html = "<html><head><title>MiPeerFlix - List</title><meta http-equiv=\"refresh\" content=\"20\"></head><body>";
 	if (client.torrents.length) {
+		const currentTimestamp = Date.now();
 		html += "<table>" + client.torrents.map(function(torrent) {
-			return "<tr><td>" + torrent.infoHash + "</td><td><a href =\"/" + torrent.infoHash + "\">" + (torrent.name ? torrent.name : torrent.infoHash) + "</a></td></tr>";
+			return "<tr><td>" + torrent.infoHash + "</td><td><a href =\"/" + torrent.infoHash + "\">" + (torrent.name ? torrent.name : torrent.infoHash) + "</a></td><td><a href =\"/remove/" + torrent.infoHash + "\">Remove</a></td><td>" + Math.round((currentTimestamp - lastUpdated[torrent.infoHash]) / 1000) + " seconds ago</td></tr>";
 		}).join("") + "</table>";
 	} else {
 		html += "No torrents in client!";
@@ -139,7 +146,18 @@ router.get("/:infoHash", function(req, res) {
 		res.send("Page does not exist!");
 	}
 });
+
+
 exports.routes = router;
+
+function getTorrent(infoHash) {
+	var torrent = client.get(infoHash);
+	if (!torrent) {
+		torrent = client.add(buildMagnetURI(infoHash));
+	}
+	lastUpdated[infoHash] = Date.now();
+	return torrent;
+}
 
 async function updateStatus(ws, torrent) {
 	if (!ws) return;
