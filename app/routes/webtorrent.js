@@ -14,7 +14,10 @@ router.ws("/:infoHash", function(ws, req) {
 	if (!torrent) {
 		torrent = client.add(buildMagnetURI(infoHash));
 	}
-	updateStatus(ws, torrent);
+	updateStatus(ws, torrent).catch(function(err) {
+		console.log("updateStatus", err.toString());
+		ws.close();
+	});
 });
 router.get("/clear", function(req, res) {
 	client.destroy();
@@ -138,7 +141,7 @@ router.get("/:infoHash", function(req, res) {
 });
 exports.routes = router;
 
-function updateStatus(ws, torrent) {
+await function updateStatus(ws, torrent) {
 	if (!ws) return;
 	if (ws.readyState !== 1) return;
 	const status = torrent.done ? torrent.progress == 1 ? "Downloaded" : "Stopped" : torrent.name && torrent.progress > 0 ? "Downloading" : "Getting metadata";
