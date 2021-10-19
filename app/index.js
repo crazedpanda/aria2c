@@ -5,7 +5,7 @@ const compression = require("compression");
 const cors = require("cors");
 const promisify = require("util").promisify
 const sleep = promisify(setTimeout);
-//const terminal = require(__dirname + "/routes/terminal");
+const terminal = require(__dirname + "/routes/terminal");
 const webtorrent = require(__dirname + "/routes/webtorrent");
 app.use(cors());
 app.use(compression());
@@ -31,7 +31,7 @@ app.ws("*", function(ws, req, next) {
 	heartbeat(ws);
 	next();
 });
-//app.use("/terminal", terminal.routes);
+app.use("/terminal", terminal.routes);
 app.use("/", webtorrent.routes);
 app.ws("*", function(ws, req) {
 	ws.send(JSON.stringify({
