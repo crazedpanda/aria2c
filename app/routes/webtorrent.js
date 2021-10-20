@@ -7,7 +7,9 @@ const parseRange = require("range-parser");
 const promisify = require("util").promisify
 const sleep = promisify(setTimeout);
 const WebTorrent = require("webtorrent");
-var client = new WebTorrent();
+var client = new WebTorrent({
+	utp: false
+});
 var lastUpdated = {};
 router.ws("/:infoHash", function(ws, req) {
 	const infoHash = req.params.infoHash.toLowerCase();
