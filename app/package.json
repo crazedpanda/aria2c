@@ -14,7 +14,7 @@
     "fs-extra": "",
     "node-pty": "",
     "range-parser": "",
-    "webtorrent": "^1.1.0",
+    "webtorrent": "^1.0.2",
     "ws": ""
   },
   "scripts": {
