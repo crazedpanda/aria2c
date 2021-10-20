@@ -9,8 +9,8 @@ const sleep = promisify(setTimeout);
 const WebTorrent = require("webtorrent");
 var client = new WebTorrent({
 	maxConns: 10,
-	tracker: true,
-	dht: false,
+	tracker: false,
+	dht: true,
 	lsd: false,
 	webSeeds: false,
 	utp: false,
