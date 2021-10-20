@@ -10,8 +10,8 @@ const WebTorrent = require("webtorrent");
 var client = new WebTorrent({
 	maxConns: 10,
 	tracker: false,
-	dht: true,
-	lsd: false,
+	dht: false,
+	lsd: true,
 	webSeeds: false,
 	utp: false,
 	uploadLimit: 1000000
