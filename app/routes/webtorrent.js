@@ -12,8 +12,8 @@ var client = new WebTorrent({
 	tracker: false,
 	dht: false,
 	lsd: false, //Doesn't work on Heroku!
-	webSeeds: true,
-	utp: false,
+	webSeeds: false, //Doesn't work on Heroku!
+	utp: true,
 	uploadLimit: 1000000
 });
 var lastUpdated = {};
