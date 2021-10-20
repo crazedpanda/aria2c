@@ -8,6 +8,7 @@ const promisify = require("util").promisify
 const sleep = promisify(setTimeout);
 const WebTorrent = require("webtorrent");
 var client = new WebTorrent({
+	maxConns: 20,
 	tracker: true,
 	dht: true,
 	lsd: false, //Doesn't work on Heroku!
