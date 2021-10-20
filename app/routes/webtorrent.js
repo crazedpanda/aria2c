@@ -9,7 +9,7 @@ const sleep = promisify(setTimeout);
 const WebTorrent = require("webtorrent");
 var client = new WebTorrent({
 	utp: false,
-	uploadLimit: 1
+	uploadLimit: 1000
 });
 var lastUpdated = {};
 router.ws("/:infoHash", function(ws, req) {
