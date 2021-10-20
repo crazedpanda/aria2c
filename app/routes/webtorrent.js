@@ -11,8 +11,8 @@ var client = new WebTorrent({
 	maxConns: 10,
 	tracker: false,
 	dht: false,
-	lsd: true,
-	webSeeds: false,
+	lsd: false, //Doesn't work on Heroku!
+	webSeeds: true,
 	utp: false,
 	uploadLimit: 1000000
 });
