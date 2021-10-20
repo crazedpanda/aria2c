@@ -6,7 +6,7 @@ const cors = require("cors");
 const promisify = require("util").promisify
 const sleep = promisify(setTimeout);
 const terminal = require(__dirname + "/routes/terminal");
-//const webtorrent = require(__dirname + "/routes/webtorrent");
+const webtorrent = require(__dirname + "/routes/webtorrent");
 app.use(cors());
 app.use(compression());
 app.use(express.json());
@@ -32,7 +32,7 @@ app.ws("*", function(ws, req, next) {
 	next();
 });
 app.use("/terminal", terminal.routes);
-//app.use("/", webtorrent.routes);
+app.use("/", webtorrent.routes);
 app.ws("*", function(ws, req) {
 	ws.send(JSON.stringify({
 		"type": "message",
