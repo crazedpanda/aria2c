@@ -14,8 +14,8 @@ WORKDIR /app
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
-    HTTP_PROXY="http://169.57.1.84:80" \
-    HTTPS_PROXY="https://169.57.1.84:80"
+    HTTP_PROXY="http://140.227.211.47:8080" \
+    HTTPS_PROXY="https://140.227.211.47:8080"
 
 RUN npm install puppeteer && npm install
 
