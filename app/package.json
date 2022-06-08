@@ -9,13 +9,12 @@
     "compression": "",
     "cors": "",
     "express": "",
-    "express-ws": "",
     "file-type": "",
     "fs-extra": "",
     "node-pty": "",
     "range-parser": "",
-    "webtorrent": "",
-    "ws": ""
+    "tinyws": "",
+    "webtorrent": ""
   },
   "scripts": {
     "start": "node index.js"
