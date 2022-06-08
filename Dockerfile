@@ -12,6 +12,8 @@ COPY /app /app
 
 WORKDIR /app
 
+RUN npm install
+
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
