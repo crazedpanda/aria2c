@@ -5,7 +5,7 @@ import parseRange from "range-parser";
 import WebTorrent from "webtorrent";
 import {fileTypeFromStream} from "file-type";
 import {promisify} from "util";
-const router = express.Router() as expressWs.Router;
+const router = express.Router();
 const sleep = promisify(setTimeout);
 var client = new WebTorrent({
 	maxConns: 20,
