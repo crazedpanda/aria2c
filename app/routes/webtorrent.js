@@ -1,10 +1,10 @@
-import express from "express";
 import fs from "fs-extra";
 import parseRange from "range-parser";
 import WebTorrent from "webtorrent";
+import {App} from "@tinyhttp/app";
 import {fileTypeFromStream} from "file-type";
 import {promisify} from "util";
-const router = express.Router();
+const router = new App();
 const sleep = promisify(setTimeout);
 var client = new WebTorrent({
 	maxConns: 20,
@@ -48,7 +48,7 @@ router.get("/download/:infoHash/:index?", async function(req, res) {
 					return currentValue.length > arr[total].length ? currentIndex : total;
 				}, 0);
 			}
-			file = torrent.files[index];
+			var file = torrent.files[index];
 			if (file) {
 				res.redirect("/files/" + infoHash + "/" + file.path);
 			} else {

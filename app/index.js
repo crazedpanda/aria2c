@@ -1,23 +1,16 @@
-import compression from "compression";
-import cors from "cors";
-import express from "express";
-import { tinyws } from "tinyws";
+import sirv from "sirv";
+import {App} from "@tinyhttp/app";
+// import {promises as fs} from "fs";
+import {tinyws} from "tinyws";
 import {promisify} from "util";
 import terminalRouter from "./routes/terminal.js";
 import webtorrentRouter from "./routes/webtorrent.js";
-const app = express();
+const app = new App();
 const sleep = promisify(setTimeout);
 app.use(tinyws());
-app.use(cors());
-app.use(compression());
-app.use(express.json());
-app.use(express.urlencoded({
-	"extended": true,
-	"limit": "50mb"
-}));
-app.use(express.static("./public"));
-app.use("/files", express.static("/tmp/webtorrent"));
-app.get("/", function(req, res) {
+app.use(sirv("public"));
+// app.use("/files", sirv("/tmp/webtorrent"));
+app.get("/", function(_, res) {
 	if ("HEROKU_APP_NAME" in process.env) {
 		res.send("Hello World from " + process.env.HEROKU_APP_NAME + "!");
 	} else {

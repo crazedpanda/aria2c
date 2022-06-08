@@ -1,12 +1,10 @@
 {
-  "name": "mipeerflix",
+  "name": "4bd1ede9aa3d44e816ac27d99132fe06",
+  "version": "1.0.0",
   "description": "npm --prefix ./ install webtorrent",
-  "exports": "./index.js",
-  "version": "0.0.0",
+  "main": "index.js",
   "dependencies": {
-    "compression": "",
-    "cors": "",
-    "express": "",
+    "@tinyhttp/app": "",
     "file-type": "",
     "fs-extra": "",
     "node-pty": "",
