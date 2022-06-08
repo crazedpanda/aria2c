@@ -1,4 +1,4 @@
-const express = require("express");
+import express from "express";
 const app = express();
 const expressWs = require("express-ws")(app);
 const compression = require("compression");
