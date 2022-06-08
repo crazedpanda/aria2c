@@ -17,7 +17,7 @@ var client = new WebTorrent({
 	uploadLimit: 1000000
 });
 var lastUpdated = {};
-router.use("/:infoHash", function(req, res, next) {
+router.use("/:infoHash", async function(req, res, next) {
 	if (req.ws) {
 		const ws = await req.ws();
 		const infoHash = req.params.infoHash.toLowerCase();
