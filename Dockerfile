@@ -15,6 +15,8 @@ WORKDIR /app
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
+RUN npm install
+
 RUN chmod +x /app/entrypoint.sh
 
 CMD ["/app/entrypoint.sh"]
