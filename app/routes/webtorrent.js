@@ -1,6 +1,5 @@
 import crypto from "crypto";
 import express from "express";
-import expressWs from "express-ws";
 import fs from "fs-extra";
 import parseRange from "range-parser";
 import WebTorrent from "webtorrent";
@@ -18,13 +17,17 @@ var client = new WebTorrent({
 	uploadLimit: 1000000
 });
 var lastUpdated = {};
-router.ws("/:infoHash", function(ws, req) {
-	const infoHash = req.params.infoHash.toLowerCase();
-	var torrent = getTorrent(infoHash);
-	updateStatus(ws, torrent).catch(function(err) {
-		console.log("updateStatus", err.toString());
-		ws.close();
-	});
+router.use("/:infoHash", function(req, res, next) {
+	if (req.ws) {
+		const infoHash = req.params.infoHash.toLowerCase();
+		var torrent = getTorrent(infoHash);
+		updateStatus(ws, torrent).catch(function(err) {
+			console.log("updateStatus", err.toString());
+			ws.close();
+		});
+	} else {
+		next();
+	}
 });
 router.get("/clear", function(req, res) {
 	client.destroy();
