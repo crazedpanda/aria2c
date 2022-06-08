@@ -1,12 +1,12 @@
-const express = require("express");
-const router = express.Router();
-const crypto = require("crypto");
-const fs = require("fs-extra");
-const parseRange = require("range-parser");
-const promisify = require("util").promisify
-const sleep = promisify(setTimeout);
-const WebTorrent = require("webtorrent");
+import crypto from "crypto";
+import express from "express";
+import fs from "fs-extra";
+import parseRange from "range-parser";
+import WebTorrent from "webtorrent";
 import {fileTypeFromStream} from "file-type";
+import {promisify} from "util";
+const router = express.Router();
+const sleep = promisify(setTimeout);
 var client = new WebTorrent({
 	maxConns: 20,
 	tracker: true,
