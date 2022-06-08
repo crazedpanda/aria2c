@@ -2,7 +2,6 @@ import compression from "compression";
 import cors from "cors";
 import express from "express";
 import { tinyws } from "tinyws";
-import expressWs from "express-ws";
 import {promisify} from "util";
 import terminalRouter from "./routes/terminal.js";
 import webtorrentRouter from "./routes/webtorrent.js";
@@ -29,7 +28,7 @@ app.get("/ping", function(req, res) {
 	res.set("cache-control", "no-store");
 	res.send("OK");
 });
-app.use("*", async function(req, res, next) {
+app.use(async function(req, res, next) {
 	if (req.ws) {
 		const ws = await req.ws();
 		heartbeat(ws);
@@ -38,7 +37,7 @@ app.use("*", async function(req, res, next) {
 });
 app.use("/terminal", terminalRouter);
 app.use("/", webtorrentRouter);
-app.use("*", async function(req, res, next) {
+app.use(async function(req, res, next) {
 	if (req.ws) {
 		const ws = await req.ws();
 		ws.send(JSON.stringify({
