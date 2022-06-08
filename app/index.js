@@ -1,12 +1,12 @@
+import compression from "compression";
+import cors from "cors";
 import express from "express";
-const app = express();
-const expressWs = require("express-ws")(app);
-const compression = require("compression");
-const cors = require("cors");
-const promisify = require("util").promisify
+import expressWs from "express-ws";
+import {promisify} from "util";
+import terminal from "./routes/terminal.js";
+import webtorrent from "./routes/webtorrent.js";
+const app = expressWs(express()).app;
 const sleep = promisify(setTimeout);
-const terminal = require(__dirname + "/routes/terminal");
-const webtorrent = require(__dirname + "/routes/webtorrent");
 app.use(cors());
 app.use(compression());
 app.use(express.json());
