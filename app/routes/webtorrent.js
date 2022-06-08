@@ -162,7 +162,7 @@ router.get("/:infoHash", function(req, res) {
 		res.send("Page does not exist!");
 	}
 });
-exports.routes = router;
+export default router
 
 function getTorrent(infoHash) {
 	var torrent = client.get(infoHash);
