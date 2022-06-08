@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const crypto = require("crypto");
-const FileType = require("file-type");
+const fileTypeFromStream = require("file-type").fileTypeFromStream;
 const fs = require("fs-extra");
 const parseRange = require("range-parser");
 const promisify = require("util").promisify
@@ -78,7 +78,7 @@ router.get("/stream/:infoHash/:index?", async function(req, res) {
 					"Content-Length": file.length,
 					"Content-Type": "application/octet-stream"
 				};
-				var contenttype = await FileType.fromStream(file.createReadStream({
+				var contenttype = await fileTypeFromStream(file.createReadStream({
 					start: 0,
 					end: 256
 				}));
