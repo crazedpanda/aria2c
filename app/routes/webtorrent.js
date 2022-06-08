@@ -19,15 +19,15 @@ var client = new WebTorrent({
 var lastUpdated = {};
 router.use("/:infoHash", function(req, res, next) {
 	if (req.ws) {
+		const ws = await req.ws();
 		const infoHash = req.params.infoHash.toLowerCase();
 		var torrent = getTorrent(infoHash);
 		updateStatus(ws, torrent).catch(function(err) {
 			console.log("updateStatus", err.toString());
 			ws.close();
 		});
-	} else {
-		next();
 	}
+	next();
 });
 router.get("/clear", function(req, res) {
 	client.destroy();
