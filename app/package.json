@@ -10,6 +10,7 @@
     "file-type": "",
     "fs-extra": "",
     "node-pty": "",
+    "puppeteer": "",
     "range-parser": "",
     "tinyws": "",
     "webtorrent": "",
