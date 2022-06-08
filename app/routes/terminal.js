@@ -1,6 +1,7 @@
+import express from "express";
+import pty from "node-pty";
 const express = require("express");
 const router = express.Router();
-const pty = require("node-pty");
 router.ws("/", function(ws, req) {
 	const term = pty.spawn("bash", [], {
 		name: "xterm-color",
