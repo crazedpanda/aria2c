@@ -1,7 +1,7 @@
 import express from "express";
 import pty from "node-pty";
 const router = express.Router();
-router.use("/", async function(req, res, next) {
+router.use("/", async function(req, res) {
 	if (req.ws) {
 		const ws = await req.ws();
 		const term = pty.spawn("bash", [], {
@@ -47,8 +47,6 @@ router.use("/", async function(req, res, next) {
 			term.kill();
 			console.log(`Closed terminal with PID: ${term.pid}`);
 		});
-	} else {
-		next();
 	}
 });
 router.get("/", function(req, res) {
