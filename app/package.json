@@ -10,6 +10,7 @@
     "node-pty": "",
     "puppeteer-core": "",
     "range-parser": "",
+    "sirv": "",
     "tinyws": "",
     "webtorrent": "",
     "ws": ""
