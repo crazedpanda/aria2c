@@ -1,5 +1,5 @@
 import {App} from "@tinyhttp/app";
-// import {promises as fs} from "fs";
+import {promises as fs} from "fs";
 import {tinyws} from "tinyws";
 import {promisify} from "util";
 import sirv from "sirv";
@@ -9,7 +9,10 @@ const app = new App();
 const sleep = promisify(setTimeout);
 app.use(tinyws());
 app.use(sirv("public"));
-// app.use("/files", sirv("/tmp/webtorrent"));
+fs.mkdir("/tmp/webtorrent", {
+  recursive: true
+});
+app.use("/files", sirv("/tmp/webtorrent"));
 app.get("/", function(_, res) {
 	if ("HEROKU_APP_NAME" in process.env) {
 		res.send("Hello World from " + process.env.HEROKU_APP_NAME + "!");
