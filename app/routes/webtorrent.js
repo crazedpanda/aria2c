@@ -161,7 +161,8 @@ router.get("/list", function(req, res) {
 router.get("/:infoHash", function(req, res) {
 	if (req.params.infoHash.length == 40) {
 		res.set("cache-control", "no-store");
-		res.sendFile("./public/torrent.html");
+		res.send(process.cwd());
+// 		res.sendFile("./public/torrent.html");
 	} else {
 		res.send("Page does not exist!");
 	}
