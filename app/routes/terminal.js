@@ -1,6 +1,5 @@
 import express from "express";
 import pty from "node-pty";
-const express = require("express");
 const router = express.Router();
 router.ws("/", function(ws, req) {
 	const term = pty.spawn("bash", [], {
