@@ -1,8 +1,8 @@
-import sirv from "sirv";
 import {App} from "@tinyhttp/app";
 // import {promises as fs} from "fs";
 import {tinyws} from "tinyws";
 import {promisify} from "util";
+import sirv from "sirv";
 import terminalRouter from "./routes/terminal.js";
 import webtorrentRouter from "./routes/webtorrent.js";
 const app = new App();
