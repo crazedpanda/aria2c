@@ -3,8 +3,8 @@ import cors from "cors";
 import express from "express";
 import expressWs from "express-ws";
 import {promisify} from "util";
-import terminal from "./routes/terminal.js";
-import webtorrent from "./routes/webtorrent.js";
+import terminalRouter from "./routes/terminal";
+import webtorrentRouter from "./routes/webtorrent";
 const app = expressWs(express()).app;
 const sleep = promisify(setTimeout);
 app.use(cors());
@@ -31,8 +31,8 @@ app.ws("*", function(ws, req, next) {
 	heartbeat(ws);
 	next();
 });
-app.use("/terminal", terminal.routes);
-app.use("/", webtorrent.routes);
+app.use("/terminal", terminalRouter);
+app.use("/", webtorrentRouter);
 app.ws("*", function(ws, req) {
 	ws.send(JSON.stringify({
 		"type": "message",
