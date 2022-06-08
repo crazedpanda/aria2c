@@ -28,13 +28,6 @@ app.get("/ping", function(req, res) {
 	res.set("cache-control", "no-store");
 	res.send("OK");
 });
-app.use(async function(req, res, next) {
-	if (req.ws) {
-		const ws = await req.ws();
-		heartbeat(ws);
-	}
-	next();
-});
 app.use("/terminal", terminalRouter);
 app.use("/", webtorrentRouter);
 app.use(async function(req, res, next) {
