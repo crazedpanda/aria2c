@@ -1,10 +1,11 @@
-const BitField = require('bitfield').default
-const debug = require('debug')('webtorrent:webconn')
+const { default: BitField } = require('bitfield')
+const debugFactory = require('debug')
 const get = require('simple-get')
 const ltDontHave = require('lt_donthave')
 const sha1 = require('simple-sha1')
 const Wire = require('bittorrent-protocol')
 
+const debug = debugFactory('webtorrent:webconn')
 const VERSION = require('../package.json').version
 
 const SOCKET_TIMEOUT = 60000
@@ -101,7 +102,7 @@ class WebConn extends Wire {
         const fileEnd = requestedFile.offset + requestedFile.length - 1
         const url = this.url +
           (this.url[this.url.length - 1] === '/' ? '' : '/') +
-          requestedFile.path
+          requestedFile.path.replace(this._torrent.path, '')
         return {
           url,
           fileOffsetInRange: Math.max(requestedFile.offset - rangeStart, 0),

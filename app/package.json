@@ -4,8 +4,6 @@
   "exports": "./index.js",
   "version": "0.0.0",
   "dependencies": {
-    "abort-controller": "",
-    "axios": "",
     "compression": "",
     "cors": "",
     "express": "",
@@ -14,7 +12,8 @@
     "node-pty": "",
     "range-parser": "",
     "tinyws": "",
-    "webtorrent": ""
+    "webtorrent": "",
+    "ws": ""
   },
   "scripts": {
     "start": "node index.js"

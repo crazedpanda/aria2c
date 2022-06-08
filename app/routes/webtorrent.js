@@ -1,4 +1,3 @@
-import crypto from "crypto";
 import express from "express";
 import fs from "fs-extra";
 import parseRange from "range-parser";
@@ -76,7 +75,7 @@ router.get("/stream/:infoHash/:index?", async function(req, res) {
 					return currentValue.length > arr[total].length ? currentIndex : total;
 				}, 0);
 			}
-			file = torrent.files[index];
+			var file = torrent.files[index];
 			if (file) {
 				var header = {
 					"Content-Disposition": `filename="` + encodeURI(file.name) + `"`,
@@ -162,7 +161,7 @@ router.get("/list", function(req, res) {
 router.get("/:infoHash", function(req, res) {
 	if (req.params.infoHash.length == 40) {
 		res.set("cache-control", "no-store");
-		res.sendFile("/app/public/torrent.html");
+		res.sendFile(process.cwd().replace("/routes", "") + "/public/torrent.html");
 	} else {
 		res.send("Page does not exist!");
 	}
