@@ -50,7 +50,7 @@ router.get("/download/:infoHash/:index?", async function(req, res) {
 			}
 			var file = torrent.files[index];
 			if (file) {
-				res.redirect("/files/" + infoHash + "/" + file.path);
+				res.redirect("/files/" + infoHash + "/" + file.path.replace("/tmp/webtorrent/", ""));
 			} else {
 				res.sendStatus(404);
 			}
@@ -171,7 +171,9 @@ export default router
 function getTorrent(infoHash) {
 	var torrent = client.get(infoHash);
 	if (!torrent) {
-		torrent = client.add(buildMagnetURI(infoHash));
+		torrent = client.add(buildMagnetURI(infoHash), {
+      path: "/tmp/webtorrent/" + infoHash
+    });
 	}
 	lastUpdated[infoHash] = Date.now();
 	return torrent;
@@ -194,7 +196,7 @@ async function updateStatus(ws, torrent) {
 			files: torrent.files.map(function(file) {
 				return {
 					name: file.name,
-					path: file.path,
+					path: file.path.replace("/tmp/webtorrent/", ""),
 					downloaded: prettyBytes(file.downloaded),
 					total: prettyBytes(file.length),
 					progress: parseInt(file.progress * 100)
