@@ -9,7 +9,7 @@ const app = express();
 const sleep = promisify(setTimeout);
 app.use(tinyws());
 app.use(cors());
-app.use(compression());
+// app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({
 	"extended": true,
