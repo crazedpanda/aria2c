@@ -15,7 +15,7 @@ app.use(express.urlencoded({
 	"extended": true,
 	"limit": "50mb"
 }));
-app.use(express.static(__dirname + "/public"));
+app.use(express.static("./public"));
 app.use("/files", express.static("/tmp/webtorrent"));
 app.get("/", function(req, res) {
 	if ("HEROKU_APP_NAME" in process.env) {
