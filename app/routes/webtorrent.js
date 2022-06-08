@@ -26,8 +26,9 @@ router.use("/:infoHash", async function(req, res, next) {
 			console.log("updateStatus", err.toString());
 			ws.close();
 		});
+	} else {
+		next();
 	}
-	next();
 });
 router.get("/clear", function(req, res) {
 	client.destroy();
