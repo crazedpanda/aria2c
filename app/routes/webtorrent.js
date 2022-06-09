@@ -40,7 +40,7 @@ router.use("/:infoHash", async function(req, res, next) {
 });
 router.get("/clear", async function(_, res) {
 	client.destroy();
-  await fs.rmdir("/tmp/webtorrent", { recursive: true });
+  await fs.rm("/tmp/webtorrent", { recursive: true });
 	client = new WebTorrent();
 	res.send("<title>MiPeerFlix - Clear</title>Removed all!");
 });
@@ -147,7 +147,7 @@ router.get("/remove/:infoHash", async function(req, res, next) {
 			delete lastUpdated[infoHash];
 			torrent.destroy();
 		}
-    await fs.rmdir("/tmp/webtorrent/" + infoHash, { recursive: true });
+    await fs.rm("/tmp/webtorrent/" + infoHash, { recursive: true });
 		res.send("Removed!");
 	} else {
     next();
