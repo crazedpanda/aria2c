@@ -1,6 +1,10 @@
 import serveStatic from "serve-static";
-import {App} from "@tinyhttp/app";
-import {tinyws} from "tinyws";
+import {
+	App
+} from "@tinyhttp/app";
+import {
+	tinyws
+} from "tinyws";
 import terminalRouter from "./routes/terminal.js";
 import webtorrentRouter from "./routes/webtorrent.js";
 const app = new App();
