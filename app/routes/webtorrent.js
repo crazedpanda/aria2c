@@ -212,7 +212,7 @@ async function updateStatus(ws, torrent) {
 					path: file.path.replace("/tmp/webtorrent/", ""),
 					downloaded: prettyBytes(file.downloaded),
 					total: prettyBytes(file.length),
-					progress: parseInt(file.progress * 100)
+					progress: file.progress < 0 ? 0 : parseInt(file.progress * 100)
 				};
 			})
 		}
