@@ -6,7 +6,6 @@
   "dependencies": {
     "@tinyhttp/app": "",
     "file-type": "",
-    "fs-extra": "",
     "node-pty": "",
     "puppeteer-core": "",
     "range-parser": "",

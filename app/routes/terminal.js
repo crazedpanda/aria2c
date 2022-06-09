@@ -1,7 +1,7 @@
 import pty from "node-pty";
 import {App} from "@tinyhttp/app";
 const router = new App();
-router.use("/", async function(req, res) {
+router.use("/terminal", async function(req, res) {
 	if (req.ws) {
 		const ws = await req.ws();
 		const term = pty.spawn("bash", [], {
