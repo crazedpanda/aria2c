@@ -9,7 +9,7 @@
     "node-pty": "",
     "puppeteer-core": "",
     "range-parser": "",
-    "sirv": "",
+    "serve-static": "",
     "tinyws": "",
     "webtorrent": "",
     "ws": ""
