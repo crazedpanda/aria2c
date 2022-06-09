@@ -7,6 +7,7 @@
     "@tinyhttp/app": "",
     "file-type": "",
     "node-pty": "",
+    "pretty-bytes": "",
     "puppeteer-core": "",
     "range-parser": "",
     "serve-static": "",
