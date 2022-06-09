@@ -1,14 +1,12 @@
 import {App} from "@tinyhttp/app";
 import {tinyws} from "tinyws";
-import {promisify} from "util";
-import sirv from "sirv";
+import serveStatic from "serve-static";
 import terminalRouter from "./routes/terminal.js";
 import webtorrentRouter from "./routes/webtorrent.js";
 const app = new App();
-const sleep = promisify(setTimeout);
 app.use(tinyws());
-app.use(sirv("public"));
-app.use("/files", sirv("/tmp/"));
+app.use(serveStatic("public"));
+app.use("/files", serveStatic("/tmp/webtorrent"));
 app.use(terminalRouter);
 app.use(webtorrentRouter);
 app.get("/", function(_, res) {

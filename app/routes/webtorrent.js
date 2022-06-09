@@ -38,8 +38,9 @@ router.use("/:infoHash", async function(req, res, next) {
     next();
   }
 });
-router.get("/clear", function(req, res) {
+router.get("/clear", async function(_, res) {
 	client.destroy();
+  await fs.rmdir("/tmp/webtorrent", { recursive: true });
 	client = new WebTorrent();
 	res.send("<title>MiPeerFlix - Clear</title>Removed all!");
 });
@@ -58,7 +59,7 @@ router.get("/download/:infoHash/:index?", async function(req, res) {
 			}
 			var file = torrent.files[index];
 			if (file) {
-				res.redirect("/files/" + file.path.replace("/tmp/", ""));
+				res.redirect("/files/" + file.path.replace("/tmp/webtorrent/", ""));
 			} else {
 				res.sendStatus(404);
 			}
@@ -146,7 +147,7 @@ router.get("/remove/:infoHash", async function(req, res, next) {
 			delete lastUpdated[infoHash];
 			torrent.destroy();
 		}
-    await fs.rmdir("/tmp/" + infoHash, { recursive: true });
+    await fs.rmdir("/tmp/webtorrent/" + infoHash, { recursive: true });
 		res.send("Removed!");
 	} else {
     next();
@@ -172,7 +173,7 @@ function getTorrent(infoHash) {
 	var torrent = client.get(infoHash);
 	if (!torrent) {
 		torrent = client.add(buildMagnetURI(infoHash), {
-      path: "/tmp/" + infoHash
+      path: "/tmp/webtorrent/" + infoHash
     });
 	}
 	lastUpdated[infoHash] = Date.now();
@@ -196,7 +197,7 @@ async function updateStatus(ws, torrent) {
 			files: torrent.files.map(function(file) {
 				return {
 					name: file.name,
-					path: file.path.replace("/tmp/", ""),
+					path: file.path.replace("/tmp/webtorrent/", ""),
 					downloaded: prettyBytes(file.downloaded),
 					total: prettyBytes(file.length),
 					progress: parseInt(file.progress * 100)
