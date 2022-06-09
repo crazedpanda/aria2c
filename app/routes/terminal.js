@@ -1,5 +1,7 @@
 import pty from "node-pty";
-import {App} from "@tinyhttp/app";
+import {
+	App
+} from "@tinyhttp/app";
 const router = new App();
 router.use("/terminal", async function(req, res) {
 	if (req.ws) {
@@ -14,10 +16,10 @@ router.use("/terminal", async function(req, res) {
 		console.log(`Created terminal with PID: ${term.pid}`);
 		term.on("data", function(data) {
 			if (ws.readyState === ws.OPEN) {
-	      ws.send(JSON.stringify({
-		"type": "data",
-		"payload": data
-	      }));
+				ws.send(JSON.stringify({
+					"type": "data",
+					"payload": data
+				}));
 			}
 		});
 		term.on("exit", function() {
