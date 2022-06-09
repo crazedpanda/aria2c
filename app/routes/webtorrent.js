@@ -153,7 +153,7 @@ router.get("/remove/:infoHash", async function(req, res, next) {
     next();
   }
 });
-router.get("/list", function(req, res) {
+router.get("/list", function(_, res) {
 	res.set("cache-control", "no-store");
 	var html = "<html><head><title>MiPeerFlix - List</title><meta http-equiv=\"refresh\" content=\"20\"></head><body>";
 	if (client.torrents.length) {
