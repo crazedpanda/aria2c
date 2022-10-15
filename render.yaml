@@ -6,3 +6,6 @@ services:
   dockerfilePath: ./Dockerfile
   dockerContext: ./
   autoDeploy: false
+  envVars:
+    - key: PORT
+      value: 4000
