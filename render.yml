@@ -1,0 +1,7 @@
+services:
+- type: web
+  name: mipeerflix
+  region: ohio
+  plan: free
+  env: docker
+  autoDeploy: false
