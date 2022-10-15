@@ -1,8 +1,0 @@
-services:
-- type: web
-  name: mipeerflix
-  region: ohio
-  plan: free
-  env: docker
-  rootDir: app
-  autoDeploy: false
