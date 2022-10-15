@@ -1,4 +1,4 @@
 :$PORT
 encode gzip
-reverse_proxy /chisel localhost:4000
-reverse_proxy localhost:3000
+reverse_proxy /chisel localhost:4001
+reverse_proxy localhost:3001
