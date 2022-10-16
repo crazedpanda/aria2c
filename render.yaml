@@ -3,8 +3,6 @@ services:
   name: mipeerflix
   env: docker
   plan: free
-  dockerfilePath: ./Dockerfile
-  dockerContext: ./
   autoDeploy: false
   envVars:
     - key: PORT
