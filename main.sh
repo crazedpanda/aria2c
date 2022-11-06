@@ -1,4 +1,5 @@
 #!/bin/bash
+echo $(pwd)
 pidof aria2c > /dev/null && echo "Killing aria2c!" && pkill aria2c
 pidof chisel > /dev/null && echo "Killing chisel!" && pkill chisel
 pidof shadowsocks > /dev/null && echo "Killing shadowsocks!" && pkill shadowsocks
