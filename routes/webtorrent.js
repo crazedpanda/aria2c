@@ -1,12 +1,10 @@
-import prettyBytes from "pretty-bytes";
 import parseRange from "range-parser";
+import stream from "stream";
+import streamSignature from "stream-signature";
 import WebTorrent from "webtorrent";
 import {
 	App
 } from "@tinyhttp/app";
-import {
-	fileTypeFromStream
-} from "file-type";
 import {
 	promises as fs
 } from "fs";
@@ -20,7 +18,7 @@ const router = new App({
 });
 const sleep = promisify(setTimeout);
 var client = new WebTorrent({
-  maxConns: 20,
+	maxConns: 20,
 	tracker: true,
 	dht: true,
 	lsd: false, //Doesn't work on Heroku!
@@ -56,82 +54,21 @@ router.get("/clear", async function(_, res) {
 });
 router.get("/download/:infoHash/:index?", async function(req, res) {
 	const infoHash = req.params.infoHash.toLowerCase();
-	if (infoHash.length == 40) {
+	if (infoHash.length === 40 && infoHash.match(/[\w\d]{40}/)) {
 		var torrent = getTorrent(infoHash);
 		if (torrent.ready) {
-			var index;
+			let file;
 			if (req.params.index) {
-				index = parseInt(req.params.index) - 1;
+				file = torrent.files[parseInt(req.params.index, 10) - 1];
 			} else {
-				index = torrent.files.reduce(function(total, currentValue, currentIndex, arr) {
-					return currentValue.length > arr[total].length ? currentIndex : total;
-				}, 0);
+				for (let i = 0; i < torrent.files.length; i++) {
+					if (!file || file.length < torrent.files[i].length) {
+						file = torrent.files[i];
+					}
+				}
 			}
-			var file = torrent.files[index];
 			if (file) {
 				res.redirect("/files/" + infoHash + "/" + file.path.replace("/tmp/webtorrent/", ""));
-			} else {
-				res.sendStatus(404);
-			}
-		} else {
-			await sleep(15000);
-			res.redirect("/download/" + infoHash + (req.params.index ? "/" + req.params.index : ""));
-		}
-	} else {
-		res.sendStatus(404);
-	}
-});
-router.get("/stream/:infoHash/:index?", async function(req, res) {
-	const infoHash = req.params.infoHash.toLowerCase();
-	if (infoHash.length == 40) {
-		var torrent = getTorrent(infoHash);
-		if (torrent.ready) {
-			var index;
-			if (req.params.index) {
-				index = parseInt(req.params.index) - 1;
-			} else {
-				index = torrent.files.reduce(function(total, currentValue, currentIndex, arr) {
-					return currentValue.length > arr[total].length ? currentIndex : total;
-				}, 0);
-			}
-			var file = torrent.files[index];
-			if (file) {
-				var header = {
-					"Content-Disposition": `filename="` + encodeURI(file.name) + `"`,
-					"Content-Length": file.length,
-					"Content-Type": "application/octet-stream"
-				};
-				var contenttype = await fileTypeFromStream(file.createReadStream({
-					start: 0,
-					end: 256
-				}));
-				if (contenttype && "mime" in contenttype) {
-					header["Content-Type"] = contenttype.mime;
-				}
-				var range = req.headers.range;
-				if (range) {
-					header["Accept-Ranges"] = "bytes";
-					var ranges = parseRange(file.length, range, {
-						combine: true
-					});
-					if (ranges === -1) {
-						res.writeHead(416, header);
-						res.end();
-					} else if (ranges === -2 || ranges.type !== "bytes" || ranges.length > 1) {
-						res.writeHead(400, header);
-						res.end();
-					} else {
-						header["Content-Length"] = 1 + ranges[0].end - ranges[0].start;
-						header["Content-Range"] = `bytes ${ranges[0].start}-${ranges[0].end}/${file.length}`;
-						res.writeHead(206, header);
-						const readable = file.createReadStream(ranges[0]);
-						readable.pipe(res);
-					}
-				} else {
-					res.writeHead(200, header);
-					const readable = file.createReadStream();
-					readable.pipe(res);
-				}
 			} else {
 				res.sendStatus(404);
 			}
@@ -140,12 +77,60 @@ router.get("/stream/:infoHash/:index?", async function(req, res) {
 			res.redirect("/stream/" + infoHash + (req.params.index ? "/" + req.params.index : ""));
 		}
 	} else {
-		res.sendStatus(404);
+		next();
+	}
+});
+router.get("/stream/:infoHash/:index?", async function(req, res) {
+	const infoHash = req.params.infoHash.toLowerCase();
+	if (infoHash.length === 40 && infoHash.match(/[\w\d]{40}/)) {
+		var torrent = getTorrent(infoHash);
+		let file;
+		if (req.params.index) {
+			file = torrent.files[parseInt(req.params.index, 10) - 1];
+		} else {
+			for (let i = 0; i < torrent.files.length; i++) {
+				if (!file || file.length < torrent.files[i].length) {
+					file = torrent.files[i];
+				}
+			}
+		}
+		let start = 0;
+		let end = file.length - 1;
+		let header = {
+			"Accept-Ranges": "bytes",
+			"Content-Disposition": `filename="${encodeURI(file.name)}"`,
+			"Content-Length": file.length
+		};
+		header["Content-Type"] = await getContentType(file);
+		if (req.headers.range) {
+			let ranges = rangeParser(file.length, req.headers.range, {
+				combine: true
+			});
+			if (ranges === -2) {
+				res.status(400).end();
+			} else if (ranges === -1) {
+				res.status(416).end();
+			} else {
+				start = ranges[0].start;
+				end = ranges[0].end;
+				header["Content-Range"] = `bytes ${start}-${end}/${file.length}`;
+				header["Content-Length"] = ranges[0].end - ranges[0].start + 1;
+				res.writeHead(206, header);
+			}
+		} else {
+			res.writeHead(200, header);
+		}
+		stream.pipeline(file.createReadStream({
+			start: start,
+			end: end
+		}), res, function() {});
+	} else {
+		next();
 	}
 });
 router.get("/remove/:infoHash", async function(req, res, next) {
 	const infoHash = req.params.infoHash.toLowerCase();
-	if (infoHash.length == 40) {
+	if (infoHash.length === 40 && infoHash.match(/[\w\d]{40}/)) {
 		var torrent = client.get(infoHash);
 		if (torrent) {
 			torrent.destroy();
@@ -160,16 +145,17 @@ router.get("/remove/:infoHash", async function(req, res, next) {
 });
 router.get("/list", function(_, res) {
 	res.set("cache-control", "no-store");
-	var html = "<html><head><title>MiPeerFlix - List</title><meta http-equiv=\"refresh\" content=\"20\"></head><body>";
-	if (client.torrents.length) {
-		html += "<table>" + client.torrents.map(function(torrent) {
-			return "<tr><td>" + torrent.infoHash + "</td><td><a href =\"/" + torrent.infoHash + "\">" + (torrent.name ? torrent.name : torrent.infoHash) + "</a></td><td><a href =\"/remove/" + torrent.infoHash + "\">Remove</a></td></tr>";
-		}).join("") + "</table>";
-	} else {
-		html += "No torrents in client!";
-	}
-	html += "</body></html>";
-	res.send(html);
+	res.send(`<html><head><title>MiPeerFlix</title><meta http-equiv="refresh" content="20"></head><body>${
+      client.torrents.length
+        ? `<table>${client.torrents
+            .map(function (torrent) {
+              return `<tr><td>${
+                torrent.infoHash
+              }</td><td><a href ="/${torrent.infoHash}">${torrent.name ? torrent.name : torrent.infoHash}</a></td><td><a href="/remove/${torrent.infoHash}">Remove</a></td></tr>`;
+            })
+            .join("")}</table>`
+        : "No torrents in client!"
+    }</body></html>`);
 });
 export default router
 
@@ -179,7 +165,7 @@ function getTorrent(infoHash) {
 		torrent = client.add(buildMagnetURI(infoHash), {
 			path: "/tmp/webtorrent/" + infoHash
 		});
-  }
+	}
 	return torrent;
 }
 async function updateStatus(ws, torrent) {
@@ -193,15 +179,15 @@ async function updateStatus(ws, torrent) {
 			infoHash: torrent.infoHash,
 			name: torrent.name,
 			numPeers: torrent.numPeers,
-			speed: prettyBytes(torrent.downloadSpeed) + "/s",
+			speed: humanFileSize(torrent.downloadSpeed) + "/s",
 			timeRemaining: parseInt(torrent.timeRemaining),
 			readableTimeRemaining: humanTime(torrent.timeRemaining),
 			files: torrent.files.map(function(file) {
 				return {
 					name: file.name,
 					path: file.path.replace("/tmp/webtorrent/", ""),
-					downloaded: prettyBytes(file.downloaded),
-					total: prettyBytes(file.length),
+					downloaded: humanFileSize(file.downloaded),
+					total: humanFileSize(file.length),
 					progress: file.progress < 0 ? 0 : parseInt(file.progress * 100)
 				};
 			})
@@ -219,17 +205,48 @@ function buildMagnetURI(infoHash) {
 	return "magnet:?xt=urn:btih:" + infoHash + "&tr=http%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2F9.rarbg.me%3A2710%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2710%2Fannounce&tr=udp%3A%2F%2Fp4p.arenabg.com%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337%2Fannounce&tr=udp%3A%2F%2Fexodus.desync.com%3A6969%2Fannounce&tr=udp%3A%2F%2Fopen.stealth.si%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.cyberia.is%3A6969%2Fannounce&tr=udp%3A%2F%2Fretracker.lanta-net.ru%3A2710%2Fannounce&tr=udp%3A%2F%2Ftracker.sbsub.com%3A2710%2Fannounce&tr=udp%3A%2F%2Ftracker.tiny-vps.com%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce&tr=udp%3A%2F%2Ftracker.moeking.me%3A6969%2Fannounce&tr=udp%3A%2F%2Fipv4.tracker.harry.lu%3A80%2Fannounce&tr=http%3A%2F%2Ftracker.nyap2p.com%3A8080%2Fannounce&tr=udp%3A%2F%2Fbt1.archive.org%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker3.itzmx.com%3A6961%2Fannounce&tr=udp%3A%2F%2Fbt2.archive.org%3A6969%2Fannounce&tr=http%3A%2F%2Ftracker1.itzmx.com%3A8080%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%2Fannounce&tr=udp%3A%2F%2Ftracker.istole.it%3A80&tr=udp%3A%2F%2Ftracker.kicks-ass.net%3A80%2Fannounce";
 }
 
+function getContentType(file) {
+	return new Promise(function(resolve) {
+		const myTimeout = setTimeout(function() {
+			resolve("application/octet-stream");
+		}, 5000);
+		const signature = new streamSignature();
+		file.createReadStream({
+			start: 0,
+			end: 512
+		}).pipe(signature);
+		signature.on("signature", function(signature) {
+			clearTimeout(myTimeout);
+			if ("mimetype" in signature) {
+				resolve(signature.mimetype);
+			} else {
+				resolve("application/octet-stream");
+			}
+		});
+	});
+}
+
 function humanTime(ms) {
 	var seconds = ms / 1000;
 	var result = "";
-	var days = Math.floor(seconds % 31536000 / 86400);
+	var days = Math.floor((seconds % 31536000) / 86400);
 	if (days > 0) result += "".concat(days, "d ");
-	var hours = Math.floor(seconds % 31536000 % 86400 / 3600);
+	var hours = Math.floor(((seconds % 31536000) % 86400) / 3600);
 	if (hours > 0) result += "".concat(hours, "h ");
-	var minutes = Math.floor(seconds % 31536000 % 86400 % 3600 / 60);
+	var minutes = Math.floor((((seconds % 31536000) % 86400) % 3600) / 60);
 	if (minutes > 0) result += "".concat(minutes, "m ");
-	seconds = (seconds % 31536000 % 86400 % 3600 % 60).toFixed(0);
+	seconds = ((((seconds % 31536000) % 86400) % 3600) % 60).toFixed(0);
 	if (seconds > 0) result += "".concat(seconds, "s");
 	if (result === "") result += "0s";
 	return result;
+}
+
+function humanFileSize(size) {
+	if (size > 0) {
+		var i = Math.floor(Math.log(size) / Math.log(1024));
+		return (
+			(size / Math.pow(1024, i)).toFixed(2) * 1 + " " + ["B", "kB", "MB", "GB", "TB"][i]);
+	} else {
+		return "0 B";
+	}
 }

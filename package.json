@@ -5,11 +5,10 @@
   "main": "index.js",
   "dependencies": {
     "@tinyhttp/app": "",
-    "file-type": "",
     "node-pty": "",
-    "pretty-bytes": "",
     "range-parser": "",
     "serve-static": "",
+    "stream-signature": "",
     "tinyws": "",
     "webtorrent": "",
     "ws": ""
