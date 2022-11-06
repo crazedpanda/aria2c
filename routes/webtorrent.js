@@ -20,7 +20,6 @@ const router = new App({
 });
 const sleep = promisify(setTimeout);
 var client = new WebTorrent({
-	maxConns: 20,
 	tracker: true,
 	dht: true,
 	lsd: false, //Doesn't work on Heroku!
@@ -28,7 +27,6 @@ var client = new WebTorrent({
 	utp: false, //Doesn't work on Heroku!
 	uploadLimit: 1000000
 });
-var lastUpdated = {};
 router.use("/:infoHash", async function(req, res, next) {
 	const infoHash = req.params.infoHash.toLowerCase();
 	if (infoHash.length == 40) {
@@ -70,7 +68,7 @@ router.get("/download/:infoHash/:index?", async function(req, res) {
 			}
 			var file = torrent.files[index];
 			if (file) {
-				res.redirect("/files/" + file.path.replace("/tmp/webtorrent/", ""));
+				res.redirect("/files/" + infoHash + file.path.replace("/tmp/webtorrent/", ""));
 			} else {
 				res.sendStatus(404);
 			}
@@ -127,17 +125,11 @@ router.get("/stream/:infoHash/:index?", async function(req, res) {
 						res.writeHead(206, header);
 						const readable = file.createReadStream(ranges[0]);
 						readable.pipe(res);
-						readable.on("data", function() {
-							lastUpdated[infoHash] = Date.now();
-						});
 					}
 				} else {
 					res.writeHead(200, header);
 					const readable = file.createReadStream();
 					readable.pipe(res);
-					readable.on("data", function() {
-						lastUpdated[infoHash] = Date.now();
-					});
 				}
 			} else {
 				res.sendStatus(404);
@@ -155,7 +147,6 @@ router.get("/remove/:infoHash", async function(req, res, next) {
 	if (infoHash.length == 40) {
 		var torrent = client.get(infoHash);
 		if (torrent) {
-			delete lastUpdated[infoHash];
 			torrent.destroy();
 		}
 		await fs.rm("/tmp/webtorrent/" + infoHash, {
@@ -170,9 +161,8 @@ router.get("/list", function(_, res) {
 	res.set("cache-control", "no-store");
 	var html = "<html><head><title>MiPeerFlix - List</title><meta http-equiv=\"refresh\" content=\"20\"></head><body>";
 	if (client.torrents.length) {
-		const currentTimestamp = Date.now();
 		html += "<table>" + client.torrents.map(function(torrent) {
-			return "<tr><td>" + torrent.infoHash + "</td><td><a href =\"/" + torrent.infoHash + "\">" + (torrent.name ? torrent.name : torrent.infoHash) + "</a></td><td><a href =\"/remove/" + torrent.infoHash + "\">Remove</a></td><td>" + Math.round((currentTimestamp - lastUpdated[torrent.infoHash]) / 1000) + " seconds ago</td></tr>";
+			return "<tr><td>" + torrent.infoHash + "</td><td><a href =\"/" + torrent.infoHash + "\">" + (torrent.name ? torrent.name : torrent.infoHash) + "</a></td><td><a href =\"/remove/" + torrent.infoHash + "\">Remove</a></td></tr>";
 		}).join("") + "</table>";
 	} else {
 		html += "No torrents in client!";
@@ -188,8 +178,7 @@ function getTorrent(infoHash) {
 		torrent = client.add(buildMagnetURI(infoHash), {
 			path: "/tmp/webtorrent/" + infoHash
 		});
-	}
-	lastUpdated[infoHash] = Date.now();
+  }
 	return torrent;
 }
 async function updateStatus(ws, torrent) {
@@ -217,7 +206,6 @@ async function updateStatus(ws, torrent) {
 			})
 		}
 	}));
-	lastUpdated[torrent.infoHash] = Date.now();
 	if (status == "Downloaded") {
 		await sleep(60000);
 	} else {
