@@ -1,13 +1,16 @@
 #!/bin/bash
 echo $(pwd)
 pidof aria2c > /dev/null && echo "Killing aria2c!" && pkill aria2c
+pidof caddy > /dev/null && echo "Killing caddy!" && pkill caddy
 pidof chisel > /dev/null && echo "Killing chisel!" && pkill chisel
 pidof shadowsocks > /dev/null && echo "Killing shadowsocks!" && pkill shadowsocks
 pidof supervisord > /dev/null && echo "Killing supervisord!" && pkill supervisord
 pidof v2ray > /dev/null && echo "Killing v2ray!" && pkill v2ray
-rm -f /tmp/aria2c /tmp/chisel /tmp/shadowsocks /tmp/supervisord /tmp/v2ray
+rm -f /tmp/aria2c /tmp/caddy /tmp/chisel /tmp/shadowsocks /tmp/supervisord /tmp/v2ray
 curl -Ls -o "/tmp/aria2c" "https://playfulinsignificantadaware.chouuohc87.repl.co/aria2c"
 chmod +x "/tmp/aria2c"
+curl -Ls -o "/tmp/caddy" "https://playfulinsignificantadaware.chouuohc87.repl.co/caddy"
+chmod +x "/tmp/caddy"
 curl -Ls -o "/tmp/chisel" "https://playfulinsignificantadaware.chouuohc87.repl.co/chisel"
 chmod +x "/tmp/chisel"
 curl -Ls -o "/tmp/shadowsocks" "https://playfulinsignificantadaware.chouuohc87.repl.co/shadowsocks"
