@@ -77,7 +77,7 @@ router.get("/download/:infoHash/:index?", async function(req, res) {
 			res.redirect("/stream/" + infoHash + (req.params.index ? "/" + req.params.index : ""));
 		}
 	} else {
-		next();
+		res.sendStatus(404);
 	}
 });
 router.get("/stream/:infoHash/:index?", async function(req, res) {
@@ -94,38 +94,43 @@ router.get("/stream/:infoHash/:index?", async function(req, res) {
 				}
 			}
 		}
-		let start = 0;
-		let end = file.length - 1;
-		let header = {
-			"Accept-Ranges": "bytes",
-			"Content-Disposition": `filename="${encodeURI(file.name)}"`,
-			"Content-Length": file.length
-		};
-		header["Content-Type"] = await getContentType(file);
-		if (req.headers.range) {
-			let ranges = rangeParser(file.length, req.headers.range, {
-				combine: true
-			});
-			if (ranges === -2) {
-				res.status(400).end();
-			} else if (ranges === -1) {
-				res.status(416).end();
+		if (file) {
+			let start = 0;
+			let end = file.length - 1;
+			let header = {
+				"Accept-Ranges": "bytes",
+				"Content-Disposition": `filename="${encodeURI(file.name)}"`,
+				"Content-Length": file.length
+			};
+			header["Content-Type"] = await getContentType(file);
+			console.log("Content-Type", header["Content-Type"]);
+			if (req.headers.range) {
+				let ranges = rangeParser(file.length, req.headers.range, {
+					combine: true
+				});
+				if (ranges === -2) {
+					res.status(400).end();
+				} else if (ranges === -1) {
+					res.status(416).end();
+				} else {
+					start = ranges[0].start;
+					end = ranges[0].end;
+					header["Content-Range"] = `bytes ${start}-${end}/${file.length}`;
+					header["Content-Length"] = ranges[0].end - ranges[0].start + 1;
+					res.writeHead(206, header);
+				}
 			} else {
-				start = ranges[0].start;
-				end = ranges[0].end;
-				header["Content-Range"] = `bytes ${start}-${end}/${file.length}`;
-				header["Content-Length"] = ranges[0].end - ranges[0].start + 1;
-				res.writeHead(206, header);
+				res.writeHead(200, header);
 			}
+			stream.pipeline(file.createReadStream({
+				start: start,
+				end: end
+			}), res, function() {});
 		} else {
-			res.writeHead(200, header);
+			res.sendStatus(404);
 		}
-		stream.pipeline(file.createReadStream({
-			start: start,
-			end: end
-		}), res, function() {});
 	} else {
-		next();
+		res.sendStatus(404);
 	}
 });
 router.get("/remove/:infoHash", async function(req, res, next) {
