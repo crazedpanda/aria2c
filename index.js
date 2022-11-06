@@ -24,6 +24,6 @@ app.get("/ping", function(_, res) {
 	res.set("cache-control", "no-store");
 	res.send("OK");
 });
-app.listen(3001, function() {
-	console.log("Server is running at 3001");
+app.listen(8080, function() {
+	console.log("Server is running at 8080");
 });
