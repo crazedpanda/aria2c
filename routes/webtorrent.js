@@ -20,6 +20,7 @@ const router = new App({
 });
 const sleep = promisify(setTimeout);
 var client = new WebTorrent({
+  maxConns: 20,
 	tracker: true,
 	dht: true,
 	lsd: false, //Doesn't work on Heroku!
