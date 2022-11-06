@@ -20,6 +20,6 @@ app.get("/ping", function(_, res) {
 	res.set("cache-control", "no-store");
 	res.send("OK");
 });
-app.listen(process.env.PORT, function() {
-	console.log("Server is running at " + process.env.PORT);
+app.listen(3000, function() {
+	console.log("Server is running at 3000");
 });

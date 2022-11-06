@@ -16,7 +16,7 @@
     "ws": ""
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "bash main.sh"
   },
   "type": "module",
   "engines": {
