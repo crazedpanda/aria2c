@@ -1,0 +1,184 @@
+2022-11-06 10:14:50,372 INFO supervisord started with pid 925
+2022-11-06 10:14:51,376 INFO spawned: 'chisel' with pid 926
+2022-11-06 10:14:51,379 INFO spawned: 'nginx' with pid 927
+2022-11-06 10:14:51,383 INFO spawned: 'nodejs' with pid 928
+2022-11-06 10:14:51,385 INFO spawned: 'shadowsocks' with pid 933
+2022-11-06 10:14:51,392 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:14:52,648 INFO success: chisel entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:14:52,652 INFO spawned: 'nginx' with pid 955
+2022-11-06 10:14:52,653 INFO success: nodejs entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:14:52,653 INFO success: shadowsocks entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:14:52,735 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:14:54,739 INFO spawned: 'nginx' with pid 956
+2022-11-06 10:14:54,750 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:14:57,756 INFO spawned: 'nginx' with pid 957
+2022-11-06 10:14:58,782 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:14:58,782 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:14:59,785 INFO spawned: 'nginx' with pid 958
+2022-11-06 10:14:59,801 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:15:00,805 INFO spawned: 'nginx' with pid 959
+2022-11-06 10:15:01,820 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:15:01,821 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:15:02,824 INFO spawned: 'nginx' with pid 960
+2022-11-06 10:15:03,842 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:15:03,842 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:15:04,850 INFO spawned: 'nginx' with pid 961
+2022-11-06 10:15:04,873 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:15:05,878 INFO spawned: 'nginx' with pid 962
+2022-11-06 10:15:05,892 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:15:07,897 INFO spawned: 'nginx' with pid 963
+2022-11-06 10:15:07,911 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:15:10,917 INFO spawned: 'nginx' with pid 964
+2022-11-06 10:15:10,930 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:15:11,932 INFO gave up: nginx entered FATAL state, too many start retries too quickly
+2022-11-06 10:16:02,992 WARN received SIGTERM indicating exit request
+2022-11-06 10:16:02,992 INFO waiting for chisel, nodejs, shadowsocks to die
+2022-11-06 10:16:02,992 WARN ignored SIGHUP indicating restart request (shutdown in progress)
+2022-11-06 10:16:03,011 INFO stopped: shadowsocks (exit status 0)
+2022-11-06 10:16:03,057 INFO stopped: nodejs (terminated by SIGTERM)
+2022-11-06 10:16:04,066 INFO stopped: chisel (terminated by SIGTERM)
+2022-11-06 10:16:15,886 INFO supervisord started with pid 1027
+2022-11-06 10:16:16,890 INFO spawned: 'chisel' with pid 1028
+2022-11-06 10:16:16,892 INFO spawned: 'nginx' with pid 1029
+2022-11-06 10:16:16,897 INFO spawned: 'nodejs' with pid 1030
+2022-11-06 10:16:16,909 INFO spawned: 'shadowsocks' with pid 1034
+2022-11-06 10:16:17,475 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:16:18,323 INFO success: chisel entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:16:18,326 INFO success: nodejs entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:16:18,326 INFO success: shadowsocks entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:16:19,330 INFO spawned: 'nginx' with pid 1058
+2022-11-06 10:16:19,353 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:16:21,358 INFO spawned: 'nginx' with pid 1059
+2022-11-06 10:16:21,374 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:16:24,380 INFO spawned: 'nginx' with pid 1060
+2022-11-06 10:16:24,392 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:16:25,394 INFO gave up: nginx entered FATAL state, too many start retries too quickly
+2022-11-06 10:17:11,447 WARN received SIGTERM indicating exit request
+2022-11-06 10:17:11,447 INFO waiting for chisel, nodejs, shadowsocks to die
+2022-11-06 10:17:11,447 WARN ignored SIGHUP indicating restart request (shutdown in progress)
+2022-11-06 10:17:11,467 INFO stopped: shadowsocks (exit status 0)
+2022-11-06 10:17:12,487 INFO stopped: nodejs (terminated by SIGTERM)
+2022-11-06 10:17:13,519 INFO stopped: chisel (terminated by SIGTERM)
+2022-11-06 10:17:25,080 INFO supervisord started with pid 1122
+2022-11-06 10:17:26,084 INFO spawned: 'nodejs' with pid 1123
+2022-11-06 10:17:26,086 INFO spawned: 'shadowsocks' with pid 1124
+2022-11-06 10:17:26,087 INFO spawned: 'chisel' with pid 1125
+2022-11-06 10:17:26,090 INFO spawned: 'nginx' with pid 1126
+2022-11-06 10:17:26,557 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:17:27,455 INFO success: nodejs entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:17:27,455 INFO success: shadowsocks entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:17:27,455 INFO success: chisel entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:17:28,458 INFO spawned: 'nginx' with pid 1151
+2022-11-06 10:17:28,469 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:17:30,473 INFO spawned: 'nginx' with pid 1152
+2022-11-06 10:17:30,486 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:17:33,492 INFO spawned: 'nginx' with pid 1153
+2022-11-06 10:17:33,510 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:17:34,511 INFO gave up: nginx entered FATAL state, too many start retries too quickly
+2022-11-06 10:17:52,535 WARN received SIGTERM indicating exit request
+2022-11-06 10:17:52,535 INFO waiting for nodejs, shadowsocks, chisel to die
+2022-11-06 10:17:53,538 WARN ignored SIGHUP indicating restart request (shutdown in progress)
+2022-11-06 10:17:53,567 INFO stopped: chisel (terminated by SIGTERM)
+2022-11-06 10:17:53,640 INFO stopped: shadowsocks (exit status 0)
+2022-11-06 10:17:53,680 INFO stopped: nodejs (terminated by SIGTERM)
+2022-11-06 10:18:09,157 INFO supervisord started with pid 1218
+2022-11-06 10:18:10,162 INFO spawned: 'nodejs' with pid 1219
+2022-11-06 10:18:10,165 INFO spawned: 'shadowsocks' with pid 1220
+2022-11-06 10:18:10,168 INFO spawned: 'chisel' with pid 1221
+2022-11-06 10:18:10,174 INFO spawned: 'nginx' with pid 1222
+2022-11-06 10:18:10,911 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:18:11,734 INFO success: nodejs entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:18:11,734 INFO success: shadowsocks entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:18:11,734 INFO success: chisel entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:18:12,737 INFO spawned: 'nginx' with pid 1250
+2022-11-06 10:18:12,780 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:18:14,788 INFO spawned: 'nginx' with pid 1251
+2022-11-06 10:18:14,805 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:18:17,812 INFO spawned: 'nginx' with pid 1252
+2022-11-06 10:18:17,830 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:18:18,832 INFO gave up: nginx entered FATAL state, too many start retries too quickly
+2022-11-06 10:18:39,862 WARN received SIGTERM indicating exit request
+2022-11-06 10:18:39,862 INFO waiting for nodejs, shadowsocks, chisel to die
+2022-11-06 10:18:40,863 WARN ignored SIGHUP indicating restart request (shutdown in progress)
+2022-11-06 10:18:40,889 INFO stopped: chisel (terminated by SIGTERM)
+2022-11-06 10:18:40,900 INFO stopped: shadowsocks (exit status 0)
+2022-11-06 10:18:40,971 INFO stopped: nodejs (terminated by SIGTERM)
+2022-11-06 10:18:52,957 INFO supervisord started with pid 1313
+2022-11-06 10:18:53,963 INFO spawned: 'nodejs' with pid 1314
+2022-11-06 10:18:53,967 INFO spawned: 'shadowsocks' with pid 1315
+2022-11-06 10:18:53,978 INFO spawned: 'chisel' with pid 1316
+2022-11-06 10:18:53,986 INFO spawned: 'nginx' with pid 1324
+2022-11-06 10:18:55,445 INFO success: nodejs entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:18:55,446 INFO success: shadowsocks entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:18:55,446 INFO success: chisel entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:18:55,447 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:19:16,473 WARN received SIGTERM indicating exit request
+2022-11-06 10:19:16,474 INFO waiting for nodejs, shadowsocks, chisel, nginx to die
+2022-11-06 10:19:16,524 INFO stopped: nginx (exit status 0)
+2022-11-06 10:19:16,524 WARN ignored SIGHUP indicating restart request (shutdown in progress)
+2022-11-06 10:19:16,550 INFO stopped: chisel (terminated by SIGTERM)
+2022-11-06 10:19:16,571 INFO stopped: shadowsocks (exit status 0)
+2022-11-06 10:19:17,648 INFO stopped: nodejs (terminated by SIGTERM)
+2022-11-06 10:19:29,595 INFO supervisord started with pid 1409
+2022-11-06 10:19:30,599 INFO spawned: 'nodejs' with pid 1410
+2022-11-06 10:19:30,603 INFO spawned: 'shadowsocks' with pid 1411
+2022-11-06 10:19:30,606 INFO spawned: 'chisel' with pid 1412
+2022-11-06 10:19:30,609 INFO spawned: 'nginx' with pid 1413
+2022-11-06 10:19:30,662 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:19:32,052 INFO success: nodejs entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:19:32,055 INFO success: shadowsocks entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:19:32,055 INFO success: chisel entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:19:32,057 INFO spawned: 'nginx' with pid 1439
+2022-11-06 10:19:32,146 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:19:34,150 INFO spawned: 'nginx' with pid 1440
+2022-11-06 10:19:34,182 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:19:37,188 INFO spawned: 'nginx' with pid 1441
+2022-11-06 10:19:37,210 INFO exited: nginx (exit status 1; not expected)
+2022-11-06 10:19:38,214 INFO gave up: nginx entered FATAL state, too many start retries too quickly
+2022-11-06 10:19:54,234 WARN received SIGTERM indicating exit request
+2022-11-06 10:19:54,234 INFO waiting for nodejs, shadowsocks, chisel to die
+2022-11-06 10:19:55,235 WARN ignored SIGHUP indicating restart request (shutdown in progress)
+2022-11-06 10:19:55,249 INFO stopped: chisel (terminated by SIGTERM)
+2022-11-06 10:19:55,339 INFO stopped: shadowsocks (exit status 0)
+2022-11-06 10:19:55,352 INFO stopped: nodejs (terminated by SIGTERM)
+2022-11-06 10:20:07,440 INFO supervisord started with pid 1505
+2022-11-06 10:20:08,444 INFO spawned: 'nodejs' with pid 1506
+2022-11-06 10:20:08,446 INFO spawned: 'shadowsocks' with pid 1507
+2022-11-06 10:20:08,449 INFO spawned: 'chisel' with pid 1508
+2022-11-06 10:20:08,452 INFO spawned: 'nginx' with pid 1509
+2022-11-06 10:20:09,840 INFO success: nodejs entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:20:09,841 INFO success: shadowsocks entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:20:09,841 INFO success: chisel entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:20:09,841 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:21:13,927 WARN received SIGTERM indicating exit request
+2022-11-06 10:21:13,927 INFO waiting for nodejs, shadowsocks, chisel, nginx to die
+2022-11-06 10:21:13,968 INFO stopped: nginx (exit status 0)
+2022-11-06 10:21:13,968 WARN ignored SIGHUP indicating restart request (shutdown in progress)
+2022-11-06 10:21:13,983 INFO stopped: chisel (terminated by SIGTERM)
+2022-11-06 10:21:14,051 INFO stopped: shadowsocks (exit status 0)
+2022-11-06 10:21:14,138 INFO stopped: nodejs (terminated by SIGTERM)
+2022-11-06 10:21:26,953 INFO supervisord started with pid 1860
+2022-11-06 10:21:27,956 INFO spawned: 'nodejs' with pid 1864
+2022-11-06 10:21:27,958 INFO spawned: 'shadowsocks' with pid 1865
+2022-11-06 10:21:27,960 INFO spawned: 'chisel' with pid 1866
+2022-11-06 10:21:27,963 INFO spawned: 'nginx' with pid 1867
+2022-11-06 10:21:29,275 INFO success: nodejs entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:21:29,275 INFO success: shadowsocks entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:21:29,276 INFO success: chisel entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:21:29,276 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:22:52,370 WARN received SIGTERM indicating exit request
+2022-11-06 10:22:52,371 INFO waiting for nodejs, shadowsocks, chisel, nginx to die
+2022-11-06 10:22:52,425 INFO stopped: nginx (exit status 0)
+2022-11-06 10:22:52,425 WARN ignored SIGHUP indicating restart request (shutdown in progress)
+2022-11-06 10:22:52,440 INFO stopped: chisel (terminated by SIGTERM)
+2022-11-06 10:22:52,475 INFO stopped: shadowsocks (exit status 0)
+2022-11-06 10:22:53,634 INFO stopped: nodejs (terminated by SIGTERM)
+2022-11-06 10:23:06,240 INFO supervisord started with pid 2454
+2022-11-06 10:23:07,244 INFO spawned: 'nodejs' with pid 2455
+2022-11-06 10:23:07,248 INFO spawned: 'shadowsocks' with pid 2456
+2022-11-06 10:23:07,257 INFO spawned: 'chisel' with pid 2457
+2022-11-06 10:23:07,266 INFO spawned: 'nginx' with pid 2466
+2022-11-06 10:23:08,675 INFO success: nodejs entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:23:08,675 INFO success: shadowsocks entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:23:08,675 INFO success: chisel entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2022-11-06 10:23:08,675 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
