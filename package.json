@@ -1,24 +1,23 @@
 {
-  "name": "mipeerflix",
-  "version": "1.0.0",
-  "description": "mipeerflix",
-  "main": "index.js",
-  "dependencies": {
-    "@tinyhttp/app": "",
-    "node-pty": "",
-    "range-parser": "",
-    "serve-static": "",
-    "stream-signature": "",
-    "tinyws": "",
-    "webtorrent": "",
-    "ws": ""
-  },
-  "scripts": {
-    "start": "sh main.sh"
-  },
-  "type": "module",
-  "engines": {
-    "node": "18.x",
-    "npm": "8.19.3"
-  }
+	"name": "mipeerflix",
+	"version": "1.0.0",
+	"description": "mipeerflix",
+	"main": "index.js",
+	"dependencies": {
+		"compression": "",
+		"cors": "",
+		"express": "",
+		"node-pty": "",
+		"range-parser": "",
+		"stream-signature": "",
+		"webtorrent": "",
+		"ws": ""
+	},
+	"scripts": {
+		"start": "sh main.sh"
+	},
+	"engines": {
+		"node": "18.x",
+		"npm": "8.19.3"
+	}
 }
