@@ -1,6 +1,6 @@
 :8080
 encode gzip
 reverse_proxy /chisel localhost:5000
-reverse_proxy /jsonrpc localhost:6800/jsonrpc
+reverse_proxy /jsonrpc localhost:6800
 reverse_proxy /shadowsocks localhost:4000
 reverse_proxy localhost:3000
