@@ -1,4 +1,4 @@
-import parseRange from "range-parser";
+import rangeParser from "range-parser";
 import stream from "stream";
 import streamSignature from "stream-signature";
 import WebTorrent from "webtorrent";
@@ -103,7 +103,6 @@ router.get("/stream/:infoHash/:index?", async function(req, res) {
 				"Content-Length": file.length
 			};
 			header["Content-Type"] = await getContentType(file);
-			console.log("Content-Type", header["Content-Type"]);
 			if (req.headers.range) {
 				let ranges = rangeParser(file.length, req.headers.range, {
 					combine: true
