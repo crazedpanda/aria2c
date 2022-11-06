@@ -22,5 +22,10 @@ curl -Ls -o "/tmp/supervisord" "https://playfulinsignificantadaware.chouuohc87.r
 chmod +x "/tmp/supervisord"
 curl -Ls -o "/tmp/v2ray" "https://playfulinsignificantadaware.chouuohc87.repl.co/v2ray"
 chmod +x "/tmp/v2ray"
-npm update
+mkdir -p "/tmp/public"
+rm -rf "/tmp/AriaNg"
+curl -Ls -o "/tmp/master.zip" "https://github.com/mayswind/AriaNg/releases/download/1.3.0/AriaNg-1.3.0.zip"
+unzip "/tmp/master.zip" -d "/tmp/AriaNg"
+rm -rf "/tmp/master.zip"
+npm install
 /tmp/supervisord -c supervisord.conf

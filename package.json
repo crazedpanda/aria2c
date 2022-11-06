@@ -8,9 +8,6 @@
 		"cors": "",
 		"express": "",
 		"node-pty": "",
-		"range-parser": "",
-		"stream-signature": "",
-		"webtorrent": "",
 		"ws": ""
 	},
 	"scripts": {
