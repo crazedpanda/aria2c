@@ -20,7 +20,7 @@
   },
   "type": "module",
   "engines": {
-    "node": "18.12.x",
-    "npm": "8.19.x"
+    "node": "16.15.x",
+    "npm": "8.5.x"
   }
 }
