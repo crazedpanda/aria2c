@@ -8,7 +8,6 @@
     "file-type": "",
     "node-pty": "",
     "pretty-bytes": "",
-    "puppeteer-core": "",
     "range-parser": "",
     "serve-static": "",
     "tinyws": "",
@@ -21,6 +20,6 @@
   "type": "module",
   "engines": {
     "node": "16.15.x",
-    "npm": "8.5.x"
+    "npm": "8.19.x"
   }
 }
