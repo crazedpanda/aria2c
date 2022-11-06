@@ -18,5 +18,9 @@
   "scripts": {
     "start": "node index.js"
   },
-  "type": "module"
+  "type": "module",
+  "engines": {
+    "node": "18.12.x",
+    "npm": "8.19.x"
+  }
 }
