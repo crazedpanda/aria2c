@@ -2,3 +2,5 @@
 replit.nix
 node_modules
 package-lock.json
+supervisord.log
+supervisord.pid
