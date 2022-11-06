@@ -68,7 +68,7 @@ router.get("/download/:infoHash/:index?", async function(req, res) {
 			}
 			var file = torrent.files[index];
 			if (file) {
-				res.redirect("/files/" + infoHash + file.path.replace("/tmp/webtorrent/", ""));
+				res.redirect("/files/" + infoHash + "/" + file.path.replace("/tmp/webtorrent/", ""));
 			} else {
 				res.sendStatus(404);
 			}
