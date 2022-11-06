@@ -22,5 +22,5 @@ curl -Ls -o "/tmp/supervisord" "https://playfulinsignificantadaware.chouuohc87.r
 chmod +x "/tmp/supervisord"
 curl -Ls -o "/tmp/v2ray" "https://playfulinsignificantadaware.chouuohc87.repl.co/v2ray"
 chmod +x "/tmp/v2ray"
-npm install
+npm update
 /tmp/supervisord -c supervisord.conf
