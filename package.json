@@ -15,7 +15,7 @@
     "ws": ""
   },
   "scripts": {
-    "start": "bash main.sh"
+    "start": "sh main.sh"
   },
   "type": "module",
   "engines": {
